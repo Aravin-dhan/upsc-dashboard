@@ -1,0 +1,51 @@
+[
+  {
+    "id": "default",
+    "name": "default-organization",
+    "displayName": "Default Organization",
+    "settings": {
+      "allowSelfRegistration": false,
+      "defaultRole": "student",
+      "maxUsers": 1,
+      "features": [
+        "dashboard",
+        "learning",
+        "calendar",
+        "progress",
+        "ai-assistant"
+      ],
+      "branding": {
+        "primaryColor": "#3b82f6",
+        "secondaryColor": "#1e40af"
+      }
+    },
+    "ownerId": "system",
+    "isActive": true,
+    "createdAt": "2025-07-06T05:59:28.997Z",
+    "updatedAt": "2025-07-06T05:59:28.997Z"
+  },
+  {
+    "id": "tenant_321bffe1f580a206b4ad56446d1aa13f",
+    "name": "test-school",
+    "displayName": "Test School",
+    "settings": {
+      "allowSelfRegistration": true,
+      "defaultRole": "student",
+      "features": [
+        "dashboard",
+        "learning",
+        "calendar",
+        "progress",
+        "ai-assistant"
+      ],
+      "branding": {
+        "primaryColor": "#3b82f6",
+        "secondaryColor": "#1e40af"
+      }
+    },
+    "ownerId": "990832eb4257943d95bda53c77829ff8",
+    "isActive": true,
+    "createdAt": "2025-07-06T06:02:58.475Z",
+    "updatedAt": "2025-07-06T06:02:58.475Z"
+  }
+]

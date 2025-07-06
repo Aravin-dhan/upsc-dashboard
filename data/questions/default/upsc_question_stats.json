@@ -1,0 +1,55 @@
+{
+  "totalQuestions": 420,
+  "byYear": {
+    "2022": 100,
+    "2023": 120,
+    "2024": 140,
+    "2025": 60
+  },
+  "bySubject": {
+    "Environmental Issues": 5,
+    "Economic Issues": 9,
+    "Philosophy": 4,
+    "Political Issues": 8,
+    "Social Issues": 14,
+    "Society": 79,
+    "Art & Culture": 92,
+    "History": 85,
+    "Indian Heritage": 68,
+    "Geography": 56
+  },
+  "byTopic": {
+    "Judiciary": 29,
+    "Industry": 31,
+    "Parliament": 27,
+    "Economic Development": 38,
+    "Ancient History": 21,
+    "Constitution": 26,
+    "Human Geography": 27,
+    "Economic Geography": 22,
+    "Medieval History": 27,
+    "Modern History": 23,
+    "Physical Geography": 25,
+    "Biodiversity": 40,
+    "Climate Change": 30,
+    "Pollution": 30,
+    "Agriculture": 24
+  },
+  "byDifficulty": {
+    "Hard": 133,
+    "Easy": 144,
+    "Medium": 143
+  },
+  "byExamType": {
+    "Mains": 300,
+    "Prelims": 120
+  },
+  "byPaperType": {
+    "Essay": 40,
+    "GS-I": 380
+  },
+  "byQuestionType": {
+    "Descriptive": 300,
+    "MCQ": 120
+  }
+}

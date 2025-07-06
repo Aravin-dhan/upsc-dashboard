@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# UPSC Dashboard
 
-## Getting Started
+A comprehensive dashboard to organize your UPSC Civil Services preparation with progress tracking, analytics, and smart revision system.
 
-First, run the development server:
+## 🚀 Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### ✅ Currently Available
+- **Command Center**: Live countdown timers, daily goals, and Pomodoro timer
+- **Syllabus Tracker**: Visual progress tracking with color-coded status
+- **Smart Timetable**: Daily schedule with time blocks and study tracking
+- **Performance Analytics**: Mock test scores and subject-wise analysis
+- **Smart Revision Engine**: Spaced repetition system
+- **Current Affairs Hub**: News feed with tagging and bookmarking
+- **Knowledge Base**: Note management and answer practice
+- **Wellness Corner**: Health tracking and motivation
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 🔄 Core Philosophy
+- **Organize Chaos**: Clear structure for vast UPSC syllabus
+- **Data-Driven Insights**: Analytics to identify strengths and weaknesses
+- **Long-term Motivation**: Streak tracking and milestone system
+- **Clean & Distraction-Free**: Minimalist design focused on productivity
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠️ Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **Styling**: Tailwind CSS
+- **Icons**: Lucide React
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth
+- **Deployment**: Vercel-ready
 
-## Learn More
+## 🏃‍♂️ Quick Start
 
-To learn more about Next.js, take a look at the following resources:
+1. **Start Development Server**
+   ```bash
+   npm run dev
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. **Open in Browser**
+   ```
+   http://localhost:3000
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📊 Dashboard Widgets
 
-## Deploy on Vercel
+### 1. Command Center
+- **Countdown Timers**: Real-time countdown to Prelims/Mains
+- **Daily Goals**: Top 3 goals with completion tracking
+- **Pomodoro Timer**: 25-minute focus sessions with breaks
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 2. Syllabus Tracker
+- **Progress Visualization**: Color-coded status for each topic
+- **Status Levels**: Not Started → In Progress → First Reading → Revised → Mastered
+- **Overall Progress**: Aggregate completion percentage
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 3. Performance Analytics
+- **Mock Test Trends**: Score progression over time
+- **Subject Analysis**: Identify strong and weak areas
+- **Question-level Insights**: Topic-wise performance breakdown
+
+### 4. Smart Revision Engine
+- **Spaced Repetition**: Automated revision scheduling
+- **Priority Queue**: High/Medium/Low priority topics
+- **Adaptive Intervals**: Customizable revision frequency
+
+**Good luck with your UPSC preparation! 🎯**

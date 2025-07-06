@@ -1,0 +1,58 @@
+[
+  {
+    "id": "990832eb4257943d95bda53c77829ff8",
+    "email": "admin@upsc.local",
+    "name": "System Administrator",
+    "role": "admin",
+    "tenantId": "default",
+    "createdAt": "2025-07-06T05:07:33.694Z",
+    "isActive": true,
+    "passwordHash": "ef95df85e33172485c1690ac1b6cc7f0687c2554055e391a2ac941b768326dc0",
+    "salt": "dd445102e76ea787d17c9c9535fa4ad5adf994615d757b119182dd6c4b39c31a",
+    "lastLogin": "2025-07-06T10:48:22.255Z"
+  },
+  {
+    "id": "f134ae2262c6828780d7be166ac9925f",
+    "email": "test@example.com",
+    "name": "Test User",
+    "role": "student",
+    "tenantId": "tenant_cc4abe733220387b14819218",
+    "createdAt": "2025-07-06T05:08:55.414Z",
+    "isActive": true,
+    "passwordHash": "17a012f8a5a25d0d95a416f341f661f14937d6d9a96b96ab5f8669d1468b27b3",
+    "salt": "90daa744c4edf726136d209fa539b3b7047f25929c122b29a2c32dc43ea828a9",
+    "lastLogin": "2025-07-06T05:09:02.328Z"
+  },
+  {
+    "id": "144d8e88725850088fe58f4c6bafdf36",
+    "email": "teacher@example.com",
+    "name": "Test Teacher",
+    "role": "teacher",
+    "tenantId": "tenant_d25db109dc765b83dad6bcbf",
+    "createdAt": "2025-07-06T05:17:41.605Z",
+    "isActive": true,
+    "passwordHash": "948e01bb20bb7fbd464a5da2051ab461c7108b0a474b3657ac091120adf8e953",
+    "salt": "949e0d7707500ffabc4b0adc20b41e05348429c3aaae90c48998944dc3501e20",
+    "lastLogin": "2025-07-06T05:17:48.433Z"
+  },
+  {
+    "id": "af01a859658e252d82cee6118ccf2401",
+    "email": "aravindhanb2004@gmail.com",
+    "name": "Aravin-dhan",
+    "role": "student",
+    "tenantId": "default",
+    "tenantRole": "member",
+    "tenants": [
+      "default"
+    ],
+    "createdAt": "2025-07-06T08:20:02.604Z",
+    "isActive": true,
+    "passwordHash": "2d6b09de212249ee3652bf5999bef6c37e2085feb08a8fb9d43be871fb501f63",
+    "salt": "54c888cc703d3e7a896820ab3e8cc9b71e6c5b74f509917985c41db35510685f",
+    "preferences": {
+      "defaultTenant": "default",
+      "theme": "light",
+      "language": "en"
+    }
+  }
+]
