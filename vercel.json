@@ -1,30 +1,43 @@
 {
   "version": 2,
   "name": "upsc-dashboard",
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  },
+  "framework": "nextjs",
+  "buildCommand": "npm run build:next",
+  "devCommand": "npm run dev:next",
+  "installCommand": "npm install",
+  "outputDirectory": ".next",
   "functions": {
     "app/api/**/*.js": {
+      "maxDuration": 30
+    },
+    "app/api/**/*.ts": {
       "maxDuration": 30
     }
   },
   "regions": ["iad1"],
-  "framework": "nextjs"
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        }
+      ]
+    }
+  ]
 }
