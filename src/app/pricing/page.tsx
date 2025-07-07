@@ -1,13 +1,36 @@
 'use client';
 
-import { useState } from 'react';
-import { Check, X, Star, Zap, Crown, Users, ChevronRight, HelpCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Check, X, Star, Zap, Crown, Users, ChevronRight, HelpCircle, Tag, Loader2 } from 'lucide-react';
 import PublicNavbar from '@/components/marketing/PublicNavbar';
 import Footer from '@/components/marketing/Footer';
+
+interface CouponValidation {
+  isValid: boolean;
+  coupon?: {
+    code: string;
+    description: string;
+    type: string;
+    value: number;
+  };
+  pricing?: {
+    originalAmount: number;
+    discountAmount: number;
+    finalAmount: number;
+    savings: number;
+    currency: string;
+  };
+  error?: string;
+  warnings?: string[];
+}
 
 export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [showFAQ, setShowFAQ] = useState<number | null>(null);
+  const [couponCode, setCouponCode] = useState('');
+  const [couponValidation, setCouponValidation] = useState<CouponValidation | null>(null);
+  const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+  const [showCouponInput, setShowCouponInput] = useState(false);
 
   const plans = [
     {
@@ -123,12 +146,6 @@ export default function PricingPage() {
     }
   ];
 
-  const getPrice = (plan: typeof plans[0]) => {
-    if (typeof plan.price.monthly === 'string') return plan.price.monthly;
-    const price = billingCycle === 'monthly' ? plan.price.monthly : plan.price.yearly;
-    return price === 0 ? 'Free' : `₹${price}`;
-  };
-
   const getPeriod = () => {
     return billingCycle === 'monthly' ? '/month' : '/year';
   };
@@ -139,6 +156,98 @@ export default function PricingPage() {
     const savings = monthlyTotal - yearlyPrice;
     const percentage = Math.round((savings / monthlyTotal) * 100);
     return { amount: savings, percentage };
+  };
+
+  // Validate coupon code
+  const validateCoupon = async (code: string) => {
+    if (!code.trim()) {
+      setCouponValidation(null);
+      return;
+    }
+
+    setIsValidatingCoupon(true);
+    try {
+      const response = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code: code.trim(),
+          planType: 'pro',
+          billingCycle
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.isValid) {
+        setCouponValidation({
+          isValid: true,
+          coupon: data.coupon,
+          pricing: data.pricing,
+          warnings: data.warnings
+        });
+      } else {
+        setCouponValidation({
+          isValid: false,
+          error: data.error || 'Invalid coupon code'
+        });
+      }
+    } catch (error) {
+      console.error('Coupon validation error:', error);
+      setCouponValidation({
+        isValid: false,
+        error: 'Failed to validate coupon. Please try again.'
+      });
+    } finally {
+      setIsValidatingCoupon(false);
+    }
+  };
+
+  // Debounced coupon validation
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (couponCode.trim()) {
+        validateCoupon(couponCode);
+      } else {
+        setCouponValidation(null);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [couponCode, billingCycle]);
+
+  // Get final price with coupon applied
+  const getFinalPrice = (plan: typeof plans[0]) => {
+    if (typeof plan.price.monthly === 'string') return plan.price.monthly;
+
+    const originalPrice = billingCycle === 'monthly' ? plan.price.monthly : plan.price.yearly;
+
+    if (originalPrice === 0) return 'Free';
+
+    // Apply coupon discount if valid and for Pro plan
+    if (plan.name === 'Pro' && couponValidation?.isValid && couponValidation.pricing) {
+      return `₹${couponValidation.pricing.finalAmount}`;
+    }
+
+    return `₹${originalPrice}`;
+  };
+
+  // Get original price (crossed out when coupon applied)
+  const getOriginalPrice = (plan: typeof plans[0]) => {
+    if (typeof plan.price.monthly === 'string') return null;
+
+    const originalPrice = billingCycle === 'monthly' ? plan.price.monthly : plan.price.yearly;
+
+    if (originalPrice === 0) return null;
+
+    // Show original price only if coupon is applied and for Pro plan
+    if (plan.name === 'Pro' && couponValidation?.isValid && couponValidation.pricing) {
+      return `₹${originalPrice}`;
+    }
+
+    return null;
   };
 
   return (
@@ -181,6 +290,79 @@ export default function PricingPage() {
               <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
                 Save {getSavings().percentage}%
               </span>
+            )}
+          </div>
+
+          {/* Coupon Code Section */}
+          <div className="max-w-md mx-auto">
+            <button
+              onClick={() => setShowCouponInput(!showCouponInput)}
+              className="flex items-center justify-center space-x-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
+            >
+              <Tag className="h-4 w-4" />
+              <span>Have a coupon code?</span>
+            </button>
+
+            {showCouponInput && (
+              <div className="mt-4 space-y-3">
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                    placeholder="Enter coupon code"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                  />
+                  {isValidatingCoupon && (
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                    </div>
+                  )}
+                </div>
+
+                {couponValidation && (
+                  <div className={`p-3 rounded-lg ${
+                    couponValidation.isValid
+                      ? 'bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800'
+                      : 'bg-red-50 border border-red-200 dark:bg-red-900/20 dark:border-red-800'
+                  }`}>
+                    {couponValidation.isValid ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Check className="h-4 w-4 text-green-600" />
+                          <span className="text-green-800 dark:text-green-200 font-medium">
+                            Coupon applied successfully!
+                          </span>
+                        </div>
+                        <p className="text-green-700 dark:text-green-300 text-sm">
+                          {couponValidation.coupon?.description}
+                        </p>
+                        {couponValidation.pricing && (
+                          <div className="text-green-700 dark:text-green-300 text-sm">
+                            <span className="font-medium">
+                              You save ₹{couponValidation.pricing.savings}!
+                            </span>
+                          </div>
+                        )}
+                        {couponValidation.warnings && couponValidation.warnings.length > 0 && (
+                          <div className="text-yellow-700 dark:text-yellow-300 text-sm">
+                            {couponValidation.warnings.map((warning, index) => (
+                              <p key={index}>⚠️ {warning}</p>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-2">
+                        <X className="h-4 w-4 text-red-600" />
+                        <span className="text-red-800 dark:text-red-200 text-sm">
+                          {couponValidation.error}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -227,13 +409,28 @@ export default function PricingPage() {
                     {plan.description}
                   </p>
                   <div className="mb-6">
-                    <span className="text-4xl font-bold text-gray-900 dark:text-white">
-                      {getPrice(plan)}
-                    </span>
+                    <div className="flex items-center justify-center space-x-2">
+                      {getOriginalPrice(plan) && (
+                        <span className="text-2xl font-medium text-gray-500 dark:text-gray-400 line-through">
+                          {getOriginalPrice(plan)}
+                        </span>
+                      )}
+                      <span className="text-4xl font-bold text-gray-900 dark:text-white">
+                        {getFinalPrice(plan)}
+                      </span>
+                    </div>
                     {typeof plan.price.monthly === 'number' && plan.price.monthly > 0 && (
                       <span className="text-gray-600 dark:text-gray-400">
                         {getPeriod()}
                       </span>
+                    )}
+                    {plan.name === 'Pro' && couponValidation?.isValid && couponValidation.pricing && (
+                      <div className="mt-2">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-200">
+                          <Tag className="h-3 w-3 mr-1" />
+                          Save ₹{couponValidation.pricing.savings}
+                        </span>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -254,7 +451,11 @@ export default function PricingPage() {
                 </div>
 
                 <a
-                  href={plan.href}
+                  href={`${plan.href}${
+                    plan.name === 'Pro' && couponValidation?.isValid
+                      ? `${plan.href.includes('?') ? '&' : '?'}coupon=${couponCode}`
+                      : ''
+                  }`}
                   className={`w-full flex items-center justify-center px-6 py-3 rounded-lg font-semibold transition-colors ${
                     plan.popular
                       ? 'bg-blue-600 text-white hover:bg-blue-700'

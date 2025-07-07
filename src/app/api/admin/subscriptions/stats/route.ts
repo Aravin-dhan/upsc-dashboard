@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession, hasPermission } from '@/lib/auth';
-import { CouponService } from '@/lib/services/couponService';
+import { SubscriptionService } from '@/lib/services/subscriptionService';
 
 export const runtime = 'nodejs';
 
-const couponService = CouponService.getInstance();
+const subscriptionService = SubscriptionService.getInstance();
 
 export async function GET(request: NextRequest) {
   try {
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const stats = await couponService.getCouponStats();
+    const stats = await subscriptionService.getSubscriptionStats();
 
     return NextResponse.json({
       success: true,
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     });
     
   } catch (error) {
-    console.error('Get coupon stats error:', error);
+    console.error('Get subscription stats error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
