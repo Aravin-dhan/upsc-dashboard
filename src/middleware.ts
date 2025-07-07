@@ -206,7 +206,7 @@ async function detectSuspiciousActivity(request: NextRequest, session: any) {
   const userAgent = request.headers.get('user-agent') || '';
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ||
             request.headers.get('x-real-ip') ||
-            request.ip;
+            'unknown';
 
   // Check for bot-like behavior
   const suspiciousBots = ['bot', 'crawler', 'spider', 'scraper'];

@@ -4,15 +4,15 @@ import path from 'path';
 
 export async function GET(request: NextRequest) {
   try {
-    const diagnostics = {
+    const diagnostics: any = {
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV,
       jwtSecret: process.env.JWT_SECRET ? 'SET' : 'NOT_SET',
       jwtSecretLength: process.env.JWT_SECRET?.length || 0,
       workingDirectory: process.cwd(),
       dataDirectory: path.join(process.cwd(), 'data'),
-      files: {},
-      errors: []
+      files: {} as any,
+      errors: [] as any[]
     };
 
     // Check if data directory exists

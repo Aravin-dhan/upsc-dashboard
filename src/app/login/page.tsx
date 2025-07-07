@@ -134,9 +134,9 @@ export default function LoginPage() {
           </div>
 
           {isLogin ? (
-            <LoginForm onSuccess={handleAuthSuccess} redirectTo={redirectTo} />
+            <LoginForm onSuccess={handleAuthSuccess} redirectTo={redirectTo || undefined} />
           ) : (
-            <RegisterForm onSuccess={handleAuthSuccess} redirectTo={redirectTo} allowRoleSelection={true} />
+            <RegisterForm onSuccess={handleAuthSuccess} redirectTo={redirectTo || undefined} allowRoleSelection={true} />
           )}
         </div>
       </div>

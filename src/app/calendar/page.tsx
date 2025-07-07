@@ -91,6 +91,7 @@ export default function CalendarPage() {
       category: 'exam',
       priority: 'high',
       isRecurring: false,
+      isCompleted: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     },
@@ -105,6 +106,7 @@ export default function CalendarPage() {
       priority: 'high',
       isRecurring: true,
       recurringPattern: 'daily',
+      isCompleted: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }
@@ -252,6 +254,7 @@ export default function CalendarPage() {
                 category: 'other',
                 priority: 'medium',
                 isRecurring: false,
+                isCompleted: false,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
               };

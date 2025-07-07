@@ -502,7 +502,14 @@ class FeatureTester {
 
     // Test modern JavaScript features
     const features = [
-      { name: 'ES6 Modules', test: () => typeof import !== 'undefined' },
+      { name: 'ES6 Modules', test: () => {
+        try {
+          // Check if dynamic import is supported
+          return typeof (new Function('return import'))() === 'object';
+        } catch {
+          return false;
+        }
+      }},
       { name: 'Async/Await', test: () => typeof (async () => {}) === 'function' },
       { name: 'Fetch API', test: () => typeof fetch !== 'undefined' },
       { name: 'Local Storage', test: () => typeof localStorage !== 'undefined' },

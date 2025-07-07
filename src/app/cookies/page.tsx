@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { 
-  Cookie, Settings, Shield, BarChart3, Target, 
-  CheckCircle, X, Calendar, Info, Toggle
+import {
+  Cookie, Settings, Shield, BarChart3, Target,
+  CheckCircle, X, Calendar, Info
 } from 'lucide-react';
 import PublicNavbar from '@/components/marketing/PublicNavbar';
 import Footer from '@/components/marketing/Footer';
@@ -110,7 +110,7 @@ export default function CookiesPage() {
     
     setCookieSettings(prev => ({
       ...prev,
-      [type]: !prev[type]
+      [type]: !prev[type as keyof typeof prev]
     }));
   };
 

@@ -224,6 +224,7 @@ export const prelimsSyllabus: SyllabusSubject[] = [
                 estimatedHours: 80,
                 completed: false,
                 resources: {
+                  books: ['Ancient India by R.S. Sharma', 'India\'s Ancient Past by R.S. Sharma'],
                   ncertBooks: ['Class 6 Our Pasts-I', 'Class 11 Themes in World History', 'Class 12 Themes in Indian History'],
                   standardBooks: ['Ancient India by R.S. Sharma', 'India\'s Ancient Past by R.S. Sharma'],
                   onlineResources: ['ClearIAS Ancient History', 'InsightsIAS Ancient History'],
@@ -279,6 +280,7 @@ export const prelimsSyllabus: SyllabusSubject[] = [
                 estimatedHours: 70,
                 completed: false,
                 resources: {
+                  books: ['Medieval India by Satish Chandra', 'History of Medieval India by J.L. Mehta'],
                   ncertBooks: ['Class 7 Our Pasts-II', 'Class 11-12 History'],
                   standardBooks: ['Medieval India by Satish Chandra', 'History of Medieval India by J.L. Mehta'],
                   onlineResources: ['Medieval History Notes by ClearIAS'],

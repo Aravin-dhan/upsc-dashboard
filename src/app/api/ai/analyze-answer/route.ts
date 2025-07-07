@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
-  let mode: string, question: string, answer: string, image: string;
+  let mode: string = '', question: string = '', answer: string = '', image: string = '';
 
   try {
     ({ mode, question, answer, image } = await request.json());

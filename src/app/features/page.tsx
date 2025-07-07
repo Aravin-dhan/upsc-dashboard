@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { 
   Brain, Calendar, BookOpen, TrendingUp, Map, Users, 
   MessageSquare, Target, Clock, Award, Zap, Shield,
