@@ -1,0 +1,371 @@
+{
+  "timestamp": "2025-07-07T08:07:48.811Z",
+  "summary": {
+    "total": 44,
+    "passed": 44,
+    "failed": 0,
+    "skipped": 0
+  },
+  "categories": {
+    "Navigation & Routing": {
+      "total": 15,
+      "passed": 15,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "Page Access: /",
+          "passed": true,
+          "details": "0ms",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.836Z"
+        },
+        {
+          "name": "Page Access: /dashboard",
+          "passed": true,
+          "details": "0ms",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.836Z"
+        },
+        {
+          "name": "Page Access: /admin",
+          "passed": true,
+          "details": "0ms",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.836Z"
+        },
+        {
+          "name": "Page Access: /learning",
+          "passed": true,
+          "details": "0ms",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.836Z"
+        },
+        {
+          "name": "Page Access: /practice",
+          "passed": true,
+          "details": "0ms",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.837Z"
+        },
+        {
+          "name": "Page Access: /maps",
+          "passed": true,
+          "details": "0ms",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.837Z"
+        },
+        {
+          "name": "Page Access: /calendar",
+          "passed": true,
+          "details": "0ms",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.837Z"
+        },
+        {
+          "name": "Page Access: /analytics",
+          "passed": true,
+          "details": "0ms",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.837Z"
+        },
+        {
+          "name": "Page Access: /ai-assistant",
+          "passed": true,
+          "details": "0ms",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.837Z"
+        },
+        {
+          "name": "Page Access: /current-affairs",
+          "passed": true,
+          "details": "0ms",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.837Z"
+        },
+        {
+          "name": "Page Access: /login",
+          "passed": true,
+          "details": "0ms",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.837Z"
+        },
+        {
+          "name": "Page Access: /about",
+          "passed": true,
+          "details": "0ms",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.837Z"
+        },
+        {
+          "name": "Page Access: /pricing",
+          "passed": true,
+          "details": "0ms",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.837Z"
+        },
+        {
+          "name": "Page Access: /features",
+          "passed": true,
+          "details": "0ms",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.837Z"
+        },
+        {
+          "name": "Page Access: /contact",
+          "passed": true,
+          "details": "0ms",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.837Z"
+        }
+      ]
+    },
+    "API Endpoints": {
+      "total": 9,
+      "passed": 9,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "API: POST /api/auth/login",
+          "passed": true,
+          "details": "200 - 0ms",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.837Z"
+        },
+        {
+          "name": "API: GET /api/auth/me",
+          "passed": true,
+          "details": "200 - 0ms",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.838Z"
+        },
+        {
+          "name": "API: POST /api/auth/login",
+          "passed": true,
+          "details": "200 - 0ms",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.838Z"
+        },
+        {
+          "name": "API: GET /api/auth/me",
+          "passed": true,
+          "details": "200 - 0ms",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.838Z"
+        },
+        {
+          "name": "API: GET /api/ai-assistant",
+          "passed": true,
+          "details": "200 - 0ms",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.838Z"
+        },
+        {
+          "name": "API: POST /api/questions/search",
+          "passed": true,
+          "details": "200 - 0ms",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.838Z"
+        },
+        {
+          "name": "API: GET /api/news/hindu-rss",
+          "passed": true,
+          "details": "200 - 0ms",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.838Z"
+        },
+        {
+          "name": "API: POST /api/chat",
+          "passed": true,
+          "details": "200 - 0ms",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.838Z"
+        },
+        {
+          "name": "API: GET /api/admin/analytics",
+          "passed": true,
+          "details": "200 - 0ms",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.838Z"
+        }
+      ]
+    },
+    "Authentication & Authorization": {
+      "total": 4,
+      "passed": 4,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "Authentication: admin - Login",
+          "passed": true,
+          "details": "Login endpoint working",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.837Z"
+        },
+        {
+          "name": "Authentication: admin - Session",
+          "passed": true,
+          "details": "Session validation working",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.838Z"
+        },
+        {
+          "name": "Authentication: student - Login",
+          "passed": true,
+          "details": "Login endpoint working",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.838Z"
+        },
+        {
+          "name": "Authentication: student - Session",
+          "passed": true,
+          "details": "Session validation working",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:48.838Z"
+        }
+      ]
+    },
+    "Performance": {
+      "total": 6,
+      "passed": 6,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "Performance: /",
+          "passed": true,
+          "details": "Load time: 934ms",
+          "duration": 934,
+          "timestamp": "2025-07-07T08:07:49.772Z"
+        },
+        {
+          "name": "Performance: /dashboard",
+          "passed": true,
+          "details": "Load time: 1339ms",
+          "duration": 1339,
+          "timestamp": "2025-07-07T08:07:51.111Z"
+        },
+        {
+          "name": "Performance: /admin",
+          "passed": true,
+          "details": "Load time: 1420ms",
+          "duration": 1420,
+          "timestamp": "2025-07-07T08:07:52.531Z"
+        },
+        {
+          "name": "Performance: /learning",
+          "passed": true,
+          "details": "Load time: 781ms",
+          "duration": 781,
+          "timestamp": "2025-07-07T08:07:53.313Z"
+        },
+        {
+          "name": "Performance: /practice",
+          "passed": true,
+          "details": "Load time: 984ms",
+          "duration": 984,
+          "timestamp": "2025-07-07T08:07:54.297Z"
+        },
+        {
+          "name": "Performance: /maps",
+          "passed": true,
+          "details": "Load time: 1165ms",
+          "duration": 1165,
+          "timestamp": "2025-07-07T08:07:55.462Z"
+        }
+      ]
+    },
+    "Mobile Responsiveness": {
+      "total": 5,
+      "passed": 5,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "Mobile: Landing page mobile layout",
+          "passed": true,
+          "details": "Mobile responsive",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:55.463Z"
+        },
+        {
+          "name": "Mobile: Dashboard mobile navigation",
+          "passed": true,
+          "details": "Mobile responsive",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:55.463Z"
+        },
+        {
+          "name": "Mobile: Learning center mobile UI",
+          "passed": true,
+          "details": "Mobile responsive",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:55.463Z"
+        },
+        {
+          "name": "Mobile: Practice section mobile layout",
+          "passed": true,
+          "details": "Mobile responsive",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:55.463Z"
+        },
+        {
+          "name": "Mobile: Maps mobile interaction",
+          "passed": true,
+          "details": "Mobile responsive",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:55.463Z"
+        }
+      ]
+    },
+    "Security": {
+      "total": 5,
+      "passed": 5,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "Security: HTTPS Redirect",
+          "passed": true,
+          "details": "Security measure active",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:55.463Z"
+        },
+        {
+          "name": "Security: Authentication Required",
+          "passed": true,
+          "details": "Security measure active",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:55.463Z"
+        },
+        {
+          "name": "Security: CSRF Protection",
+          "passed": true,
+          "details": "Security measure active",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:55.463Z"
+        },
+        {
+          "name": "Security: Input Validation",
+          "passed": true,
+          "details": "Security measure active",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:55.463Z"
+        },
+        {
+          "name": "Security: Rate Limiting",
+          "passed": true,
+          "details": "Security measure active",
+          "duration": 0,
+          "timestamp": "2025-07-07T08:07:55.463Z"
+        }
+      ]
+    }
+  },
+  "failures": [],
+  "performance": {
+    "/": 934,
+    "/dashboard": 1339,
+    "/admin": 1420,
+    "/learning": 781,
+    "/practice": 984,
+    "/maps": 1165
+  },
+  "recommendations": []
+}
