@@ -111,7 +111,8 @@ export async function middleware(request: NextRequest) {
       }
       
       // Redirect to appropriate dashboard based on user role
-      const dashboardUrl = new URL('/', request.url);
+      const destination = session.user.role === 'admin' ? '/admin' : '/dashboard';
+      const dashboardUrl = new URL(destination, request.url);
       return NextResponse.redirect(dashboardUrl);
     }
     

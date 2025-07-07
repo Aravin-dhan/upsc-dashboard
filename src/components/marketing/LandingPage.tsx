@@ -10,15 +10,16 @@ import Footer from './Footer';
 import PublicNavbar from './PublicNavbar';
 
 export default function LandingPage() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect authenticated users to dashboard
-    if (!isLoading && isAuthenticated) {
-      router.push('/dashboard');
+    // Redirect authenticated users to appropriate dashboard based on role
+    if (!isLoading && isAuthenticated && user) {
+      const destination = user.role === 'admin' ? '/admin' : '/dashboard';
+      router.push(destination);
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, user, router]);
 
   // Show loading while checking auth
   if (isLoading) {
