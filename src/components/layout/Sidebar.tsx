@@ -24,7 +24,10 @@ import {
   Map,
   GraduationCap,
   Languages,
-  Shield
+  Shield,
+  Users,
+  Mail,
+  Ticket
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -46,6 +49,18 @@ const navigation = [
   { name: 'Wellness', href: '/wellness', icon: Heart },
   { name: 'Quick Links', href: '/quick-links', icon: ExternalLink },
   { name: 'AI Assistant', href: '/ai-assistant', icon: MessageCircle },
+];
+
+// Admin-specific navigation items
+const adminNavigation = [
+  { name: 'Admin Dashboard', href: '/admin', icon: Shield },
+  { name: 'User Management', href: '/admin/users', icon: Users },
+  { name: 'Content Management', href: '/admin/content', icon: FileText },
+  { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
+  { name: 'Coupon Management', href: '/admin/coupons', icon: Ticket },
+  { name: 'Email Subscriptions', href: '/admin/subscriptions', icon: Mail },
+  { name: 'Security Center', href: '/admin/security', icon: Shield },
+  { name: 'System Settings', href: '/admin/settings', icon: Settings },
 ];
 
 const bottomNavigation = [
@@ -113,6 +128,7 @@ export default function Sidebar() {
 
           {/* Navigation */}
           <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+            {/* Main Navigation */}
             {navigation.map((item) => {
               const isActive = pathname === item.href;
               return (
@@ -136,31 +152,44 @@ export default function Sidebar() {
                 </Link>
               );
             })}
+
+            {/* Admin Navigation Section - Only visible to admin users */}
+            {user?.role === 'admin' && (
+              <>
+                <div className="pt-4 pb-2">
+                  <div className="px-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Administration
+                  </div>
+                </div>
+                {adminNavigation.map((item) => {
+                  const isActive = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`
+                        group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 transform hover:scale-105 active:scale-95
+                        ${isActive
+                          ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-200 shadow-sm'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300'
+                        }
+                      `}
+                    >
+                      <item.icon className={`
+                        mr-3 h-5 w-5 flex-shrink-0
+                        ${isActive ? 'text-red-500' : 'text-gray-400 group-hover:text-red-500'}
+                      `} />
+                      {item.name}
+                    </Link>
+                  );
+                })}
+              </>
+            )}
           </nav>
 
           {/* Bottom navigation */}
           <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-4 space-y-1">
-            {/* Admin Panel Link - Only visible to admin users */}
-            {user?.role === 'admin' && (
-              <Link
-                href="/admin"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`
-                  group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 transform hover:scale-105 active:scale-95
-                  ${pathname.startsWith('/admin')
-                    ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-200 shadow-sm'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300'
-                  }
-                `}
-              >
-                <Shield className={`
-                  mr-3 h-5 w-5 flex-shrink-0
-                  ${pathname.startsWith('/admin') ? 'text-red-500' : 'text-gray-400 group-hover:text-red-500'}
-                `} />
-                Admin Panel
-              </Link>
-            )}
-
             {bottomNavigation.map((item) => {
               const isActive = pathname === item.href;
               return (
