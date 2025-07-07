@@ -10,10 +10,32 @@ export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirect') || '/';
+  const redirectTo = searchParams.get('redirect');
 
-  const handleAuthSuccess = () => {
-    router.push(redirectTo);
+  // Role-based redirect logic
+  const getRoleBasedRedirect = (userRole: string): string => {
+    // If there's a specific redirect URL, use it
+    if (redirectTo) {
+      return redirectTo;
+    }
+
+    // Default role-based redirects
+    switch (userRole) {
+      case 'admin':
+        return '/admin';
+      case 'teacher':
+        return '/dashboard'; // Teachers go to main dashboard
+      case 'student':
+        return '/dashboard'; // Students go to main dashboard
+      default:
+        return '/dashboard';
+    }
+  };
+
+  const handleAuthSuccess = (user?: any) => {
+    // Determine redirect based on user role
+    const destination = user?.role ? getRoleBasedRedirect(user.role) : (redirectTo || '/dashboard');
+    router.push(destination);
     router.refresh();
   };
 

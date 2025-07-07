@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Mail, Lock, LogIn } from 'lucide-react';
 
 interface LoginFormProps {
-  onSuccess?: () => void;
+  onSuccess?: (user?: any) => void;
   redirectTo?: string;
 }
 
@@ -75,11 +75,13 @@ export default function LoginForm({ onSuccess, redirectTo = '/' }: LoginFormProp
       const data = await response.json();
 
       if (response.ok) {
-        // Success - redirect or call success callback
+        // Success - redirect or call success callback with user data
         if (onSuccess) {
-          onSuccess();
+          onSuccess(data.user);
         } else {
-          router.push(redirectTo);
+          // Fallback role-based redirect if no success callback
+          const destination = data.user?.role === 'admin' ? '/admin' : '/dashboard';
+          router.push(destination);
           router.refresh();
         }
       } else {

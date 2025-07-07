@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Mail, Lock, User, UserPlus, Shield } from 'lucide-react';
 
 interface RegisterFormProps {
-  onSuccess?: () => void;
+  onSuccess?: (user?: any) => void;
   redirectTo?: string;
   allowRoleSelection?: boolean;
 }
@@ -126,9 +126,11 @@ export default function RegisterForm({
 
       if (response.ok) {
         if (onSuccess) {
-          onSuccess();
+          onSuccess(data.user);
         } else {
-          router.push(redirectTo);
+          // Fallback role-based redirect if no success callback
+          const destination = data.user?.role === 'admin' ? '/admin' : '/dashboard';
+          router.push(destination);
           router.refresh();
         }
       } else {
