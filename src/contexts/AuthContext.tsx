@@ -54,9 +54,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   
   const checkAuth = async () => {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+
       const response = await fetch('/api/auth/me', {
         credentials: 'include',
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
@@ -78,13 +84,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Load available tenants
         await loadAvailableTenants();
+
+        // Log session expiry warning if applicable
+        if (data.isExpiringSoon) {
+          console.warn('Session expires soon:', data.expires);
+        }
       } else {
+        const errorData = await response.json().catch(() => ({}));
+
+        // Enhanced error logging for session validation failures
+        console.error('Session validation failed:', {
+          error: errorData.error,
+          code: errorData.code,
+          details: errorData.details,
+          status: response.status,
+          requiresLogin: errorData.requiresLogin
+        });
+
         setUser(null);
         setTenant(null);
         setStorageService(null);
       }
-    } catch (error) {
-      console.error('Auth check failed:', error);
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.error('Session check timeout:', error);
+      } else if (error instanceof TypeError && error.message.includes('fetch')) {
+        console.error('Network error during session check:', error);
+      } else {
+        console.error('Unexpected auth check error:', error);
+      }
+
       setUser(null);
       setTenant(null);
       setStorageService(null);
@@ -110,15 +139,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string, tenantId?: string): Promise<boolean> => {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password, tenantId }),
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+          tenantId
+        }),
         credentials: 'include',
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
       const data = await response.json();
 
       if (response.ok) {
@@ -142,37 +180,84 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await loadAvailableTenants();
         return true;
       } else {
-        console.error('Login failed:', data.error);
+        // Enhanced error logging with structured error information
+        console.error('Login failed:', {
+          error: data.error,
+          code: data.code,
+          details: data.details,
+          status: response.status
+        });
         return false;
       }
-    } catch (error) {
-      console.error('Login error:', error);
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.error('Login timeout:', error);
+      } else if (error instanceof TypeError && error.message.includes('fetch')) {
+        console.error('Network error during login:', error);
+      } else {
+        console.error('Unexpected login error:', error);
+      }
       return false;
     }
   };
   
   const register = async (registerData: RegisterData): Promise<boolean> => {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout for registration
+
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(registerData),
+        body: JSON.stringify({
+          ...registerData,
+          email: registerData.email.trim(),
+          name: registerData.name.trim()
+        }),
         credentials: 'include',
+        signal: controller.signal,
       });
-      
+
+      clearTimeout(timeoutId);
       const data = await response.json();
-      
+
       if (response.ok) {
         setUser(data.user);
+        setTenant(data.tenant);
+
+        // Initialize tenant storage service if tenant data is available
+        if (data.user && data.tenant) {
+          const storage = TenantStorageService.getInstance({
+            tenantId: data.tenant.id,
+            userId: data.user.id,
+            useAPI: false
+          });
+          setStorageService(storage);
+        }
+
+        // Load available tenants
+        await loadAvailableTenants();
         return true;
       } else {
-        console.error('Registration failed:', data.error);
+        // Enhanced error logging with structured error information
+        console.error('Registration failed:', {
+          error: data.error,
+          code: data.code,
+          details: data.details,
+          status: response.status
+        });
         return false;
       }
-    } catch (error) {
-      console.error('Registration error:', error);
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.error('Registration timeout:', error);
+      } else if (error instanceof TypeError && error.message.includes('fetch')) {
+        console.error('Network error during registration:', error);
+      } else {
+        console.error('Unexpected registration error:', error);
+      }
       return false;
     }
   };

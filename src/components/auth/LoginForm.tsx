@@ -9,6 +9,13 @@ interface LoginFormProps {
   redirectTo?: string;
 }
 
+interface AuthError {
+  error: string;
+  code?: string;
+  details?: string;
+  requiresLogin?: boolean;
+}
+
 export default function LoginForm({ onSuccess, redirectTo = '/' }: LoginFormProps) {
   const [formData, setFormData] = useState({
     email: '',
@@ -16,27 +23,59 @@ export default function LoginForm({ onSuccess, redirectTo = '/' }: LoginFormProp
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  
+  const [error, setError] = useState<AuthError | null>(null);
+  const [networkError, setNetworkError] = useState(false);
+
   const router = useRouter();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
-    
+    setError(null);
+    setNetworkError(false);
+
+    // Client-side validation
+    if (!formData.email.trim() || !formData.password) {
+      setError({
+        error: 'Please enter both email and password.',
+        code: 'MISSING_FIELDS'
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email.trim())) {
+      setError({
+        error: 'Please enter a valid email address.',
+        code: 'INVALID_EMAIL_FORMAT'
+      });
+      setIsLoading(false);
+      return;
+    }
+
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          email: formData.email.trim(),
+          password: formData.password
+        }),
+        signal: controller.signal,
       });
-      
+
+      clearTimeout(timeoutId);
       const data = await response.json();
-      
+
       if (response.ok) {
+        // Success - redirect or call success callback
         if (onSuccess) {
           onSuccess();
         } else {
@@ -44,10 +83,35 @@ export default function LoginForm({ onSuccess, redirectTo = '/' }: LoginFormProp
           router.refresh();
         }
       } else {
-        setError(data.error || 'Login failed');
+        // Handle API errors with enhanced error information
+        setError({
+          error: data.error || 'Login failed. Please try again.',
+          code: data.code,
+          details: data.details,
+          requiresLogin: data.requiresLogin
+        });
       }
-    } catch (error) {
-      setError('Network error. Please try again.');
+    } catch (error: any) {
+      console.error('Login error:', error);
+
+      if (error.name === 'AbortError') {
+        setError({
+          error: 'Login request timed out. Please check your internet connection and try again.',
+          code: 'TIMEOUT_ERROR'
+        });
+        setNetworkError(true);
+      } else if (error instanceof TypeError && error.message.includes('fetch')) {
+        setError({
+          error: 'Unable to connect to the server. Please check your internet connection.',
+          code: 'NETWORK_ERROR'
+        });
+        setNetworkError(true);
+      } else {
+        setError({
+          error: 'An unexpected error occurred. Please try again.',
+          code: 'UNKNOWN_ERROR'
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -58,7 +122,11 @@ export default function LoginForm({ onSuccess, redirectTo = '/' }: LoginFormProp
       ...prev,
       [e.target.name]: e.target.value
     }));
-    setError(''); // Clear error when user types
+    // Clear errors when user starts typing
+    if (error) {
+      setError(null);
+      setNetworkError(false);
+    }
   };
   
   return (
@@ -74,8 +142,43 @@ export default function LoginForm({ onSuccess, redirectTo = '/' }: LoginFormProp
         </div>
         
         {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-            {error}
+          <div className={`mb-4 p-4 rounded-lg border ${
+            networkError
+              ? 'bg-orange-50 border-orange-200 text-orange-800'
+              : 'bg-red-50 border-red-200 text-red-800'
+          }`}>
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                {networkError ? (
+                  <svg className="h-5 w-5 text-orange-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                )}
+              </div>
+              <div className="ml-3 flex-1">
+                <p className="text-sm font-medium">
+                  {error.error}
+                </p>
+                {error.code && process.env.NODE_ENV === 'development' && (
+                  <p className="mt-1 text-xs opacity-75">
+                    Error Code: {error.code}
+                  </p>
+                )}
+                {networkError && (
+                  <button
+                    type="button"
+                    onClick={() => handleSubmit({ preventDefault: () => {} } as React.FormEvent)}
+                    className="mt-2 text-sm underline hover:no-underline focus:outline-none"
+                  >
+                    Try again
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         )}
         
