@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Tenant } from '@/lib/auth';
 import { TenantStorageService, LEGACY_STORAGE_KEYS } from '@/services/TenantStorageService';
+import { hasPermission, getUserPermissions } from '@/lib/auth/rbac';
+import { logAuthEvent, AUDIT_ACTIONS } from '@/lib/auth/audit';
 
 interface AuthContextType {
   user: User | null;
@@ -17,6 +19,10 @@ interface AuthContextType {
   switchTenant: (tenantId: string) => Promise<boolean>;
   createTenant: (data: CreateTenantData) => Promise<boolean>;
   storageService: TenantStorageService | null;
+  // New RBAC methods
+  hasPermission: (resource: string, action: string, context?: Record<string, any>) => boolean;
+  getUserPermissions: () => Array<{ resource: string; action: string; conditions?: Record<string, any> }>;
+  canAccessRoute: (route: string) => boolean;
 }
 
 interface RegisterData {
@@ -363,6 +369,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // RBAC helper functions
+  const checkPermission = (resource: string, action: string, context?: Record<string, any>): boolean => {
+    if (!user) return false;
+    return hasPermission(user, resource, action, context);
+  };
+
+  const getUserPermissionsList = () => {
+    if (!user) return [];
+    return getUserPermissions(user);
+  };
+
+  const canAccessRoute = (route: string): boolean => {
+    if (!user) return false;
+    // Import canUserAccessRoute from routing module
+    const { canUserAccessRoute } = require('@/lib/auth/routing');
+    return canUserAccessRoute(user, route);
+  };
+
   const value: AuthContextType = {
     user,
     tenant,
@@ -376,6 +400,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     switchTenant,
     createTenant,
     storageService,
+    // RBAC methods
+    hasPermission: checkPermission,
+    getUserPermissions: getUserPermissionsList,
+    canAccessRoute,
   };
   
   return (

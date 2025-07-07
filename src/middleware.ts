@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getSession } from '@/lib/auth';
+import { canUserAccessRoute, getUnauthorizedRedirect } from '@/lib/auth/routing';
+import { logSecurityEvent, AUDIT_ACTIONS } from '@/lib/auth/audit';
 
 // Define protected routes and their required roles
 const protectedRoutes = {
@@ -28,8 +30,35 @@ const protectedRoutes = {
 
 // Public routes that don't require authentication
 const publicRoutes = [
+  '/',
   '/login',
+  '/signup',
   '/register',
+  '/pricing',
+  '/features',
+  '/demo',
+  '/docs',
+  '/about',
+  '/careers',
+  '/press',
+  '/partners',
+  '/affiliate',
+  '/contact',
+  '/community',
+  '/chat',
+  '/support',
+  '/status',
+  '/privacy',
+  '/terms',
+  '/cookies',
+  '/data-protection',
+  '/refund',
+  '/resources',
+  '/resources/materials',
+  '/resources/tests',
+  '/resources/current-affairs',
+  '/resources/papers',
+  '/resources/guides',
   '/api/auth/login',
   '/api/auth/register',
   '/api/auth/logout',
@@ -95,13 +124,38 @@ export async function middleware(request: NextRequest) {
     
     // If no session, redirect to login
     if (!session) {
+      await logSecurityEvent(
+        AUDIT_ACTIONS.UNAUTHORIZED_ACCESS,
+        {
+          route: pathname,
+          reason: 'No session found',
+          userAgent: request.headers.get('user-agent'),
+          referer: request.headers.get('referer')
+        },
+        request
+      );
+
       const loginUrl = new URL('/login', request.url);
       loginUrl.searchParams.set('redirect', pathname);
       return NextResponse.redirect(loginUrl);
     }
-    
-    // Check if user has required permissions
-    if (!hasPermission(session.user.role, requiredRole)) {
+
+    // Enhanced permission checking using new RBAC system
+    if (!canUserAccessRoute(session.user, pathname)) {
+      await logSecurityEvent(
+        AUDIT_ACTIONS.PERMISSION_DENIED,
+        {
+          route: pathname,
+          reason: 'Insufficient permissions',
+          userRole: session.user.role,
+          requiredRole,
+          userAgent: request.headers.get('user-agent')
+        },
+        request,
+        session.user.id,
+        session.user.email
+      );
+
       // Return 403 for API routes
       if (pathname.startsWith('/api/')) {
         return NextResponse.json(
@@ -109,19 +163,22 @@ export async function middleware(request: NextRequest) {
           { status: 403 }
         );
       }
-      
+
       // Redirect to appropriate dashboard based on user role
-      const destination = session.user.role === 'admin' ? '/admin' : '/dashboard';
+      const destination = getUnauthorizedRedirect(session.user, pathname);
       const dashboardUrl = new URL(destination, request.url);
       return NextResponse.redirect(dashboardUrl);
     }
     
+    // Check for suspicious activity patterns
+    await detectSuspiciousActivity(request, session);
+
     // Add user info to headers for use in API routes
     const response = NextResponse.next();
     response.headers.set('x-user-id', session.user.id);
     response.headers.set('x-user-role', session.user.role);
     response.headers.set('x-user-tenant', session.user.tenantId);
-    
+
     return response;
     
   } catch (error) {
@@ -139,6 +196,49 @@ export async function middleware(request: NextRequest) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(loginUrl);
+  }
+}
+
+/**
+ * Detect suspicious activity patterns
+ */
+async function detectSuspiciousActivity(request: NextRequest, session: any) {
+  const userAgent = request.headers.get('user-agent') || '';
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ||
+            request.headers.get('x-real-ip') ||
+            request.ip;
+
+  // Check for bot-like behavior
+  const suspiciousBots = ['bot', 'crawler', 'spider', 'scraper'];
+  if (suspiciousBots.some(bot => userAgent.toLowerCase().includes(bot))) {
+    await logSecurityEvent(
+      AUDIT_ACTIONS.SUSPICIOUS_ACTIVITY,
+      {
+        type: 'bot_detection',
+        userAgent,
+        route: request.nextUrl.pathname,
+        ip
+      },
+      request,
+      session?.user?.id,
+      session?.user?.email
+    );
+  }
+
+  // Check for unusual user agent patterns
+  if (!userAgent || userAgent.length < 10) {
+    await logSecurityEvent(
+      AUDIT_ACTIONS.SUSPICIOUS_ACTIVITY,
+      {
+        type: 'suspicious_user_agent',
+        userAgent,
+        route: request.nextUrl.pathname,
+        ip
+      },
+      request,
+      session?.user?.id,
+      session?.user?.email
+    );
   }
 }
 

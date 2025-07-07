@@ -2,6 +2,7 @@ import { createHash, randomBytes, timingSafeEqual } from 'crypto';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import { NextRequest } from 'next/server';
+import { logAuthEvent, logSecurityEvent, AUDIT_ACTIONS } from './auth/audit';
 
 // Multi-tenant types
 export interface Tenant {
@@ -53,6 +54,10 @@ export interface AuthSession {
   user: User;
   tenant: Tenant;
   expires: string;
+  sessionId: string;
+  lastActivity: number;
+  ipAddress?: string;
+  userAgent?: string;
 }
 
 export interface LoginCredentials {
@@ -119,8 +124,18 @@ export function verifyPassword(password: string, hash: string, salt: string): bo
          timingSafeEqual(expectedBuffer, actualBuffer);
 }
 
+// In-memory session store (in production, use Redis or database)
+const activeSessions = new Map<string, AuthSession>();
+
 // Session management
-export async function createSession(user: User, tenant?: Tenant): Promise<string> {
+export async function createSession(
+  user: User,
+  tenant?: Tenant,
+  request?: NextRequest
+): Promise<string> {
+  const sessionId = generateSessionId();
+  const now = Date.now();
+
   const sessionData = {
     userId: user.id,
     email: user.email,
@@ -129,6 +144,10 @@ export async function createSession(user: User, tenant?: Tenant): Promise<string
     tenantId: user.tenantId,
     tenantRole: user.tenantRole,
     tenants: user.tenants,
+    sessionId,
+    lastActivity: now,
+    ipAddress: getClientIP(request),
+    userAgent: request?.headers.get('user-agent') || undefined,
     tenant: tenant ? {
       id: tenant.id,
       name: tenant.name,
@@ -138,7 +157,32 @@ export async function createSession(user: User, tenant?: Tenant): Promise<string
     exp: Math.floor((Date.now() + SESSION_DURATION) / 1000)
   };
 
-  return await createJWT(sessionData);
+  const token = await createJWT(sessionData);
+
+  // Store session in memory (in production, use persistent storage)
+  const session: AuthSession = {
+    user,
+    tenant: tenant || createDefaultTenant(user.id, user.name),
+    expires: new Date((sessionData.exp * 1000)).toISOString(),
+    sessionId,
+    lastActivity: now,
+    ipAddress: sessionData.ipAddress,
+    userAgent: sessionData.userAgent
+  };
+
+  activeSessions.set(sessionId, session);
+
+  // Log session creation
+  await logAuthEvent(
+    AUDIT_ACTIONS.LOGIN,
+    user.id,
+    user.email,
+    true,
+    { sessionId, userAgent: sessionData.userAgent },
+    request
+  );
+
+  return token;
 }
 
 export async function getSession(request?: NextRequest): Promise<AuthSession | null> {
@@ -162,6 +206,21 @@ export async function getSession(request?: NextRequest): Promise<AuthSession | n
 
     // Check if token is expired
     if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
+      if (payload.sessionId) {
+        await invalidateSession(payload.sessionId, 'Token expired');
+      }
+      return null;
+    }
+
+    // Check if session is still active
+    if (payload.sessionId && !activeSessions.has(payload.sessionId)) {
+      await logAuthEvent(
+        AUDIT_ACTIONS.SESSION_EXPIRED,
+        payload.userId,
+        payload.email,
+        false,
+        { reason: 'Session not found in active sessions' }
+      );
       return null;
     }
 
@@ -193,19 +252,102 @@ export async function getSession(request?: NextRequest): Promise<AuthSession | n
       updatedAt: ''
     };
 
-    return {
+    const session: AuthSession = {
       user,
       tenant,
-      expires: new Date(payload.exp * 1000).toISOString()
+      expires: new Date(payload.exp * 1000).toISOString(),
+      sessionId: payload.sessionId,
+      lastActivity: Date.now(),
+      ipAddress: payload.ipAddress,
+      userAgent: payload.userAgent
     };
+
+    // Update session activity
+    if (payload.sessionId) {
+      activeSessions.set(payload.sessionId, session);
+    }
+
+    return session;
   } catch (error) {
+    console.error('Session verification failed:', error);
     return null;
   }
 }
 
-export async function clearSession(): Promise<void> {
+export async function clearSession(sessionId?: string): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(COOKIE_NAME);
+
+  if (sessionId) {
+    await invalidateSession(sessionId, 'Manual logout');
+  }
+}
+
+export async function invalidateSession(sessionId: string, reason?: string): Promise<void> {
+  const session = activeSessions.get(sessionId);
+  if (session) {
+    activeSessions.delete(sessionId);
+
+    await logAuthEvent(
+      AUDIT_ACTIONS.LOGOUT,
+      session.user.id,
+      session.user.email,
+      true,
+      { sessionId, reason }
+    );
+  }
+}
+
+export async function invalidateAllUserSessions(userId: string): Promise<void> {
+  const userSessions = Array.from(activeSessions.values()).filter(
+    session => session.user.id === userId
+  );
+
+  for (const session of userSessions) {
+    activeSessions.delete(session.sessionId);
+  }
+
+  if (userSessions.length > 0) {
+    await logAuthEvent(
+      AUDIT_ACTIONS.LOGOUT,
+      userId,
+      userSessions[0].user.email,
+      true,
+      { reason: 'All sessions invalidated', sessionCount: userSessions.length }
+    );
+  }
+}
+
+export function getUserActiveSessions(userId: string): AuthSession[] {
+  return Array.from(activeSessions.values()).filter(
+    session => session.user.id === userId
+  );
+}
+
+export function getSessionMetrics(): {
+  totalSessions: number;
+  activeSessions: number;
+  expiredSessions: number;
+  averageSessionDuration: number;
+  sessionsToday: number;
+} {
+  const now = Date.now();
+  const oneDayAgo = now - (24 * 60 * 60 * 1000);
+
+  const sessions = Array.from(activeSessions.values());
+  const activeSessions24h = sessions.filter(s => s.lastActivity > oneDayAgo);
+
+  const totalDuration = sessions.reduce((sum, session) => {
+    return sum + (session.lastActivity - new Date(session.expires).getTime() + SESSION_DURATION);
+  }, 0);
+
+  return {
+    totalSessions: sessions.length,
+    activeSessions: activeSessions24h.length,
+    expiredSessions: sessions.length - activeSessions24h.length,
+    averageSessionDuration: sessions.length > 0 ? totalDuration / sessions.length : 0,
+    sessionsToday: activeSessions24h.length
+  };
 }
 
 // Role-based access control
@@ -225,15 +367,31 @@ export function hasPermission(userRole: string, requiredRole: string): boolean {
 export function requireAuth(requiredRole?: string) {
   return async function(request: NextRequest) {
     const session = await getSession(request);
-    
+
     if (!session) {
+      await logSecurityEvent(
+        AUDIT_ACTIONS.UNAUTHORIZED_ACCESS,
+        { route: request.nextUrl.pathname, requiredRole },
+        request
+      );
       return { error: 'Authentication required', status: 401 };
     }
-    
+
     if (requiredRole && !hasPermission(session.user.role, requiredRole)) {
+      await logSecurityEvent(
+        AUDIT_ACTIONS.PERMISSION_DENIED,
+        {
+          route: request.nextUrl.pathname,
+          userRole: session.user.role,
+          requiredRole
+        },
+        request,
+        session.user.id,
+        session.user.email
+      );
       return { error: 'Insufficient permissions', status: 403 };
     }
-    
+
     return { session };
   };
 }
@@ -311,4 +469,19 @@ export function validateTenantAccess(requestedTenantId: string, userTenantId: st
 // Generate secure IDs
 export function generateId(): string {
   return randomBytes(16).toString('hex');
+}
+
+export function generateSessionId(): string {
+  return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+}
+
+function getClientIP(request?: NextRequest): string | undefined {
+  if (!request) return undefined;
+
+  return (
+    request.headers.get('x-forwarded-for')?.split(',')[0] ||
+    request.headers.get('x-real-ip') ||
+    request.ip ||
+    undefined
+  );
 }
