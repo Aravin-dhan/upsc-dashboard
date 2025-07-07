@@ -3,26 +3,37 @@
 import { useState, useEffect } from 'react';
 import { useAuth, withAuth } from '@/contexts/AuthContext';
 import { User } from '@/lib/auth';
-import { Users, UserPlus, Edit, Trash2, Shield, Mail, Calendar, Activity } from 'lucide-react';
+import { UserSubscription } from '@/lib/types/coupon';
+import { Users, UserPlus, Edit, Trash2, Shield, Mail, Calendar, Activity, Crown, Clock, Search, Filter } from 'lucide-react';
 
 interface UserStats {
   total: number;
   byRole: Record<string, number>;
   active: number;
+  byPlan: Record<string, number>;
+}
+
+interface UserWithSubscription extends User {
+  subscription?: UserSubscription;
+  planType: string;
+  subscriptionStatus: string;
 }
 
 function UserManagementPage() {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserWithSubscription[]>([]);
   const [stats, setStats] = useState<UserStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [planFilter, setPlanFilter] = useState('all');
   const { user: currentUser } = useAuth();
   
   useEffect(() => {
     fetchUsers();
     fetchStats();
   }, []);
-  
+
   const fetchUsers = async () => {
     try {
       const response = await fetch('/api/admin/users');
@@ -38,10 +49,10 @@ function UserManagementPage() {
       setIsLoading(false);
     }
   };
-  
+
   const fetchStats = async () => {
     try {
-      const response = await fetch('/api/admin/stats');
+      const response = await fetch('/api/admin/subscriptions/stats');
       if (response.ok) {
         const data = await response.json();
         setStats(data.stats);
@@ -50,6 +61,40 @@ function UserManagementPage() {
       console.error('Failed to fetch stats:', error);
     }
   };
+
+  const handleUpdateSubscription = async (userId: string, planType: string) => {
+    try {
+      const response = await fetch(`/api/admin/subscriptions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId,
+          planType,
+          action: 'update'
+        })
+      });
+
+      if (response.ok) {
+        fetchUsers();
+        fetchStats();
+      } else {
+        setError('Failed to update subscription');
+      }
+    } catch (error) {
+      setError('Network error while updating subscription');
+    }
+  };
+
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         user.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+    const matchesPlan = planFilter === 'all' || user.planType === planFilter;
+
+    return matchesSearch && matchesRole && matchesPlan;
+  });
   
   const getRoleBadgeColor = (role: string) => {
     switch (role) {

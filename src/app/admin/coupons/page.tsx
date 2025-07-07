@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth, withAuth } from '@/contexts/AuthContext';
-import { 
-  Ticket, 
-  Plus, 
-  Edit, 
-  Trash2, 
+import CouponForm from '@/components/admin/CouponForm';
+import {
+  Ticket,
+  Plus,
+  Edit,
+  Trash2,
   Copy,
   Search,
   Calendar,
@@ -154,6 +155,55 @@ function CouponManagementPage() {
       } catch (error) {
         setError('Network error while deleting coupon');
       }
+    }
+  };
+
+  const handleSaveCoupon = async (couponData: Partial<Coupon>) => {
+    try {
+      if (editingCoupon) {
+        // Update existing coupon
+        const response = await fetch(`/api/admin/coupons/${editingCoupon.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(couponData)
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setCoupons(coupons.map(coupon =>
+            coupon.id === editingCoupon.id ? data.coupon : coupon
+          ));
+          setEditingCoupon(null);
+        } else {
+          const errorData = await response.json();
+          setError(errorData.error || 'Failed to update coupon');
+        }
+      } else {
+        // Create new coupon
+        const response = await fetch('/api/admin/coupons', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(couponData)
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setCoupons([...coupons, data.coupon]);
+          setShowCreateModal(false);
+        } else {
+          const errorData = await response.json();
+          setError(errorData.error || 'Failed to create coupon');
+        }
+      }
+
+      // Refresh stats
+      fetchCouponStats();
+    } catch (error) {
+      setError('Network error while saving coupon');
     }
   };
 
@@ -429,47 +479,16 @@ function CouponManagementPage() {
         )}
       </div>
 
-      {/* Create/Edit Modal Placeholder */}
-      {(showCreateModal || editingCoupon) && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-
-            <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div className="text-center py-8">
-                  <Ticket className="mx-auto h-12 w-12 text-gray-400" />
-                  <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
-                    {editingCoupon ? 'Edit Coupon' : 'Create Coupon'}
-                  </h3>
-                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    Coupon creation/editing form will be implemented here.
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button
-                  type="button"
-                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
-                >
-                  {editingCoupon ? 'Update' : 'Create'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowCreateModal(false);
-                    setEditingCoupon(null);
-                  }}
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-gray-600 dark:text-gray-200 dark:border-gray-500 dark:hover:bg-gray-700"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Coupon Form Modal */}
+      <CouponForm
+        coupon={editingCoupon}
+        isOpen={showCreateModal || !!editingCoupon}
+        onClose={() => {
+          setShowCreateModal(false);
+          setEditingCoupon(null);
+        }}
+        onSave={handleSaveCoupon}
+      />
     </div>
   );
 }
