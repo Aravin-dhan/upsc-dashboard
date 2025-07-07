@@ -35,7 +35,7 @@ export default function PricingSection() {
     {
       name: 'Pro',
       description: 'For serious UPSC aspirants',
-      price: { monthly: 999, annual: 799 },
+      price: { monthly: 200, annual: 200 },
       badge: 'Most Popular',
       icon: Zap,
       features: [
