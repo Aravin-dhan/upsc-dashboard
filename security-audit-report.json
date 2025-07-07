@@ -1,0 +1,308 @@
+{
+  "timestamp": "2025-07-07T07:59:23.311Z",
+  "totalEndpoints": 25,
+  "secureEndpoints": 10,
+  "vulnerableEndpoints": 15,
+  "summary": {
+    "withAuthentication": 17,
+    "withAuthorization": 11,
+    "withValidation": 4,
+    "withRateLimit": 1,
+    "withErrorHandling": 25
+  },
+  "vulnerabilities": [
+    {
+      "path": "/app/api/admin/audit",
+      "file": "app/api/admin/audit/route.ts",
+      "hasAuthentication": true,
+      "hasAuthorization": true,
+      "hasValidation": false,
+      "hasRateLimit": false,
+      "hasErrorHandling": true,
+      "httpMethods": [
+        "GET",
+        "POST"
+      ],
+      "securityIssues": [
+        "Missing input validation"
+      ],
+      "recommendations": [
+        "Add input validation and sanitization"
+      ]
+    },
+    {
+      "path": "/app/api/admin/content",
+      "file": "app/api/admin/content/route.ts",
+      "hasAuthentication": true,
+      "hasAuthorization": true,
+      "hasValidation": false,
+      "hasRateLimit": false,
+      "hasErrorHandling": true,
+      "httpMethods": [
+        "GET",
+        "POST"
+      ],
+      "securityIssues": [
+        "Missing input validation"
+      ],
+      "recommendations": [
+        "Add input validation and sanitization"
+      ]
+    },
+    {
+      "path": "/app/api/admin/coupons",
+      "file": "app/api/admin/coupons/route.ts",
+      "hasAuthentication": true,
+      "hasAuthorization": true,
+      "hasValidation": false,
+      "hasRateLimit": false,
+      "hasErrorHandling": true,
+      "httpMethods": [
+        "GET",
+        "POST"
+      ],
+      "securityIssues": [
+        "Missing input validation"
+      ],
+      "recommendations": [
+        "Add input validation and sanitization"
+      ]
+    },
+    {
+      "path": "/app/api/admin/users",
+      "file": "app/api/admin/users/route.ts",
+      "hasAuthentication": true,
+      "hasAuthorization": true,
+      "hasValidation": false,
+      "hasRateLimit": false,
+      "hasErrorHandling": true,
+      "httpMethods": [
+        "GET",
+        "POST",
+        "DELETE"
+      ],
+      "securityIssues": [
+        "Missing input validation"
+      ],
+      "recommendations": [
+        "Add input validation and sanitization"
+      ]
+    },
+    {
+      "path": "/app/api/ai/analyze-answer",
+      "file": "app/api/ai/analyze-answer/route.ts",
+      "hasAuthentication": true,
+      "hasAuthorization": false,
+      "hasValidation": false,
+      "hasRateLimit": true,
+      "hasErrorHandling": true,
+      "httpMethods": [
+        "POST"
+      ],
+      "securityIssues": [
+        "Missing input validation"
+      ],
+      "recommendations": [
+        "Add input validation and sanitization"
+      ]
+    },
+    {
+      "path": "/app/api/ai-assistant",
+      "file": "app/api/ai-assistant/route.ts",
+      "hasAuthentication": true,
+      "hasAuthorization": false,
+      "hasValidation": false,
+      "hasRateLimit": false,
+      "hasErrorHandling": true,
+      "httpMethods": [
+        "POST",
+        "GET"
+      ],
+      "securityIssues": [
+        "Missing input validation"
+      ],
+      "recommendations": [
+        "Add input validation and sanitization"
+      ]
+    },
+    {
+      "path": "/app/api/auth/login",
+      "file": "app/api/auth/login/route.ts",
+      "hasAuthentication": false,
+      "hasAuthorization": false,
+      "hasValidation": false,
+      "hasRateLimit": false,
+      "hasErrorHandling": true,
+      "httpMethods": [
+        "POST"
+      ],
+      "securityIssues": [
+        "Missing authentication",
+        "Missing input validation"
+      ],
+      "recommendations": [
+        "Add getSession() or requireAuth() check",
+        "Add input validation and sanitization"
+      ]
+    },
+    {
+      "path": "/app/api/auth/logout",
+      "file": "app/api/auth/logout/route.ts",
+      "hasAuthentication": false,
+      "hasAuthorization": false,
+      "hasValidation": false,
+      "hasRateLimit": false,
+      "hasErrorHandling": true,
+      "httpMethods": [
+        "POST",
+        "GET"
+      ],
+      "securityIssues": [
+        "Missing authentication",
+        "Missing input validation"
+      ],
+      "recommendations": [
+        "Add getSession() or requireAuth() check",
+        "Add input validation and sanitization"
+      ]
+    },
+    {
+      "path": "/app/api/auth/register",
+      "file": "app/api/auth/register/route.ts",
+      "hasAuthentication": false,
+      "hasAuthorization": false,
+      "hasValidation": false,
+      "hasRateLimit": false,
+      "hasErrorHandling": true,
+      "httpMethods": [
+        "POST"
+      ],
+      "securityIssues": [
+        "Missing authentication",
+        "Missing input validation"
+      ],
+      "recommendations": [
+        "Add getSession() or requireAuth() check",
+        "Add input validation and sanitization"
+      ]
+    },
+    {
+      "path": "/app/api/chat",
+      "file": "app/api/chat/route.ts",
+      "hasAuthentication": true,
+      "hasAuthorization": false,
+      "hasValidation": false,
+      "hasRateLimit": false,
+      "hasErrorHandling": true,
+      "httpMethods": [
+        "POST"
+      ],
+      "securityIssues": [
+        "Missing input validation"
+      ],
+      "recommendations": [
+        "Add input validation and sanitization"
+      ]
+    },
+    {
+      "path": "/app/api/debug/auth",
+      "file": "app/api/debug/auth/route.ts",
+      "hasAuthentication": false,
+      "hasAuthorization": false,
+      "hasValidation": false,
+      "hasRateLimit": false,
+      "hasErrorHandling": true,
+      "httpMethods": [
+        "GET"
+      ],
+      "securityIssues": [
+        "Missing authentication"
+      ],
+      "recommendations": [
+        "Add getSession() or requireAuth() check"
+      ]
+    },
+    {
+      "path": "/app/api/news/hindu-enhanced",
+      "file": "app/api/news/hindu-enhanced/route.ts",
+      "hasAuthentication": false,
+      "hasAuthorization": false,
+      "hasValidation": true,
+      "hasRateLimit": false,
+      "hasErrorHandling": true,
+      "httpMethods": [
+        "GET"
+      ],
+      "securityIssues": [
+        "Potential hardcoded secret"
+      ],
+      "recommendations": [
+        "Move secrets to environment variables"
+      ]
+    },
+    {
+      "path": "/app/api/questions/parse",
+      "file": "app/api/questions/parse/route.ts",
+      "hasAuthentication": false,
+      "hasAuthorization": false,
+      "hasValidation": false,
+      "hasRateLimit": false,
+      "hasErrorHandling": true,
+      "httpMethods": [
+        "POST",
+        "GET"
+      ],
+      "securityIssues": [
+        "Missing authentication",
+        "Missing input validation"
+      ],
+      "recommendations": [
+        "Add getSession() or requireAuth() check",
+        "Add input validation and sanitization"
+      ]
+    },
+    {
+      "path": "/app/api/questions/search",
+      "file": "app/api/questions/search/route.ts",
+      "hasAuthentication": true,
+      "hasAuthorization": false,
+      "hasValidation": false,
+      "hasRateLimit": false,
+      "hasErrorHandling": true,
+      "httpMethods": [
+        "POST",
+        "GET"
+      ],
+      "securityIssues": [
+        "Missing input validation"
+      ],
+      "recommendations": [
+        "Add input validation and sanitization"
+      ]
+    },
+    {
+      "path": "/app/api/tenants",
+      "file": "app/api/tenants/route.ts",
+      "hasAuthentication": true,
+      "hasAuthorization": true,
+      "hasValidation": false,
+      "hasRateLimit": false,
+      "hasErrorHandling": true,
+      "httpMethods": [
+        "GET",
+        "POST"
+      ],
+      "securityIssues": [
+        "Missing input validation"
+      ],
+      "recommendations": [
+        "Add input validation and sanitization"
+      ]
+    }
+  ],
+  "recommendations": [
+    "Implement authentication on more endpoints",
+    "Add rate limiting to prevent abuse",
+    "Improve input validation across endpoints"
+  ]
+}

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getSession } from '@/lib/auth';
 
 interface AIAssistantRequest {
   message: string;
@@ -109,6 +110,15 @@ async function processAIRequest(request: AIAssistantRequest): Promise<AIAssistan
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication
+    const session = await getSession(request);
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     const body: AIAssistantRequest = await request.json();
     
     if (!body.message) {

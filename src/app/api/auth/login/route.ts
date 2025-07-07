@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { UserDatabase, SessionDatabase, TenantDatabase } from '@/lib/database';
 import { verifyPassword, createSession } from '@/lib/auth';
 import { cookies } from 'next/headers';
+import { validateSchema, createValidationErrorResponse, COMMON_SCHEMAS } from '@/lib/validation';
 
 export const runtime = 'nodejs';
 
@@ -68,34 +69,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { email, password } = body;
-
-    // Validate input
-    if (!email || !password) {
-      const error = AUTH_ERRORS.MISSING_FIELDS;
-      return NextResponse.json(
-        {
-          error: error.userMessage,
-          code: error.code,
-          details: error.message
-        },
-        { status: error.status }
-      );
+    // Validate and sanitize input
+    const validation = validateSchema(body, COMMON_SCHEMAS.login);
+    if (!validation.isValid) {
+      return createValidationErrorResponse(validation.errors);
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-      const error = AUTH_ERRORS.INVALID_EMAIL_FORMAT;
-      return NextResponse.json(
-        {
-          error: error.userMessage,
-          code: error.code,
-          details: error.message
-        },
-        { status: error.status }
-      );
-    }
+    const { email, password } = validation.sanitizedData!;
+
+    // Email format is already validated by the schema
 
     // Find user by email (case-insensitive)
     const user = await UserDatabase.findByEmail(email.trim().toLowerCase());

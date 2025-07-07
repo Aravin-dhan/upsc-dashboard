@@ -33,10 +33,29 @@ export class ErrorBoundary extends Component<Props, State> {
       console.error('Error info:', errorInfo);
     }
 
+    // Log error to monitoring service in production
+    if (process.env.NODE_ENV === 'production') {
+      this.logErrorToService(error, errorInfo);
+    }
+
     // Call custom error handler if provided
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
     }
+  }
+
+  private logErrorToService = (error: Error, errorInfo: ErrorInfo) => {
+    // In production, this would send to an error monitoring service
+    const errorData = {
+      message: error.message,
+      stack: error.stack,
+      componentStack: errorInfo.componentStack,
+      timestamp: new Date().toISOString(),
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
+      url: typeof window !== 'undefined' ? window.location.href : 'unknown',
+    };
+
+    console.error('Error logged:', errorData);
   }
 
   render() {

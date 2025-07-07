@@ -143,7 +143,9 @@ export const trackBundleLoading = (componentName: string, startTime: number) => 
   const endTime = performance.now();
   const loadTime = endTime - startTime;
   
-  console.log(`Component "${componentName}" loaded in ${loadTime.toFixed(2)}ms`);
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`Component "${componentName}" loaded in ${loadTime.toFixed(2)}ms`);
+  }
   
   // Track in performance API if available
   if (typeof performance !== 'undefined' && performance.mark) {

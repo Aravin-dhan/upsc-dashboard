@@ -2,14 +2,42 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { UPSCQuestionParser } from '@/services/questionParser';
 import { QuestionStorageService } from '@/services/questionStorage';
+import { getSession, hasPermission } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication and admin permissions
+    const session = await getSession(request);
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
+    if (!hasPermission(session.user.role, 'admin')) {
+      return NextResponse.json(
+        { error: 'Admin access required for question parsing' },
+        { status: 403 }
+      );
+    }
+
     const { tenantId } = await request.json();
+
+    // Validate tenant access
+    if (tenantId && tenantId !== session.user.tenantId) {
+      return NextResponse.json(
+        { error: 'Access denied to this tenant data' },
+        { status: 403 }
+      );
+    }
+
+    // Use user's tenant if not specified
+    const validTenantId = tenantId || session.user.tenantId;
     
     // Initialize services
     const parser = new UPSCQuestionParser();
-    const storage = new QuestionStorageService(tenantId);
+    const storage = new QuestionStorageService(validTenantId);
     
     // Parse all question papers
     const parsedData = await parser.parseAllQuestionPapers();

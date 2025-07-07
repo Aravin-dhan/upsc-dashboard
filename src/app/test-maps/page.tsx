@@ -6,7 +6,9 @@ import { optimizedIndiaLocations, searchLocations } from '@/data/optimizedMapDat
 export default function TestMapsPage() {
   const testSearch = () => {
     const results = searchLocations('ganges');
-    console.log('Search results for "ganges":', results);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Search results for "ganges":', results);
+    }
   };
 
   return (

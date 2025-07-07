@@ -1,9 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getSession } from '@/lib/auth';
+import { checkRateLimit } from '@/lib/errorHandler';
 
 export async function POST(request: NextRequest) {
   let mode: string = '', question: string = '', answer: string = '', image: string = '';
 
   try {
+    // Check authentication
+    const session = await getSession(request);
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
+    // Rate limiting - 10 requests per minute per user
+    const userIdentifier = session.user.id;
+    if (!checkRateLimit(userIdentifier, 10, 60000)) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded. Please try again later.' },
+        { status: 429 }
+      );
+    }
     ({ mode, question, answer, image } = await request.json());
 
     if (!question) {
@@ -31,7 +50,9 @@ export async function POST(request: NextRequest) {
 
     // If no API key is configured, use fallback analysis
     if (!apiKey) {
-      console.log('No Gemini API key found, using fallback analysis');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('No Gemini API key found, using fallback analysis');
+      }
       const fallbackAnalysis = await generateFallbackAnalysis(mode, question, answer, image);
       return NextResponse.json(fallbackAnalysis);
     }

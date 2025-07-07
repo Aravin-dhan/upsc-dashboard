@@ -2565,7 +2565,9 @@ function EditorModal({
                     setContent(JSON.stringify(data, null, 2));
                   }}
                   onExport={(format) => {
-                    console.log(`Exporting mindmap as ${format}`);
+                    if (process.env.NODE_ENV === 'development') {
+                      console.log(`Exporting mindmap as ${format}`);
+                    }
                   }}
                 />
 

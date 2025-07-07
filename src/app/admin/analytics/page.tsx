@@ -84,7 +84,9 @@ function AnalyticsPage() {
 
   const exportData = () => {
     // Implementation for exporting analytics data
-    console.log('Exporting analytics data...');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Exporting analytics data...');
+    }
   };
 
   if (isLoading) {

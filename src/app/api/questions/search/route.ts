@@ -2,9 +2,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { QuestionStorageService } from '@/services/questionStorage';
 import { QuestionFilter } from '@/types/questions';
+import { getSession } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication
+    const session = await getSession(request);
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const {
       tenantId,
@@ -15,8 +25,18 @@ export async function POST(request: NextRequest) {
       limit = 50,
       offset = 0
     } = body;
-    
-    const storage = new QuestionStorageService(tenantId);
+
+    // Validate tenant access
+    if (tenantId && tenantId !== session.user.tenantId) {
+      return NextResponse.json(
+        { error: 'Access denied to this tenant data' },
+        { status: 403 }
+      );
+    }
+
+    // Use user's tenant if not specified
+    const validTenantId = tenantId || session.user.tenantId;
+    const storage = new QuestionStorageService(validTenantId);
     
     const searchResult = await storage.searchQuestions(
       filters as QuestionFilter,

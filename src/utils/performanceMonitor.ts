@@ -45,11 +45,12 @@ class PerformanceMonitor {
 
     this.metrics.push(metrics);
     
-    console.log(`Performance metrics for ${pageName}:`, {
-      loadTime: `${metrics.loadTime.toFixed(2)}ms`,
-      firstContentfulPaint: `${metrics.firstContentfulPaint.toFixed(2)}ms`,
-    });
-  }
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Performance metrics for ${pageName}:`, {
+        loadTime: `${metrics.loadTime.toFixed(2)}ms`,
+        firstContentfulPaint: `${metrics.firstContentfulPaint.toFixed(2)}ms`,
+      });
+    }
 
   // Track build performance
   trackBuildMetrics(compilationTime: number, moduleCount: number): void {
@@ -62,11 +63,13 @@ class PerformanceMonitor {
 
     this.buildMetrics.push(buildMetric);
     
-    console.log(`Build metrics:`, {
-      compilationTime: `${compilationTime}ms`,
-      moduleCount,
-      optimizationLevel: buildMetric.optimizationLevel,
-    });
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Build metrics:`, {
+        compilationTime: `${compilationTime}ms`,
+        moduleCount,
+        optimizationLevel: buildMetric.optimizationLevel,
+      });
+    }
   }
 
   // Measure Core Web Vitals
@@ -77,14 +80,18 @@ class PerformanceMonitor {
     new PerformanceObserver((entryList) => {
       const entries = entryList.getEntries();
       const lastEntry = entries[entries.length - 1];
-      console.log('LCP:', lastEntry.startTime);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('LCP:', lastEntry.startTime);
+      }
     }).observe({ entryTypes: ['largest-contentful-paint'] });
 
     // First Input Delay
     new PerformanceObserver((entryList) => {
       const entries = entryList.getEntries();
       entries.forEach((entry) => {
-        console.log('FID:', entry.processingStart - entry.startTime);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('FID:', entry.processingStart - entry.startTime);
+        }
       });
     }).observe({ entryTypes: ['first-input'] });
 
@@ -96,7 +103,9 @@ class PerformanceMonitor {
           clsValue += entry.value;
         }
       });
-      console.log('CLS:', clsValue);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('CLS:', clsValue);
+      }
     }).observe({ entryTypes: ['layout-shift'] });
   }
 
