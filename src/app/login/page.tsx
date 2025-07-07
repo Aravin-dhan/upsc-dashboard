@@ -79,8 +79,7 @@ export default function LoginPage() {
               🚀 Getting Started
             </h4>
             <p className="text-blue-800 dark:text-blue-200 text-sm">
-              Use the default admin credentials (admin@upsc.local / admin123) to explore all features,
-              or create a new account to get started with your UPSC preparation journey.
+              Create a new account to get started with your UPSC preparation journey, or sign in if you already have an account.
             </p>
           </div>
         </div>

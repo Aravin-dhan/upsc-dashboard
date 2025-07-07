@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import HeroSection from './HeroSection';
 import FeatureShowcase from './FeatureShowcase';
 import PricingSection from './PricingSection';
-import TestimonialsSection from './TestimonialsSection';
 import Footer from './Footer';
 import PublicNavbar from './PublicNavbar';
 
@@ -41,7 +40,6 @@ export default function LandingPage() {
       <HeroSection />
       <FeatureShowcase />
       <PricingSection />
-      <TestimonialsSection />
       <Footer />
     </div>
   );
