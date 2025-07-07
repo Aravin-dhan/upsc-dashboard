@@ -4,9 +4,12 @@ import { analyticsService } from '@/lib/services/analyticsService';
 
 export const runtime = 'nodejs';
 
-export async function GET(request: NextRequest) {
+// GET: Get analytics for a specific user
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { userId: string } }
+) {
   try {
-    // Check authentication and admin permissions
     const session = await getSession(request);
     if (!session) {
       return NextResponse.json(
@@ -15,30 +18,29 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (!hasPermission(session.user.role, 'admin')) {
+    const { userId } = params;
+    
+    // Check if user can access this data (admin or own data)
+    const isAdmin = hasPermission(session.user.role, 'admin');
+    const isOwnData = session.user.id === userId;
+    
+    if (!isAdmin && !isOwnData) {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: 'Access denied' },
         { status: 403 }
       );
     }
 
-    // Get query parameters
-    const { searchParams } = new URL(request.url);
-    const range = searchParams.get('range') || '7d';
-
-    // Get real analytics data from service
-    const analytics = await analyticsService.getAnalyticsSummary(range);
-
+    const userAnalytics = await analyticsService.getUserAnalytics(userId);
 
     return NextResponse.json({
       success: true,
-      analytics,
-      range
+      analytics: userAnalytics
     });
-
+    
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
-      console.error('Get analytics error:', error);
+      console.error('Get user analytics error:', error);
     }
     return NextResponse.json(
       { error: 'Internal server error' },

@@ -6,6 +6,7 @@ import "../styles/responsive.css";
 import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { AnalyticsProvider } from "@/contexts/AnalyticsContext";
 import MainLayout from "@/components/layout/MainLayout";
 import ThemeScript from "@/components/ui/ThemeScript";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -37,10 +38,12 @@ export default function RootLayout({
             storageKey="upsc-theme"
           >
             <AuthProvider>
-              <MainLayout>
-                {children}
-              </MainLayout>
-              <Toaster position="top-right" />
+              <AnalyticsProvider>
+                <MainLayout>
+                  {children}
+                </MainLayout>
+                <Toaster position="top-right" />
+              </AnalyticsProvider>
             </AuthProvider>
           </ThemeProvider>
         </ErrorBoundary>

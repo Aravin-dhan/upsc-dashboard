@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth, withAuth } from '@/contexts/AuthContext';
-import { 
-  BarChart3, 
-  TrendingUp, 
-  Users, 
+import { RealTimeAnalytics } from '@/components/admin/RealTimeAnalytics';
+import {
+  BarChart3,
+  TrendingUp,
+  Users,
   Eye,
   Clock,
   Globe,
@@ -48,6 +49,7 @@ function AnalyticsPage() {
   const [error, setError] = useState('');
   const [dateRange, setDateRange] = useState('7d');
   const [refreshing, setRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState<'realtime' | 'historical'>('realtime');
   const { user } = useAuth();
 
   useEffect(() => {
@@ -111,24 +113,28 @@ function AnalyticsPage() {
             </p>
           </div>
           <div className="flex items-center space-x-4">
-            <select
-              value={dateRange}
-              onChange={(e) => setDateRange(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
-            >
-              <option value="1d">Last 24 Hours</option>
-              <option value="7d">Last 7 Days</option>
-              <option value="30d">Last 30 Days</option>
-              <option value="90d">Last 90 Days</option>
-            </select>
-            <button
-              onClick={fetchAnalytics}
-              disabled={refreshing}
-              className="inline-flex items-center px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-              Refresh
-            </button>
+            {activeTab === 'historical' && (
+              <select
+                value={dateRange}
+                onChange={(e) => setDateRange(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              >
+                <option value="1d">Last 24 Hours</option>
+                <option value="7d">Last 7 Days</option>
+                <option value="30d">Last 30 Days</option>
+                <option value="90d">Last 90 Days</option>
+              </select>
+            )}
+            {activeTab === 'historical' && (
+              <button
+                onClick={fetchAnalytics}
+                disabled={refreshing}
+                className="inline-flex items-center px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                Refresh
+              </button>
+            )}
             <button
               onClick={exportData}
               className="inline-flex items-center px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
@@ -138,15 +144,47 @@ function AnalyticsPage() {
             </button>
           </div>
         </div>
+
+        {/* Tab Navigation */}
+        <div className="mt-6 border-b border-gray-200 dark:border-gray-700">
+          <nav className="-mb-px flex space-x-8">
+            <button
+              onClick={() => setActiveTab('realtime')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'realtime'
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+              }`}
+            >
+              Real-Time Analytics
+            </button>
+            <button
+              onClick={() => setActiveTab('historical')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'historical'
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+              }`}
+            >
+              Historical Data
+            </button>
+          </nav>
+        </div>
       </div>
 
-      {error && (
+      {error && activeTab === 'historical' && (
         <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
           {error}
         </div>
       )}
 
-      {analytics && (
+      {/* Real-Time Analytics Tab */}
+      {activeTab === 'realtime' && (
+        <RealTimeAnalytics />
+      )}
+
+      {/* Historical Analytics Tab */}
+      {activeTab === 'historical' && analytics && (
         <>
           {/* Overview Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
@@ -389,6 +427,14 @@ function AnalyticsPage() {
             </div>
           </div>
         </>
+      )}
+
+      {/* Loading state for historical data */}
+      {activeTab === 'historical' && isLoading && (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-2 text-gray-600 dark:text-gray-400">Loading analytics data...</span>
+        </div>
       )}
     </div>
   );

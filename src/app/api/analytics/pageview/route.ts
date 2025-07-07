@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSession, hasPermission } from '@/lib/auth';
+import { getSession } from '@/lib/auth';
 import { analyticsService } from '@/lib/services/analyticsService';
 
 export const runtime = 'nodejs';
 
-export async function GET(request: NextRequest) {
+// POST: Track a page view
+export async function POST(request: NextRequest) {
   try {
-    // Check authentication and admin permissions
     const session = await getSession(request);
     if (!session) {
       return NextResponse.json(
@@ -15,30 +15,32 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (!hasPermission(session.user.role, 'admin')) {
+    const { sessionId, userId, path, title, loadTime } = await request.json();
+    
+    // Validate input
+    if (!sessionId || !userId || !path || !title) {
       return NextResponse.json(
-        { error: 'Admin access required' },
-        { status: 403 }
+        { error: 'Missing required fields' },
+        { status: 400 }
       );
     }
 
-    // Get query parameters
-    const { searchParams } = new URL(request.url);
-    const range = searchParams.get('range') || '7d';
-
-    // Get real analytics data from service
-    const analytics = await analyticsService.getAnalyticsSummary(range);
-
+    const pageViewId = await analyticsService.trackPageView(
+      sessionId,
+      userId,
+      path,
+      title,
+      loadTime
+    );
 
     return NextResponse.json({
       success: true,
-      analytics,
-      range
+      pageViewId
     });
-
+    
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
-      console.error('Get analytics error:', error);
+      console.error('Track page view error:', error);
     }
     return NextResponse.json(
       { error: 'Internal server error' },
