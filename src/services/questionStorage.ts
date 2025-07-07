@@ -123,7 +123,7 @@ export class QuestionStorageService {
    * Get question statistics
    */
   async getQuestionStats(): Promise<QuestionStats | null> {
-    return this.getData<QuestionStats>(this.QUESTION_STATS_KEY, null);
+    return this.getData<QuestionStats>(this.QUESTION_STATS_KEY, undefined);
   }
 
   /**

@@ -191,8 +191,8 @@ export function useDashboardData() {
 // Hook for performance analytics
 export function usePerformanceAnalytics() {
   const [analytics, setAnalytics] = useState({
-    weeklyProgress: [],
-    subjectPerformance: [],
+    weeklyProgress: [] as any[],
+    subjectPerformance: [] as any[],
     studyTime: 0,
     streakDays: 0
   });

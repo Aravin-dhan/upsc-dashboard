@@ -36,7 +36,7 @@ export interface UserProfile {
 
 export class UserMemoryService {
   private memories: Map<string, UserMemory> = new Map();
-  private userProfile: UserProfile;
+  private userProfile: UserProfile | null = null;
   private readonly STORAGE_KEY = 'upsc_user_memory';
   private readonly PROFILE_KEY = 'upsc_user_profile';
 
@@ -208,19 +208,22 @@ export class UserMemoryService {
   }
 
   updateProfile(updates: Partial<UserProfile>): void {
+    if (!this.userProfile) {
+      this.userProfile = this.getDefaultProfile();
+    }
     this.userProfile = {
-      ...this.userProfile,
+      ...this.userProfile!,
       ...updates,
       preferences: {
-        ...this.userProfile.preferences,
+        ...this.userProfile!.preferences,
         ...updates.preferences
       },
       goals: {
-        ...this.userProfile.goals,
+        ...this.userProfile!.goals,
         ...updates.goals
       },
       context: {
-        ...this.userProfile.context,
+        ...this.userProfile!.context,
         ...updates.context
       }
     };
@@ -228,10 +231,16 @@ export class UserMemoryService {
   }
 
   getProfile(): UserProfile {
+    if (!this.userProfile) {
+      this.userProfile = this.getDefaultProfile();
+    }
     return { ...this.userProfile };
   }
 
   addToContext(topic: string): void {
+    if (!this.userProfile) {
+      this.userProfile = this.getDefaultProfile();
+    }
     const recentTopics = this.userProfile.context.recentTopics || [];
     const updatedTopics = [topic, ...recentTopics.filter(t => t !== topic)].slice(0, 10);
     
@@ -244,6 +253,9 @@ export class UserMemoryService {
   }
 
   addFrequentQuestion(question: string): void {
+    if (!this.userProfile) {
+      this.userProfile = this.getDefaultProfile();
+    }
     const frequentQuestions = this.userProfile.context.frequentQuestions || [];
     const updatedQuestions = [question, ...frequentQuestions.filter(q => q !== question)].slice(0, 5);
     

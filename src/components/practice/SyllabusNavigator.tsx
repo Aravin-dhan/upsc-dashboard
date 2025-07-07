@@ -316,8 +316,6 @@ export default function SyllabusNavigator({
     const allSubtopics = getAllSubtopics('prelims');
     const incompleteTopics = allSubtopics.filter(node => !completedTopics.includes(node.id));
     const recommended = getRecommendedStudyOrder(incompleteTopics.map(n => n.id))
-      .map(id => getSyllabusNode(id))
-      .filter(Boolean)
       .slice(0, 10);
 
     return (

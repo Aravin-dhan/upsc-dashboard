@@ -231,7 +231,7 @@ export async function GET(request: NextRequest) {
               title,
               summary: description.substring(0, 300) + (description.length > 300 ? '...' : ''),
               url: item.link?.[0] || '',
-              source: feed.source,
+              source: 'The Hindu',
               publishedAt: new Date(item.pubDate?.[0] || new Date()).toISOString(),
               category: analysis.category || feed.category,
               tags: analysis.tags,

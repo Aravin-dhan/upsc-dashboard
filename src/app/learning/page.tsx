@@ -559,10 +559,13 @@ export default function LearningPage() {
       i.id === item.id
         ? {
             ...i,
+            lastAccessed: new Date().toISOString(),
             analytics: {
-              ...i.analytics,
+              timeSpent: i.analytics?.timeSpent || 0,
               accessCount: (i.analytics?.accessCount || 0) + 1,
-              lastAccessed: new Date().toISOString()
+              lastScore: i.analytics?.lastScore,
+              averageScore: i.analytics?.averageScore,
+              completionDate: i.analytics?.completionDate
             }
           }
         : i

@@ -659,7 +659,7 @@ class AICommandParser {
   }
 
   // Enhanced command parsing with NLP
-  parseCommand(input: string): ParsedCommand {
+  async parseCommand(input: string): Promise<ParsedCommand> {
     const normalizedInput = input.trim().toLowerCase();
     const nlpEntities = this.extractNLPEntities(input);
 
@@ -948,6 +948,11 @@ class AICommandParser {
     }
     
     return 'general';
+  }
+
+  addCustomPattern(pattern: CommandPattern): void {
+    // Add a custom command pattern to the parser
+    this.commandPatterns.push(pattern);
   }
 }
 

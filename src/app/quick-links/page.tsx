@@ -262,9 +262,12 @@ export default function QuickLinksPage() {
     toast.success('Quick link added successfully!');
   };
 
-  const updateQuickLink = (updatedLink: QuickLink) => {
+  const updateQuickLink = (updatedLink: QuickLink | Omit<QuickLink, 'id'>) => {
+    // If it's a partial link (missing id), it means we're editing an existing link
+    const fullLink = 'id' in updatedLink ? updatedLink : { ...editingLink!, ...updatedLink };
+
     const updatedLinks = quickLinks.map(link =>
-      link.id === updatedLink.id ? updatedLink : link
+      link.id === fullLink.id ? fullLink : link
     );
     setQuickLinks(updatedLinks);
     saveQuickLinks(updatedLinks);

@@ -200,13 +200,14 @@ class PDFGenerationService {
     }, {} as Record<string, any[]>);
 
     Object.entries(categorizedArticles).forEach(([category, categoryArticles]) => {
+      const articles = categoryArticles as any[];
       content.push({
         type: 'heading',
         content: category,
         style: { fontSize: 18, fontWeight: 'bold', margin: { top: 20, bottom: 10 } }
       });
 
-      categoryArticles.forEach((article, index) => {
+      articles.forEach((article, index) => {
         content.push(
           {
             type: 'text',

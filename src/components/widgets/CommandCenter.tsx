@@ -211,7 +211,8 @@ function CommandCenterContent() {
   const router = useRouter();
 
   // Use data sync for goals
-  const { goals: todayGoals, updateGoal, addGoal } = useDailyGoals();
+  const dailyGoalsData = useDailyGoals();
+  const { goals, updateGoal, addGoal } = dailyGoalsData;
   const dashboardData = useDashboardData();
 
   // Goals are now managed by the data sync service
@@ -223,7 +224,7 @@ function CommandCenterContent() {
   // Goals are now managed by the data sync service
 
   const toggleGoal = (id: string) => {
-    const goal = (todayGoals?.goals || []).find(g => g.id === id);
+    const goal: any = (goals || []).find((g: any) => g.id === id);
     if (goal) {
       updateGoal(id, !goal.completed);
       toast.success(
@@ -306,7 +307,7 @@ function CommandCenterContent() {
         </div>
 
         <div className="space-y-3">
-          {(todayGoals?.goals || []).map((goal) => (
+          {(goals || []).map((goal: any) => (
             <div key={goal.id} className="flex items-center space-x-3 group">
               <button
                 onClick={() => toggleGoal(goal.id)}

@@ -5,7 +5,7 @@ import React, { Suspense, lazy } from 'react';
 // Lazy load heavy page components
 const LazyAnalyticsPage = lazy(() => import('@/app/analytics/page'));
 const LazyPracticePage = lazy(() => import('@/app/practice/page'));
-const LazyMapsPage = lazy(() => import('@/app/maps/page'));
+// const LazyMapsPage = lazy(() => import('@/app/maps/page')); // Removed for SSR compatibility
 const LazyDictionaryPage = lazy(() => import('@/app/dictionary/page'));
 const LazyCalendarPage = lazy(() => import('@/app/calendar/page'));
 
@@ -35,7 +35,7 @@ const PageSkeleton = ({ title }: { title: string }) => (
 
 const AnalyticsSkeleton = () => <PageSkeleton title="Analytics" />;
 const PracticeSkeleton = () => <PageSkeleton title="Practice" />;
-const MapsSkeleton = () => <PageSkeleton title="Maps" />;
+// const MapsSkeleton = () => <PageSkeleton title="Maps" />; // Removed for SSR compatibility
 const DictionarySkeleton = () => <PageSkeleton title="Dictionary" />;
 const CalendarSkeleton = () => <PageSkeleton title="Calendar" />;
 
@@ -52,11 +52,11 @@ export const OptimizedPracticePage = () => (
   </Suspense>
 );
 
-export const OptimizedMapsPage = () => (
-  <Suspense fallback={<MapsSkeleton />}>
-    <LazyMapsPage />
-  </Suspense>
-);
+// export const OptimizedMapsPage = () => (
+//   <Suspense fallback={<MapsSkeleton />}>
+//     <LazyMapsPage />
+//   </Suspense>
+// ); // Removed for SSR compatibility
 
 export const OptimizedDictionaryPage = () => (
   <Suspense fallback={<DictionarySkeleton />}>
@@ -70,41 +70,19 @@ export const OptimizedCalendarPage = () => (
   </Suspense>
 );
 
-// Preload functions for critical pages
-export const preloadAnalytics = () => {
-  LazyAnalyticsPage.preload?.();
-};
+// Note: React lazy components don't support preloading
+// Preloading is handled automatically by React.lazy when components are rendered
 
-export const preloadPractice = () => {
-  LazyPracticePage.preload?.();
-};
-
-export const preloadMaps = () => {
-  LazyMapsPage.preload?.();
-};
-
-// Hook for preloading based on user navigation patterns
+// Hook for navigation patterns (preloading removed as not supported by React.lazy)
 export const usePagePreloader = () => {
   const preloadCriticalPages = React.useCallback(() => {
-    // Preload most commonly accessed pages
-    setTimeout(() => {
-      preloadAnalytics();
-      preloadPractice();
-    }, 1000); // Delay to avoid blocking initial render
+    // Note: Preloading is handled automatically by React.lazy
+    console.log('Page preloading is handled automatically by React.lazy');
   }, []);
 
   const preloadOnHover = React.useCallback((pageName: string) => {
-    switch (pageName) {
-      case 'analytics':
-        preloadAnalytics();
-        break;
-      case 'practice':
-        preloadPractice();
-        break;
-      case 'maps':
-        preloadMaps();
-        break;
-    }
+    // Note: Preloading is handled automatically by React.lazy
+    console.log(`Hover preload for ${pageName} - handled automatically by React.lazy`);
   }, []);
 
   return { preloadCriticalPages, preloadOnHover };

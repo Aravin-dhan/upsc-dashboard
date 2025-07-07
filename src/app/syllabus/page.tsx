@@ -209,7 +209,7 @@ export default function SyllabusPage() {
     const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
-    const matchesExamType = selectedExamType === 'All' || item.examType === selectedExamType;
+    const matchesExamType = selectedExamType === 'all' || item.examType === selectedExamType;
     const matchesWeightage = selectedWeightage === 'All' || item.weightage === selectedWeightage;
     const shouldShow = true; // Show all items for now
 
@@ -284,10 +284,10 @@ export default function SyllabusPage() {
           <div className="flex flex-col md:flex-row gap-4">
             <select
               value={selectedExamType}
-              onChange={(e) => setSelectedExamType(e.target.value)}
+              onChange={(e) => setSelectedExamType(e.target.value as 'prelims' | 'mains' | 'all')}
               className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
             >
-              <option value="All">All Exam Types</option>
+              <option value="all">All Exam Types</option>
               {examTypes.slice(1).map(type => (
                 <option key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</option>
               ))}
@@ -324,13 +324,11 @@ export default function SyllabusPage() {
         <div className="lg:col-span-2 space-y-4">
           {filteredTopics.map((item) => {
             const progress = syllabusProgress[item.id];
-            const hasChildren = item.children && item.children.length > 0;
+            const hasChildren = false; // SyllabusItem doesn't have children property
             const isExpanded = expandedTopics.has(item.id);
 
             return (
-              <div key={item.id} className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 ${
-                item.isSubTopic ? 'ml-6 border-l-4 border-l-blue-200 dark:border-l-blue-800' : ''
-              }`}>
+              <div key={item.id} className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6`}>
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
@@ -350,9 +348,6 @@ export default function SyllabusPage() {
 
                     <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400 mb-2">
                       <span className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">{item.category}</span>
-                      {item.subCategory && (
-                        <span className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">{item.subCategory}</span>
-                      )}
                       <span className={`px-2 py-1 rounded ${
                         item.examType === 'both' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' :
                         item.examType === 'prelims' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
@@ -360,11 +355,7 @@ export default function SyllabusPage() {
                       }`}>
                         {item.examType === 'both' ? 'Prelims + Mains' : item.examType.charAt(0).toUpperCase() + item.examType.slice(1)}
                       </span>
-                      {item.paper && (
-                        <span className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 px-2 py-1 rounded">
-                          {item.paper}
-                        </span>
-                      )}
+
                       <span className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
                         {item.estimatedHours}h
                       </span>
@@ -412,22 +403,13 @@ export default function SyllabusPage() {
                   <div className="mt-4 space-y-2">
                     <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Sub-topics:</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      {item.children?.map(childId => {
-                        const childItem = flattenedSyllabus.find(child => child.id === childId);
-                        const childProgress = syllabusProgress[childId];
-                        if (!childItem) return null;
-
-                        return (
-                          <div key={childId} className="text-sm p-2 bg-gray-50 dark:bg-gray-700 rounded">
-                            <div className="flex items-center justify-between">
-                              <span className="text-gray-700 dark:text-gray-300">{childItem.title}</span>
-                              <span className={`px-1 py-0.5 rounded text-xs ${getStatusColor(childProgress?.status || 'not_started')}`}>
-                                {childProgress?.progress || 0}%
-                              </span>
-                            </div>
+                      {item.subtopics?.map((subtopic, index) => (
+                        <div key={index} className="text-sm p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-700 dark:text-gray-300">{subtopic}</span>
                           </div>
-                        );
-                      })}
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -449,26 +431,26 @@ export default function SyllabusPage() {
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Progress Overview</h3>
             <div className="space-y-4">
               <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600">{stats.overallProgress}%</div>
+                <div className="text-3xl font-bold text-blue-600">{stats.completionPercentage}%</div>
                 <div className="text-sm text-gray-500 dark:text-gray-400">Overall Progress</div>
               </div>
 
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Total Topics</span>
-                  <span className="font-medium text-gray-900 dark:text-white">{stats.total}</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{stats.totalItems}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Completed</span>
-                  <span className="font-medium text-green-600">{stats.completed}</span>
+                  <span className="font-medium text-green-600">{stats.completedItems}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">In Progress</span>
-                  <span className="font-medium text-yellow-600">{stats.inProgress}</span>
+                  <span className="text-gray-600 dark:text-gray-400">Remaining</span>
+                  <span className="font-medium text-yellow-600">{stats.totalItems - stats.completedItems}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Not Started</span>
-                  <span className="font-medium text-gray-600">{stats.notStarted}</span>
+                  <span className="text-gray-600 dark:text-gray-400">Time Spent</span>
+                  <span className="font-medium text-gray-600">{stats.totalTimeSpent}h</span>
                 </div>
               </div>
             </div>

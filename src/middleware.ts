@@ -20,7 +20,7 @@ const protectedRoutes = {
   '/learning': 'student',
   '/practice': 'student',
   '/current-affairs': 'student',
-  '/maps': 'student',
+  // '/maps': 'student', // Removed for SSR compatibility
   '/analytics': 'student',
   '/api/user': 'student',
   '/api/learning': 'student',

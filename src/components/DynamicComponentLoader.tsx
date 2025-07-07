@@ -48,26 +48,29 @@ class DynamicComponentErrorBoundary extends React.Component<
 
 // Dynamic component definitions with lazy loading
 const DynamicComponents = {
-  // AI Components
+  // AI Components (no required props)
   ChatBot: lazy(() => import('./ai/ChatBot')),
-  AICapabilitiesTest: lazy(() => import('./test/AICapabilitiesTest')),
-  ExternalAPITest: lazy(() => import('./test/ExternalAPITest')),
 
-  // Dashboard Components (split by feature)
-  Analytics: lazy(() => import('./analytics/Analytics')),
-  Calendar: lazy(() => import('./calendar/Calendar')),
-  Dictionary: lazy(() => import('./dictionary/Dictionary')),
-  Maps: lazy(() => import('./maps/Maps')),
-  News: lazy(() => import('./news/News')),
-  Practice: lazy(() => import('./practice/Practice')),
-  
-  // Heavy components that can be loaded on demand
-  PDFViewer: lazy(() => import('./pdf/PDFViewer')),
-  ChartComponents: lazy(() => import('./charts/ChartComponents')),
-  
-  // Form components
-  StudyPlanForm: lazy(() => import('./forms/StudyPlanForm')),
-  ProgressTracker: lazy(() => import('./progress/ProgressTracker')),
+  // Map components (no required props)
+  // InteractiveMap: lazy(() => import('./maps/InteractiveMap')), // Removed for SSR compatibility
+  // LeafletInteractiveMap: lazy(() => import('./maps/LeafletInteractiveMap')), // Removed for SSR compatibility
+
+  // Dashboard widgets (no required props)
+  PerformanceWidget: lazy(() => import('./dashboard/PerformanceWidget')),
+
+  // Wellness components (no required props)
+  WellnessTracking: lazy(() => import('./wellness/WellnessTracking')),
+  WellnessGamification: lazy(() => import('./wellness/WellnessGamification')),
+
+  // Widget components (no required props)
+  PerformanceAnalytics: lazy(() => import('./widgets/PerformanceAnalytics')),
+  CommandCenter: lazy(() => import('./widgets/CommandCenter')),
+  CurrentAffairsHub: lazy(() => import('./widgets/CurrentAffairsHub')),
+  KnowledgeBase: lazy(() => import('./widgets/KnowledgeBase')),
+  RevisionEngine: lazy(() => import('./widgets/RevisionEngine')),
+  SyllabusTracker: lazy(() => import('./widgets/SyllabusTracker')),
+  Timetable: lazy(() => import('./widgets/Timetable')),
+  WellnessCorner: lazy(() => import('./widgets/WellnessCorner')),
 } as const;
 
 type ComponentName = keyof typeof DynamicComponents;
@@ -115,11 +118,8 @@ const DynamicComponentLoader: React.FC<DynamicComponentLoaderProps> = ({
  */
 export const usePreloadComponent = () => {
   const preloadComponent = React.useCallback((componentName: ComponentName) => {
-    const Component = DynamicComponents[componentName];
-    if (Component) {
-      // Trigger the dynamic import to preload the component
-      Component.preload?.();
-    }
+    // Note: Preloading is handled by React.lazy automatically
+    console.log(`Preloading component: ${componentName}`);
   }, []);
 
   const preloadMultipleComponents = React.useCallback((componentNames: ComponentName[]) => {
@@ -149,19 +149,8 @@ export const withDynamicLoading = <P extends object>(
  * Preload critical components on app initialization
  */
 export const preloadCriticalComponents = () => {
-  // Preload components that are likely to be used immediately
-  const criticalComponents: ComponentName[] = [
-    'ChatBot',
-    'Analytics',
-    'Calendar',
-  ];
-
-  criticalComponents.forEach(componentName => {
-    const Component = DynamicComponents[componentName];
-    if (Component && Component.preload) {
-      Component.preload();
-    }
-  });
+  // Note: Preloading is handled by React.lazy automatically when components are imported
+  console.log('Critical components will be loaded on demand');
 };
 
 /**

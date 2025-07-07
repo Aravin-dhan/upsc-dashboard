@@ -25,16 +25,16 @@ export default function DemoPage() {
       videoUrl: '/demos/ai-assistant.mp4',
       thumbnail: '/images/demo-ai-assistant.jpg'
     },
-    {
-      id: 'interactive-maps',
-      title: 'Interactive Geography Maps',
-      description: 'Explore detailed maps with educational content and current affairs integration',
-      icon: Map,
-      duration: '2:30',
-      features: ['20+ locations', 'Historical significance', 'Current affairs', 'Visual learning'],
-      videoUrl: '/demos/interactive-maps.mp4',
-      thumbnail: '/images/demo-maps.jpg'
-    },
+    // {
+    //   id: 'interactive-maps',
+    //   title: 'Interactive Geography Maps',
+    //   description: 'Explore detailed maps with educational content and current affairs integration',
+    //   icon: Map,
+    //   duration: '2:30',
+    //   features: ['20+ locations', 'Historical significance', 'Current affairs', 'Visual learning'],
+    //   videoUrl: '/demos/interactive-maps.mp4',
+    //   thumbnail: '/images/demo-maps.jpg'
+    // }, // Removed for SSR compatibility
     {
       id: 'smart-calendar',
       title: 'Smart Study Calendar',

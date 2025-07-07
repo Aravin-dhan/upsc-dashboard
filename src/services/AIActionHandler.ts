@@ -76,9 +76,9 @@ class AIActionHandler {
         case 'create_study_plan':
           return this.createStudyPlan(action.payload, context);
         case 'schedule_event':
-          return this.scheduleEvent(action.payload);
+          return this.scheduleEvent(action.payload, context);
         case 'set_reminder':
-          return this.setReminder(action.payload);
+          return this.setReminder(action.payload, context);
 
         // Practice Actions
         case 'start_practice_session':
@@ -90,7 +90,7 @@ class AIActionHandler {
 
         // Content Management Actions
         case 'create_note':
-          return this.createNote(action.payload);
+          return this.createNote(action.payload, context);
         case 'search_content':
           return this.searchContent(action.payload, context);
         case 'bookmark_article':
@@ -108,7 +108,7 @@ class AIActionHandler {
         case 'analyze_news':
           return this.analyzeNews(action.payload, context);
         case 'connect_to_syllabus':
-          return this.connectToSyllabus(action.payload);
+          return this.connectToSyllabus(action.payload, context);
 
         // Progress Tracking Actions
         case 'show_progress':
@@ -116,7 +116,7 @@ class AIActionHandler {
         case 'generate_insights':
           return this.generateInsights(context);
         case 'set_goals':
-          return this.setGoals(action.payload);
+          return this.setGoals(action.payload, context);
 
         // Settings Actions
         case 'update_preferences':
@@ -176,7 +176,7 @@ class AIActionHandler {
 
         // Wellness actions
         case 'track_habits':
-          return this.trackHabits(action.payload);
+          return this.trackHabits(action.payload, context);
         case 'log_mood':
           return this.logMood(action.payload);
         case 'set_wellness_goal':
@@ -194,9 +194,9 @@ class AIActionHandler {
         case 'import_data':
           return this.importData(action.payload);
         case 'sync_data':
-          return this.syncData(action.payload);
+          return this.syncData(action.payload, context);
         case 'backup_data':
-          return this.backupData(action.payload);
+          return this.backupData(action.payload, context);
 
         // Automation actions
         case 'automation':
@@ -342,84 +342,10 @@ class AIActionHandler {
   }
 
   // Study Planning Actions
-  private createStudyPlan(payload: { subject?: string; duration?: number; difficulty?: string }, context: AIContext): ActionResult {
-    const plan = {
-      id: Date.now().toString(),
-      subject: payload.subject || 'General Studies',
-      duration: payload.duration || 30,
-      difficulty: payload.difficulty || context.preferences.difficultyLevel || 'intermediate',
-      createdAt: new Date().toISOString(),
-      tasks: this.generateStudyTasks(payload.subject, payload.duration)
-    };
 
-    // Save to localStorage
-    const existingPlans = JSON.parse(localStorage.getItem('upsc-study-plans') || '[]');
-    existingPlans.push(plan);
-    localStorage.setItem('upsc-study-plans', JSON.stringify(existingPlans));
 
-    toast.success(`Created ${payload.duration}-day study plan for ${payload.subject}`);
 
-    return {
-      success: true,
-      message: `Created a comprehensive ${payload.duration}-day study plan for ${payload.subject}`,
-      data: plan,
-      nextActions: [
-        {
-          type: 'schedule_event',
-          payload: { title: `Start ${payload.subject} Study Plan`, date: new Date().toISOString() },
-          description: 'Schedule the first session'
-        }
-      ]
-    };
-  }
 
-  private scheduleEvent(payload: { title: string; date: string; duration?: number; type?: string }): ActionResult {
-    const event = {
-      id: Date.now().toString(),
-      title: payload.title,
-      date: payload.date,
-      duration: payload.duration || 60,
-      type: payload.type || 'study',
-      createdAt: new Date().toISOString()
-    };
-
-    // Save to calendar events
-    const existingEvents = JSON.parse(localStorage.getItem('upsc-calendar-events') || '[]');
-    existingEvents.push(event);
-    localStorage.setItem('upsc-calendar-events', JSON.stringify(existingEvents));
-
-    toast.success(`Scheduled: ${payload.title}`);
-
-    return {
-      success: true,
-      message: `Event "${payload.title}" scheduled successfully`,
-      data: event
-    };
-  }
-
-  private setReminder(payload: { message: string; time: string; type?: string }): ActionResult {
-    const reminder = {
-      id: Date.now().toString(),
-      message: payload.message,
-      time: payload.time,
-      type: payload.type || 'study',
-      active: true,
-      createdAt: new Date().toISOString()
-    };
-
-    // Save to reminders
-    const existingReminders = JSON.parse(localStorage.getItem('upsc-reminders') || '[]');
-    existingReminders.push(reminder);
-    localStorage.setItem('upsc-reminders', JSON.stringify(existingReminders));
-
-    toast.success(`Reminder set: ${payload.message}`);
-
-    return {
-      success: true,
-      message: `Reminder set for ${payload.time}`,
-      data: reminder
-    };
-  }
 
   // Practice Actions
   private startPracticeSession(payload: { type?: string; subject?: string; difficulty?: string }): ActionResult {
@@ -503,77 +429,9 @@ class AIActionHandler {
   }
 
   // Content Management Actions
-  private createNote(payload: { title: string; content?: string; subject?: string; tags?: string[] }): ActionResult {
-    const note = {
-      id: Date.now().toString(),
-      title: payload.title,
-      content: payload.content || '',
-      subject: payload.subject || 'General',
-      tags: payload.tags || [],
-      type: 'note',
-      createdAt: new Date().toISOString(),
-      lastModified: new Date().toISOString(),
-      isFavorite: false,
-      isArchived: false,
-      wordCount: (payload.content || '').split(' ').length
-    };
 
-    // Save to knowledge base
-    const existingNotes = JSON.parse(localStorage.getItem('upsc-knowledge-base-notes') || '[]');
-    existingNotes.push(note);
-    localStorage.setItem('upsc-knowledge-base-notes', JSON.stringify(existingNotes));
 
-    toast.success(`Created note: ${payload.title}`);
 
-    return {
-      success: true,
-      message: `Note "${payload.title}" created successfully`,
-      data: note,
-      nextActions: [
-        {
-          type: 'navigate_to_page',
-          payload: { page: '/knowledge-base' },
-          description: 'View in knowledge base'
-        }
-      ]
-    };
-  }
-
-  private searchContent(payload: { query: string; type?: string }, context: AIContext): ActionResult {
-    const results = {
-      notes: [],
-      bookmarks: [],
-      articles: [],
-      total: 0
-    };
-
-    // Search in different data sources
-    if (context.availableData.notes) {
-      results.notes = context.availableData.notes.filter((note: any) =>
-        note.title.toLowerCase().includes(payload.query.toLowerCase()) ||
-        note.content.toLowerCase().includes(payload.query.toLowerCase())
-      );
-    }
-
-    if (context.availableData.bookmarks) {
-      results.bookmarks = this.bookmarkService.searchBookmarks(payload.query);
-    }
-
-    if (context.availableData.newsArticles) {
-      results.articles = context.availableData.newsArticles.filter((article: any) =>
-        article.title.toLowerCase().includes(payload.query.toLowerCase()) ||
-        article.summary.toLowerCase().includes(payload.query.toLowerCase())
-      );
-    }
-
-    results.total = results.notes.length + results.bookmarks.length + results.articles.length;
-
-    return {
-      success: true,
-      message: `Found ${results.total} results for "${payload.query}"`,
-      data: results
-    };
-  }
 
   private bookmarkArticle(payload: { title: string; url: string; type: string; source: string }): ActionResult {
     const bookmark = this.bookmarkService.addBookmark({
@@ -684,7 +542,7 @@ class AIActionHandler {
       .map(([topic]) => topic);
   }
 
-  private connectToSyllabus(articles: any[]): Record<string, string[]> {
+  private mapArticlesToSyllabus(articles: any[]): Record<string, string[]> {
     const syllabusMapping: Record<string, string[]> = {
       'Polity & Governance': ['constitution', 'parliament', 'judiciary', 'governance', 'policy'],
       'Economy': ['budget', 'gdp', 'inflation', 'banking', 'trade', 'economy'],
@@ -844,7 +702,7 @@ class AIActionHandler {
       totalArticles: filteredArticles.length,
       categories: this.categorizeArticles(filteredArticles),
       importantTopics: this.extractImportantTopics(filteredArticles),
-      syllabusRelevance: payload.syllabusConnection ? this.connectToSyllabus(filteredArticles) : null,
+      syllabusRelevance: payload.syllabusConnection ? this.mapArticlesToSyllabus(filteredArticles) : null,
       recommendations: this.generateNewsRecommendations(filteredArticles, context)
     };
 
@@ -877,13 +735,7 @@ class AIActionHandler {
     };
   }
 
-  private connectToSyllabus(payload: any): ActionResult {
-    // Implementation for connecting content to syllabus
-    return {
-      success: true,
-      message: 'Connected to syllabus topics'
-    };
-  }
+
 
   private showProgress(context: AIContext): ActionResult {
     if (!this.router) {
@@ -907,13 +759,7 @@ class AIActionHandler {
     };
   }
 
-  private setGoals(payload: any): ActionResult {
-    // Implementation for setting goals
-    return {
-      success: true,
-      message: 'Goals set successfully'
-    };
-  }
+
 
   private updatePreferences(payload: any): ActionResult {
     this.contextService.savePreferences(payload);
@@ -1564,28 +1410,7 @@ class AIActionHandler {
     }
   }
 
-  private async analyzeNews(payload: any, context: any): Promise<ActionResult> {
-    try {
-      const { article, type } = payload;
-      return {
-        success: true,
-        message: `Analyzing ${type || 'news'} article`,
-        data: {
-          analysis: {
-            summary: 'Article analyzed successfully',
-            keyPoints: [],
-            upscRelevance: 'High',
-            analyzed: new Date().toISOString()
-          }
-        }
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: `Analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`
-      };
-    }
-  }
+
 
   private async connectToSyllabus(payload: any, context: any): Promise<ActionResult> {
     try {

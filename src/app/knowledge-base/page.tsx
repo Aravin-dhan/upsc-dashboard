@@ -160,7 +160,7 @@ export default function KnowledgeBasePage() {
     },
     () => {
       if (editingNote) {
-        updateNote(editingNote.id, editingNote);
+        updateNote(editingNote);
       }
     },
     true
@@ -196,16 +196,20 @@ export default function KnowledgeBasePage() {
     toast.success('Note added successfully!');
   };
 
-  const updateNote = (updatedNote: Note) => {
+  const updateNote = (updatedNote: Note | Omit<Note, 'id' | 'createdAt' | 'lastModified' | 'wordCount'>) => {
     const wordCount = updatedNote.content.split(/\s+/).filter(word => word.length > 0).length;
+
+    // If it's a partial note (missing id), it means we're editing an existing note
+    const fullNote = 'id' in updatedNote ? updatedNote : { ...editingNote!, ...updatedNote };
+
     const noteWithUpdatedData = {
-      ...updatedNote,
+      ...fullNote,
       lastModified: new Date().toISOString(),
       wordCount
     };
 
     const updatedNotes = notes.map(note =>
-      note.id === updatedNote.id ? noteWithUpdatedData : note
+      note.id === noteWithUpdatedData.id ? noteWithUpdatedData : note
     );
     setNotes(updatedNotes);
     saveNotes(updatedNotes);

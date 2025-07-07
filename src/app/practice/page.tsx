@@ -347,7 +347,14 @@ export default function PracticePage() {
     difficulty: authQ.difficulty,
     timeToSolve: authQ.timeToSolve,
     source: authQ.source,
-    year: authQ.year
+    year: authQ.year,
+    examType: authQ.examType || 'prelims',
+    paper: authQ.paper || 'General Studies',
+    questionType: authQ.questionType || 'mcq',
+    tags: authQ.tags || [],
+    previousAttempts: 0,
+    correctAttempts: 0,
+    bookmarked: false
   });
 
   const getRandomQuestionsFromBank = (count: number) => {

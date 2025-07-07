@@ -51,6 +51,7 @@ class PerformanceMonitor {
         firstContentfulPaint: `${metrics.firstContentfulPaint.toFixed(2)}ms`,
       });
     }
+  }
 
   // Track build performance
   trackBuildMetrics(compilationTime: number, moduleCount: number): void {
@@ -90,7 +91,8 @@ class PerformanceMonitor {
       const entries = entryList.getEntries();
       entries.forEach((entry) => {
         if (process.env.NODE_ENV === 'development') {
-          console.log('FID:', entry.processingStart - entry.startTime);
+          const fidEntry = entry as any;
+          console.log('FID:', fidEntry.processingStart - fidEntry.startTime);
         }
       });
     }).observe({ entryTypes: ['first-input'] });
@@ -99,8 +101,9 @@ class PerformanceMonitor {
     new PerformanceObserver((entryList) => {
       let clsValue = 0;
       entryList.getEntries().forEach((entry) => {
-        if (!entry.hadRecentInput) {
-          clsValue += entry.value;
+        const clsEntry = entry as any;
+        if (!clsEntry.hadRecentInput) {
+          clsValue += clsEntry.value;
         }
       });
       if (process.env.NODE_ENV === 'development') {

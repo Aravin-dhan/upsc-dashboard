@@ -669,8 +669,7 @@ export default function RevisionPage() {
                 nextReview: new Date().toISOString(),
                 lastReviewed: null,
                 isActive: true,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
+                createdAt: new Date().toISOString()
               };
 
               const updatedItems = [...revisionItems, newItem];

@@ -159,6 +159,7 @@ export interface AICapability {
 class AIContextService {
   private static instance: AIContextService;
   private recommendationEngine = AIRecommendationEngine.getInstance();
+  private currentContext: any = {};
 
   // Comprehensive page definitions with all capabilities
   private pageDefinitions: Record<string, PageCapabilities> = {
@@ -1056,6 +1057,23 @@ class AIContextService {
       sessionData.reduce((sum: number, session: any) => sum + session.duration, 0) / sessionData.length : 45;
 
     return { preferredStyle, retentionRate, optimalDuration };
+  }
+
+  // Interface compatibility methods
+  updateContext(context: any): void {
+    // Update the current context
+    this.currentContext = { ...this.currentContext, ...context };
+  }
+
+  getContext(): any {
+    // Return the current context
+    return this.currentContext;
+  }
+
+  async generateRecommendations(): Promise<any[]> {
+    // Generate general recommendations
+    const context = await this.gatherContext('/');
+    return this.generateSmartRecommendations(context);
   }
 }
 

@@ -31,9 +31,8 @@ export default function SettingsPage() {
   }, [theme, mounted, themeMounted]);
 
   const handleSave = () => {
-    updateProfile({
-      preferences: settings
-    });
+    // Save settings to localStorage
+    localStorage.setItem('userSettings', JSON.stringify(settings));
     toast.success('Settings saved successfully!');
   };
 

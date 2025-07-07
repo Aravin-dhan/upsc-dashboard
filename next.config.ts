@@ -9,7 +9,8 @@ const nextConfig: NextConfig = {
 
   // Advanced webpack optimizations
   webpack: (config, { dev, isServer }) => {
-    if (dev && !isServer) {
+    // Apply optimizations for both dev and production
+    if (!isServer) {
       // Advanced optimization settings
       config.optimization = {
         ...config.optimization,
@@ -113,13 +114,29 @@ const nextConfig: NextConfig = {
         },
       };
 
-      // Exclude heavy testing dependencies from client bundle
-      config.externals = config.externals || [];
-      config.externals.push({
-        'playwright': 'commonjs playwright',
-        'puppeteer': 'commonjs puppeteer',
-        '@playwright/test': 'commonjs @playwright/test',
-      });
+      // Exclude heavy testing dependencies and client-only libraries from server bundle
+      if (isServer) {
+        config.externals = config.externals || [];
+        config.externals.push({
+          'playwright': 'commonjs playwright',
+          'puppeteer': 'commonjs puppeteer',
+          '@playwright/test': 'commonjs @playwright/test',
+          'leaflet': 'commonjs leaflet',
+          'recharts': 'commonjs recharts',
+        });
+      }
+
+      // Add global polyfills for browser-specific variables
+      config.plugins = config.plugins || [];
+      config.plugins.push(
+        new (require('webpack')).DefinePlugin({
+          'typeof self': JSON.stringify(isServer ? 'undefined' : 'object'),
+          'typeof window': JSON.stringify(isServer ? 'undefined' : 'object'),
+          'typeof document': JSON.stringify(isServer ? 'undefined' : 'object'),
+          'typeof navigator': JSON.stringify(isServer ? 'undefined' : 'object'),
+          'self': isServer ? 'undefined' : 'self',
+        })
+      );
 
       // Advanced caching for faster rebuilds
       config.cache = {
@@ -142,7 +159,7 @@ const nextConfig: NextConfig = {
   },
 
   // Server external packages
-  serverExternalPackages: ['@google/generative-ai'],
+  serverExternalPackages: ['@google/generative-ai', 'framer-motion'],
 
   // Experimental features for performance
   experimental: {

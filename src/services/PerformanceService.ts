@@ -310,15 +310,25 @@ class PerformanceService {
     if (allMetrics.length === 0) {
       return {
         totalStudyTime: 0,
-        averageAccuracy: 0,
-        questionsAttempted: 0,
-        questionsCorrect: 0,
+        overallAccuracy: 0,
+        totalQuestionsAttempted: 0,
+        totalQuestionsCorrect: 0,
         studyStreak: { currentStreak: 0, longestStreak: 0, lastStudyDate: '', streakStartDate: '' },
         subjectProgress: [],
         insights: [],
-        trends: { studyTime: 0, accuracy: 0, questionsAttempted: 0 },
-        weeklyGoalProgress: 0,
-        monthlyGoalProgress: 0,
+        dailyAverages: { studyTime: 0, accuracy: 0, questionsAttempted: 0 },
+        weeklyTrends: [],
+        monthlyProgress: [],
+        averageSessionTime: 0,
+        studyDaysThisWeek: 0,
+        studyDaysThisMonth: 0,
+        consistencyScore: 5,
+        goals: {
+          dailyStudyTime: 120,
+          weeklyAccuracy: 75,
+          monthlyTopics: 10
+        },
+        recentSessions: [],
         lastUpdated: now.toISOString()
       };
     }
@@ -463,7 +473,7 @@ class PerformanceService {
   }
 
   private generateInsights(metrics: PerformanceMetric[], subjectProgress: SubjectProgress[]): any[] {
-    const insights = [];
+    const insights: any[] = [];
 
     // Early return if no metrics
     if (!metrics || metrics.length === 0) {
@@ -786,19 +796,29 @@ class PerformanceService {
       return result;
     } catch (error) {
       console.error('Error getting analytics:', error);
-      console.error('Stack trace:', error.stack);
+      console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace available');
       // Return a safe default instead of calling calculateAnalytics again
       return {
         totalStudyTime: 0,
-        averageAccuracy: 0,
-        questionsAttempted: 0,
-        questionsCorrect: 0,
+        totalQuestionsAttempted: 0,
+        totalQuestionsCorrect: 0,
+        overallAccuracy: 0,
+        averageSessionTime: 0,
         studyStreak: { currentStreak: 0, longestStreak: 0, lastStudyDate: '', streakStartDate: '' },
+        studyDaysThisWeek: 0,
+        studyDaysThisMonth: 0,
+        consistencyScore: 5,
         subjectProgress: [],
+        dailyAverages: { studyTime: 0, accuracy: 0, questionsAttempted: 0 },
+        weeklyTrends: [],
+        monthlyProgress: [],
         insights: [],
-        trends: { studyTime: 0, accuracy: 0, questionsAttempted: 0 },
-        weeklyGoalProgress: 0,
-        monthlyGoalProgress: 0,
+        goals: {
+          dailyStudyTime: 120,
+          weeklyAccuracy: 75,
+          monthlyTopics: 10
+        },
+        recentSessions: [],
         lastUpdated: new Date().toISOString()
       };
     }
@@ -840,7 +860,7 @@ class PerformanceService {
     try {
       const data = JSON.parse(jsonData);
       if (data.metrics && Array.isArray(data.metrics)) {
-        const validatedMetrics = data.metrics.map(metric => this.validateMetric(metric)).filter(Boolean) as PerformanceMetric[];
+        const validatedMetrics = data.metrics.map((metric: any) => this.validateMetric(metric)).filter(Boolean) as PerformanceMetric[];
         this.saveMetrics(validatedMetrics);
         return true;
       }

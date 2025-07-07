@@ -260,9 +260,11 @@ export function getNavigationItems(user: User | null): Array<{
     
     if (allowedAdminChildren.length > 0) {
       allowedItems.push({
-        ...adminItems[0],
+        label: adminItems[0].label,
+        path: adminItems[0].path,
+        icon: adminItems[0].icon,
         children: allowedAdminChildren
-      });
+      } as any);
     }
   }
 

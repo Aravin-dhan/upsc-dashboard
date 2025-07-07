@@ -184,13 +184,18 @@ export default function CalendarPage() {
       return icsEvent;
     });
 
-    createEvent(icsEvents, (error, value) => {
-      if (error) {
-        toast.error('Failed to export calendar');
-        return;
+    // Create events one by one since createEvent expects single event
+    const icsContent = icsEvents.map(event => {
+      const result = createEvent(event as EventAttributes);
+      if (result.error) {
+        console.error('Error creating event:', result.error);
+        return '';
       }
-      
-      const blob = new Blob([value], { type: 'text/calendar' });
+      return result.value || '';
+    }).join('');
+
+    if (icsContent) {
+      const blob = new Blob([icsContent], { type: 'text/calendar' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -199,9 +204,11 @@ export default function CalendarPage() {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      
+
       toast.success('Calendar exported successfully!');
-    });
+    } else {
+      toast.error('Failed to export calendar');
+    }
   };
 
   const importFromICS = (event: React.ChangeEvent<HTMLInputElement>) => {

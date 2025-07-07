@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import "../styles/responsive.css";
-import "../styles/leaflet.css";
+
 import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { AuthProvider } from "@/contexts/AuthContext";

@@ -4,7 +4,7 @@ import {
   TrendingUp, Award, Flame, CheckCircle, XCircle,
   RotateCcw, Bookmark, Filter, Search, Calendar,
   BarChart3, PieChart, Users, Medal, Zap, ArrowLeft,
-  ArrowRight, Escape
+  ArrowRight, X
 } from 'lucide-react';
 
 interface IconProps {
@@ -36,7 +36,7 @@ const iconMap = {
   Zap,
   ArrowLeft,
   ArrowRight,
-  Escape,
+  X,
 };
 
 const PracticeIcons: React.FC<IconProps> = ({ name, className }) => {

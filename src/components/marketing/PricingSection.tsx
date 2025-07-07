@@ -193,7 +193,7 @@ export default function PricingSection() {
                         )}
                         {isAnnual && plan.price.monthly > 0 && (
                           <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            Billed annually (₹{plan.price.annual * 12})
+                            Billed annually (₹{Number(plan.price.annual) * 12})
                           </div>
                         )}
                       </div>

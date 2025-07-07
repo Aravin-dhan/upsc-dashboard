@@ -83,10 +83,15 @@ export class UPSCQuestionParser {
    * Extract paper information from filename
    */
   private extractPaperInfo(fileName: string) {
-    const info = {
+    const info: {
+      year: number;
+      examType: 'Prelims' | 'Mains';
+      paperType: 'GS-I' | 'GS-II' | 'GS-III' | 'GS-IV' | 'Essay' | 'CSAT';
+      date: Date;
+    } = {
       year: 2023,
-      examType: 'Mains' as const,
-      paperType: 'GS-I' as const,
+      examType: 'Mains',
+      paperType: 'GS-I',
       date: new Date()
     };
 
@@ -168,7 +173,7 @@ export class UPSCQuestionParser {
     return [];
 
     const questions: Question[] = [];
-    const subjects = UPSC_SUBJECTS[paperInfo.paperType] || ['General Studies'];
+    const subjects = UPSC_SUBJECTS[paperInfo.paperType as keyof typeof UPSC_SUBJECTS] || ['General Studies'];
     
     for (let i = 1; i <= count; i++) {
       const subject = subjects[Math.floor(Math.random() * subjects.length)];

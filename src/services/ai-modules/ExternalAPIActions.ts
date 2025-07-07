@@ -42,8 +42,8 @@ export class ExternalAPIActions {
     try {
       const location = payload.location || 'Delhi';
       const units = payload.units || 'metric';
-      
-      const weatherData = await this.externalAPIService.getWeatherData(location, units);
+
+      const weatherData = await this.externalAPIService.getWeatherData(location);
       
       if (!weatherData) {
         return {
@@ -80,9 +80,9 @@ export class ExternalAPIActions {
       const country = payload.country || 'in';
       const limit = payload.limit || 10;
 
-      const newsData = await this.externalAPIService.getLatestNews(category, country, limit);
+      const newsData = await this.externalAPIService.getLatestNews(category);
       
-      if (!newsData || !newsData.articles) {
+      if (!newsData || !newsData.success || !newsData.data) {
         return {
           success: false,
           message: 'Failed to fetch news data'
@@ -94,7 +94,7 @@ export class ExternalAPIActions {
       return {
         success: true,
         message: `Latest ${category} news retrieved`,
-        data: newsData,
+        data: newsData.data,
         nextActions: [
           {
             type: 'navigate_to_page',
@@ -103,7 +103,7 @@ export class ExternalAPIActions {
           },
           {
             type: 'analyze_news',
-            payload: { articles: newsData.articles },
+            payload: { articles: newsData.data },
             description: 'Analyze news for UPSC relevance'
           }
         ]
@@ -119,7 +119,7 @@ export class ExternalAPIActions {
   private async getMotivationalQuote(payload: { category?: string }, context?: AIContext): Promise<ActionResult> {
     try {
       const category = payload.category || 'motivational';
-      const quote = await this.externalAPIService.getMotivationalQuote(category);
+      const quote = await this.externalAPIService.getMotivationalQuote();
       
       if (!quote) {
         return {
@@ -153,7 +153,7 @@ export class ExternalAPIActions {
   private async getRandomFact(payload: { category?: string }, context?: AIContext): Promise<ActionResult> {
     try {
       const category = payload.category || 'general';
-      const fact = await this.externalAPIService.getRandomFact(category);
+      const fact = await this.externalAPIService.getRandomFact();
       
       if (!fact) {
         return {
@@ -189,7 +189,7 @@ export class ExternalAPIActions {
       const baseCurrency = payload.baseCurrency || 'USD';
       const targetCurrencies = payload.targetCurrencies || ['INR', 'EUR', 'GBP'];
 
-      const exchangeRates = await this.externalAPIService.getExchangeRates(baseCurrency, targetCurrencies);
+      const exchangeRates = await this.externalAPIService.getExchangeRates(baseCurrency);
       
       if (!exchangeRates) {
         return {
@@ -226,10 +226,10 @@ export class ExternalAPIActions {
       
       // Clear cache for specific service or all services
       if (service === 'all') {
-        await this.externalAPIService.clearAllCache();
+        this.externalAPIService.clearCache();
         toast.success('All API cache cleared');
       } else {
-        await this.externalAPIService.clearCache(service);
+        this.externalAPIService.clearCache();
         toast.success(`${service} cache cleared`);
       }
 

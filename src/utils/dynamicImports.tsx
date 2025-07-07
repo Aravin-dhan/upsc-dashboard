@@ -6,7 +6,7 @@
 import React, { lazy } from 'react';
 
 // Heavy component imports with error boundaries
-export const createLazyComponent = (importFn: () => Promise<any>, fallback?: React.ComponentType) => {
+export const createLazyComponent = (importFn: () => Promise<any>, fallback?: React.ReactNode) => {
   const LazyComponent = lazy(importFn);
   
   return (props: any) => (
@@ -29,15 +29,11 @@ export const loadAIServices = {
 // Chart library dynamic imports
 export const loadChartLibraries = {
   recharts: () => import('recharts'),
-  chartjs: () => import('chart.js'),
-  performanceCharts: () => import('@/components/charts/PerformanceCharts'),
 };
 
 // Form library dynamic imports
 export const loadFormLibraries = {
   reactHookForm: () => import('react-hook-form'),
-  formik: () => import('formik'),
-  studyPlanForm: () => import('@/components/forms/StudyPlanForm'),
 };
 
 // Icon library dynamic imports with tree shaking
@@ -62,14 +58,13 @@ export const loadDateUtils = {
 export const loadContentLibraries = {
   reactMarkdown: () => import('react-markdown'),
   remarkGfm: () => import('remark-gfm'),
-  pdfViewer: () => import('@/components/pdf/PDFViewer'),
 };
 
 // Page component dynamic imports
 export const loadPageComponents = {
   analytics: () => import('@/app/analytics/page'),
   practice: () => import('@/app/practice/page'),
-  maps: () => import('@/app/maps/page'),
+  // maps: () => import('@/app/maps/page'), // Removed for SSR compatibility
   dictionary: () => import('@/app/dictionary/page'),
   calendar: () => import('@/app/calendar/page'),
 };

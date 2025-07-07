@@ -299,13 +299,13 @@ export const getChildNodes = (parentId: string): SyllabusNode[] => {
 
 export const getParentChain = (nodeId: string): SyllabusNode[] => {
   const chain: SyllabusNode[] = [];
-  let current = syllabusStructure[nodeId];
-  
+  let current: SyllabusNode | undefined = syllabusStructure[nodeId];
+
   while (current) {
     chain.unshift(current);
     current = current.parent ? syllabusStructure[current.parent] : undefined;
   }
-  
+
   return chain;
 };
 

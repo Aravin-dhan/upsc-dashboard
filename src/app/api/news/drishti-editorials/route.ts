@@ -21,6 +21,48 @@ async function generateAISummary(text: string): Promise<string> {
   }
 }
 
+// Fallback functions for when AI is not available
+function categorizeContent(title: string, content: string): string {
+  const text = (title + ' ' + content).toLowerCase();
+
+  if (text.includes('polity') || text.includes('constitution') || text.includes('governance')) {
+    return 'Polity & Governance';
+  } else if (text.includes('economy') || text.includes('economic') || text.includes('finance')) {
+    return 'Economy';
+  } else if (text.includes('environment') || text.includes('climate') || text.includes('ecology')) {
+    return 'Environment & Ecology';
+  } else if (text.includes('geography') || text.includes('physical') || text.includes('location')) {
+    return 'Geography';
+  } else if (text.includes('history') || text.includes('ancient') || text.includes('medieval')) {
+    return 'History';
+  } else if (text.includes('science') || text.includes('technology') || text.includes('research')) {
+    return 'Science & Technology';
+  } else if (text.includes('international') || text.includes('foreign') || text.includes('global')) {
+    return 'International Relations';
+  } else {
+    return 'Current Affairs';
+  }
+}
+
+function extractTags(title: string, content: string): string[] {
+  const text = (title + ' ' + content).toLowerCase();
+  const tags: string[] = [];
+
+  const keywords = [
+    'upsc', 'ias', 'ips', 'government', 'policy', 'india', 'economy', 'environment',
+    'technology', 'science', 'international', 'relations', 'history', 'geography',
+    'polity', 'constitution', 'governance', 'current affairs', 'news'
+  ];
+
+  keywords.forEach(keyword => {
+    if (text.includes(keyword)) {
+      tags.push(keyword);
+    }
+  });
+
+  return tags.slice(0, 5); // Return max 5 tags
+}
+
 async function generateAICategoryAndTags(title: string, content: string): Promise<{ category: string; tags: string[] }> {
   try {
     if (!process.env.GEMINI_API_KEY) {
