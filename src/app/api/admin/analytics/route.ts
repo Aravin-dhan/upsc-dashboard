@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSession, hasPermission } from '@/lib/auth';
-import { analyticsService } from '@/lib/services/analyticsService';
+import { getSession } from '@/lib/auth';
 
 export const runtime = 'nodejs';
 
@@ -15,7 +14,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (!hasPermission(session.user.role, 'admin')) {
+    if (session.user.role !== 'admin') {
       return NextResponse.json(
         { error: 'Admin access required' },
         { status: 403 }
@@ -26,8 +25,43 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const range = searchParams.get('range') || '7d';
 
-    // Get real analytics data from service
-    const analytics = await analyticsService.getAnalyticsSummary(range);
+    // Mock analytics data (replace with actual database queries)
+    const analytics = {
+      users: {
+        total: 1247,
+        active: 892,
+        new: 45,
+        growth: 12.5
+      },
+      engagement: {
+        dailyActiveUsers: 234,
+        averageSessionTime: 28.5,
+        pageViews: 15678,
+        bounceRate: 23.4
+      },
+      content: {
+        totalPages: 156,
+        mostViewed: [
+          { title: 'UPSC Syllabus', views: 2341 },
+          { title: 'Current Affairs', views: 1876 },
+          { title: 'Mock Tests', views: 1654 }
+        ]
+      },
+      performance: {
+        averageLoadTime: 1.2,
+        uptime: 99.8,
+        errorRate: 0.1
+      },
+      revenue: {
+        total: 45600,
+        monthly: 12800,
+        subscriptions: {
+          free: 1089,
+          trial: 98,
+          pro: 60
+        }
+      }
+    };
 
 
     return NextResponse.json({

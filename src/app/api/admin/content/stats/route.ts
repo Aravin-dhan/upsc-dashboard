@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSession, hasPermission } from '@/lib/auth';
+import { getSession } from '@/lib/auth';
 
 export const runtime = 'nodejs';
 
@@ -13,8 +13,8 @@ export async function GET(request: NextRequest) {
         { status: 401 }
       );
     }
-    
-    if (!hasPermission(session.user.role, 'admin')) {
+
+    if (session.user.role !== 'admin') {
       return NextResponse.json(
         { error: 'Admin access required' },
         { status: 403 }

@@ -2,6 +2,122 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 
+// Fallback response generator when AI service is unavailable
+function generateFallbackResponse(userMessage: string): string {
+  const message = userMessage.toLowerCase();
+
+  if (message.includes('syllabus') || message.includes('curriculum')) {
+    return `**UPSC Syllabus Overview:**
+
+**Preliminary Examination:**
+• General Studies Paper I: Current events, History, Geography, Polity, Economics, Environment
+• General Studies Paper II (CSAT): Comprehension, reasoning, mental ability, decision making
+
+**Main Examination:**
+• Essay Paper
+• General Studies Papers I-IV covering History, Geography, Polity, Economics, Ethics, etc.
+• Optional Subject Papers
+• Language Papers
+
+**Key Study Tips:**
+• Start with NCERT books for basics
+• Read newspapers daily for current affairs
+• Practice previous year questions
+• Take regular mock tests
+
+For detailed syllabus, visit the official UPSC website or check our syllabus section.`;
+  }
+
+  if (message.includes('strategy') || message.includes('preparation') || message.includes('plan')) {
+    return `**UPSC Preparation Strategy:**
+
+**Phase 1: Foundation (3-4 months)**
+• Complete NCERT books (6th-12th)
+• Basic understanding of all subjects
+• Start newspaper reading habit
+
+**Phase 2: Detailed Study (6-8 months)**
+• Standard reference books for each subject
+• Current affairs compilation
+• Answer writing practice
+
+**Phase 3: Revision & Tests (2-3 months)**
+• Multiple revisions of notes
+• Mock test series
+• Previous year papers
+
+**Daily Schedule:**
+• 8-10 hours of focused study
+• 2 hours for current affairs
+• 1 hour for answer writing
+• Regular breaks and physical activity
+
+Remember: Consistency is key to UPSC success!`;
+  }
+
+  if (message.includes('current affairs') || message.includes('news')) {
+    return `**Current Affairs for UPSC:**
+
+**Daily Sources:**
+• The Hindu (Editorial and main news)
+• Indian Express (Explained section)
+• PIB (Press Information Bureau)
+• Rajya Sabha TV discussions
+
+**Monthly Compilation:**
+• Vision IAS Monthly Magazine
+• Insights on India Monthly
+• Government reports and surveys
+
+**Important Areas:**
+• Government schemes and policies
+• International relations
+• Economic developments
+• Science and technology
+• Environment and ecology
+
+**Tips:**
+• Make concise notes
+• Link with static portions
+• Practice answer writing
+• Regular revision
+
+Stay updated with our Current Affairs section for latest news and analysis!`;
+  }
+
+  return `**UPSC Preparation Guidance:**
+
+I'm here to help with your UPSC journey! Here are some key areas I can assist with:
+
+**📚 Study Materials:**
+• NCERT books for foundation
+• Standard reference books
+• Current affairs sources
+• Previous year papers
+
+**📝 Preparation Strategy:**
+• Subject-wise study plan
+• Time management tips
+• Answer writing techniques
+• Revision strategies
+
+**📊 Progress Tracking:**
+• Mock test analysis
+• Performance evaluation
+• Weak area identification
+• Improvement suggestions
+
+**🎯 Exam-Specific Tips:**
+• Prelims strategy
+• Mains preparation
+• Interview guidance
+• Optional subject selection
+
+Feel free to ask specific questions about any UPSC topic, and I'll provide detailed guidance to help you succeed!
+
+*Note: AI service is temporarily unavailable, but I'm still here to help with your UPSC preparation!*`;
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
@@ -48,13 +164,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if API key is available and initialize genAI here
+    // Check if API key is available and provide fallback if not
     if (!process.env.GEMINI_API_KEY) {
-      console.error('GEMINI_API_KEY is not set in environment variables.');
-      return NextResponse.json(
-        { error: 'AI service is not configured. Please set GEMINI_API_KEY.' },
-        { status: 500 }
-      );
+      console.warn('GEMINI_API_KEY is not set in environment variables. Providing fallback response.');
+
+      // Provide a helpful fallback response based on the user's question
+      const fallbackResponse = generateFallbackResponse(userMessage);
+
+      return NextResponse.json({
+        response: fallbackResponse,
+        fallback: true,
+        note: "This is a fallback response. AI service is currently unavailable."
+      });
     }
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
