@@ -5,11 +5,18 @@
     "name": "System Administrator",
     "role": "admin",
     "tenantId": "default",
+    "tenantRole": "owner",
+    "tenants": ["default"],
     "createdAt": "2025-07-06T05:07:33.694Z",
     "isActive": true,
     "passwordHash": "ef95df85e33172485c1690ac1b6cc7f0687c2554055e391a2ac941b768326dc0",
     "salt": "dd445102e76ea787d17c9c9535fa4ad5adf994615d757b119182dd6c4b39c31a",
-    "lastLogin": "2025-07-06T10:48:22.255Z"
+    "lastLogin": "2025-07-06T10:48:22.255Z",
+    "preferences": {
+      "defaultTenant": "default",
+      "theme": "light",
+      "language": "en"
+    }
   },
   {
     "id": "f134ae2262c6828780d7be166ac9925f",
