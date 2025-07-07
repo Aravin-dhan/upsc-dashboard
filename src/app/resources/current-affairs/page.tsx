@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import PublicNavbar from '@/components/marketing/PublicNavbar';
 import Footer from '@/components/marketing/Footer';
+import EmailSubscriptionForm from '@/components/email/EmailSubscriptionForm';
 
 export default function CurrentAffairsPage() {
   const [selectedPeriod, setSelectedPeriod] = useState('monthly');
@@ -289,15 +290,14 @@ export default function CurrentAffairsPage() {
             Get daily current affairs delivered to your inbox with UPSC relevance analysis.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-            <input
-              type="email"
+          <div className="max-w-md mx-auto">
+            <EmailSubscriptionForm
+              subscriptionType="current-affairs"
+              source="current-affairs-page"
               placeholder="Enter your email"
-              className="flex-1 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg"
+              buttonText="Subscribe"
+              className="flex flex-col sm:flex-row gap-4"
             />
-            <button className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors font-medium">
-              Subscribe
-            </button>
           </div>
           
           <p className="text-sm text-gray-500 mt-4">

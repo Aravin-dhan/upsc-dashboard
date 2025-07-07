@@ -378,3 +378,77 @@ export const COMMON_SCHEMAS = {
     }
   }
 };
+
+// Simple validation function for API endpoints
+export function validateInput(data: any, schema: Record<string, any>): { isValid: boolean; errors: string[]; sanitizedData?: any } {
+  const errors: string[] = [];
+  const sanitizedData: any = {};
+
+  for (const [field, rules] of Object.entries(schema)) {
+    const value = data[field];
+
+    // Check required fields
+    if (rules.required && (value === undefined || value === null || value === '')) {
+      errors.push(`${field} is required`);
+      continue;
+    }
+
+    // Skip validation if field is not required and not provided
+    if (!rules.required && (value === undefined || value === null)) {
+      continue;
+    }
+
+    // Type validation
+    if (rules.type === 'email' && value) {
+      if (!PATTERNS.email.test(value)) {
+        errors.push(`${field} must be a valid email address`);
+      } else {
+        sanitizedData[field] = sanitizeEmail(value);
+      }
+    } else if (rules.type === 'string' && value) {
+      sanitizedData[field] = sanitizeString(value, rules.maxLength);
+    } else if (rules.type === 'number' && value) {
+      const num = Number(value);
+      if (isNaN(num)) {
+        errors.push(`${field} must be a valid number`);
+      } else {
+        sanitizedData[field] = num;
+      }
+    } else if (rules.type === 'boolean' && value !== undefined) {
+      sanitizedData[field] = sanitizeBoolean(value);
+    } else if (rules.type === 'array' && value) {
+      if (!Array.isArray(value)) {
+        errors.push(`${field} must be an array`);
+      } else {
+        sanitizedData[field] = sanitizeArray(value);
+      }
+    } else if (rules.type === 'object' && value) {
+      if (typeof value !== 'object' || Array.isArray(value)) {
+        errors.push(`${field} must be an object`);
+      } else {
+        sanitizedData[field] = value;
+      }
+    } else if (value) {
+      sanitizedData[field] = value;
+    }
+
+    // Enum validation
+    if (rules.enum && value && !rules.enum.includes(value)) {
+      errors.push(`${field} must be one of: ${rules.enum.join(', ')}`);
+    }
+
+    // Length validation
+    if (rules.minLength && value && value.length < rules.minLength) {
+      errors.push(`${field} must be at least ${rules.minLength} characters long`);
+    }
+    if (rules.maxLength && value && value.length > rules.maxLength) {
+      errors.push(`${field} must be no more than ${rules.maxLength} characters long`);
+    }
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    sanitizedData: errors.length === 0 ? sanitizedData : undefined
+  };
+};

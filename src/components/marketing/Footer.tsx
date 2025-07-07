@@ -1,18 +1,19 @@
 'use client';
 
 import Link from 'next/link';
-import { 
-  BookOpen, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Facebook, 
-  Twitter, 
-  Instagram, 
+import {
+  BookOpen,
+  Mail,
+  Phone,
+  MapPin,
+  Facebook,
+  Twitter,
+  Instagram,
   Linkedin,
   Youtube,
   ArrowRight
 } from 'lucide-react';
+import EmailSubscriptionForm from '@/components/email/EmailSubscriptionForm';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -89,17 +90,13 @@ export default function Footer() {
               </p>
             </div>
             <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <input
-                  type="email"
-                  placeholder="Enter your email address"
-                  className="flex-1 px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <button className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 flex items-center justify-center">
-                  Subscribe
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </button>
-              </div>
+              <EmailSubscriptionForm
+                subscriptionType="newsletter"
+                source="footer"
+                placeholder="Enter your email address"
+                buttonText="Subscribe"
+                className="max-w-md"
+              />
               <p className="text-sm text-gray-400">
                 Join 25,000+ UPSC aspirants. Unsubscribe anytime.
               </p>
