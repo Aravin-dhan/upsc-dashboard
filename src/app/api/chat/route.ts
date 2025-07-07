@@ -13,20 +13,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { history, context } = await request.json();
+    const body = await request.json();
+    const { history, context, message } = body;
 
-    // Basic validation for incoming data
-    if (!history || !Array.isArray(history) || history.length === 0) {
-      return NextResponse.json(
-        { error: 'Message history is required and must be an array' },
-        { status: 400 }
-      );
-    }
+    let processedHistory: any[] = [];
+    let userMessage = '';
 
-    const lastMessage = history[history.length - 1];
-    if (!lastMessage || typeof lastMessage.content !== 'string' || lastMessage.content.trim() === '') {
+    // Handle both formats: direct message or history array
+    if (message && typeof message === 'string') {
+      // Simple message format - convert to history format
+      userMessage = message.trim();
+      if (!userMessage) {
+        return NextResponse.json(
+          { error: 'Message cannot be empty' },
+          { status: 400 }
+        );
+      }
+      processedHistory = [{ role: 'user', content: userMessage }];
+    } else if (history && Array.isArray(history) && history.length > 0) {
+      // History format validation
+      const lastMessage = history[history.length - 1];
+      if (!lastMessage || typeof lastMessage.content !== 'string' || lastMessage.content.trim() === '') {
+        return NextResponse.json(
+          { error: 'Last message in history must have valid content' },
+          { status: 400 }
+        );
+      }
+      processedHistory = history;
+      userMessage = lastMessage.content;
+    } else {
       return NextResponse.json(
-        { error: 'Last message in history must have valid content' },
+        { error: 'Either message or history array is required' },
         { status: 400 }
       );
     }
@@ -43,7 +60,7 @@ export async function POST(request: NextRequest) {
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     // Prepare history for Gemini API, ensuring it starts with a user message
-    const geminiHistory = history.map((msg: any) => ({
+    const geminiHistory = processedHistory.map((msg: any) => ({
       role: msg.role === 'user' ? 'user' : 'model', // Map roles to Gemini's expected format
       parts: [{ text: msg.content }],
     })).filter((msg: any, index: number, arr: any[]) => {
@@ -60,8 +77,6 @@ export async function POST(request: NextRequest) {
         maxOutputTokens: 2000,
       },
     });
-
-    const userMessage = lastMessage.content;
 
     const fullPrompt = `You are a helpful UPSC (Union Public Service Commission) preparation assistant. You specialize in helping Indian civil services aspirants with their preparation. Your knowledge includes:\n\n- UPSC exam pattern, syllabus, and strategy\n- Current affairs and their relevance to UPSC\n- Subject-specific guidance (History, Geography, Polity, Economics, etc.)\n- Answer writing techniques for Mains\n- Interview preparation tips\n- Study planning and time management\n- Motivation and stress management\n\n${context ? `Here is some additional context for the current conversation: ${JSON.stringify(context)}` : ''}\n\nPlease provide helpful, accurate, and encouraging responses. Keep your answers concise but comprehensive. Use bullet points and structured formatting when appropriate. Be open-ended and provide detailed explanations when asked.\n\nUser question: ${userMessage}`;
 
