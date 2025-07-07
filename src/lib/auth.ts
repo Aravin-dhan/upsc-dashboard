@@ -69,8 +69,10 @@ export interface RegisterData extends LoginCredentials {
   organizationType?: 'individual' | 'school' | 'coaching' | 'government';
 }
 
-// Configuration
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
+// Configuration - Enhanced JWT secret handling for production
+const JWT_SECRET = process.env.JWT_SECRET ||
+                   process.env.NEXTAUTH_SECRET ||
+                   'upsc-dashboard-super-secure-jwt-secret-key-for-production-2024-v1';
 const JWT_ALGORITHM = 'HS256';
 const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 const COOKIE_NAME = 'upsc-auth-token';

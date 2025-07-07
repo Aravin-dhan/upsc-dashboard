@@ -2,12 +2,16 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { User, UserWithPassword, RegisterData, Tenant, generateId, generateTenantId, hashPassword, createDefaultTenant } from './auth';
 
-// Database file paths
-const DATA_DIR = path.join(process.cwd(), 'data');
+// Database file paths - handle Vercel serverless environment
+const isVercel = process.env.VERCEL === '1';
+const DATA_DIR = isVercel ? '/tmp/data' : path.join(process.cwd(), 'data');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const TENANTS_FILE = path.join(DATA_DIR, 'tenants.json');
 const SESSIONS_FILE = path.join(DATA_DIR, 'sessions.json');
 const USER_DATA_DIR = path.join(DATA_DIR, 'user-data'); // Tenant-scoped user data
+
+// Source data directory for initial data in Vercel
+const SOURCE_DATA_DIR = path.join(process.cwd(), 'data');
 
 // Ensure data directory exists
 async function ensureDataDir(): Promise<void> {
@@ -24,51 +28,107 @@ async function ensureDataDir(): Promise<void> {
   }
 }
 
+// Copy file from source to destination if it doesn't exist
+async function copyFileIfNotExists(sourcePath: string, destPath: string): Promise<void> {
+  try {
+    await fs.access(destPath);
+  } catch {
+    try {
+      const data = await fs.readFile(sourcePath, 'utf-8');
+      await fs.writeFile(destPath, data);
+    } catch (sourceError) {
+      // If source doesn't exist, create default content
+      throw sourceError;
+    }
+  }
+}
+
 // Initialize database files if they don't exist
 async function initializeDatabase(): Promise<void> {
   await ensureDataDir();
 
-  // Initialize tenants file
-  try {
-    await fs.access(TENANTS_FILE);
-  } catch {
-    // Create default tenant
-    const defaultTenant = createDefaultTenant('system', 'Default Organization', 'individual');
-    defaultTenant.id = 'default'; // Use fixed ID for default tenant
-    await fs.writeFile(TENANTS_FILE, JSON.stringify([defaultTenant], null, 2));
-  }
+  // In Vercel, copy existing data files from source directory
+  if (isVercel) {
+    try {
+      await copyFileIfNotExists(path.join(SOURCE_DATA_DIR, 'tenants.json'), TENANTS_FILE);
+    } catch {
+      // Create default tenant if source doesn't exist
+      const defaultTenant = createDefaultTenant('system', 'Default Organization', 'individual');
+      defaultTenant.id = 'default';
+      await fs.writeFile(TENANTS_FILE, JSON.stringify([defaultTenant], null, 2));
+    }
 
-  try {
-    await fs.access(USERS_FILE);
-  } catch {
-    // Create initial users file with default admin
-    const { hash, salt } = hashPassword('admin123');
-    const defaultAdmin: UserWithPassword = {
-      id: generateId(),
-      email: 'admin@upsc.local',
-      name: 'System Administrator',
-      role: 'admin',
-      tenantId: 'default',
-      tenantRole: 'owner',
-      tenants: ['default'],
-      createdAt: new Date().toISOString(),
-      isActive: true,
-      passwordHash: hash,
-      salt: salt,
-      preferences: {
-        defaultTenant: 'default',
-        theme: 'light',
-        language: 'en'
-      }
-    };
+    try {
+      await copyFileIfNotExists(path.join(SOURCE_DATA_DIR, 'users.json'), USERS_FILE);
+    } catch {
+      // Create default admin if source doesn't exist
+      const { hash, salt } = hashPassword('admin123');
+      const defaultAdmin: UserWithPassword = {
+        id: generateId(),
+        email: 'admin@upsc.local',
+        name: 'System Administrator',
+        role: 'admin',
+        tenantId: 'default',
+        tenantRole: 'owner',
+        tenants: ['default'],
+        createdAt: new Date().toISOString(),
+        isActive: true,
+        passwordHash: hash,
+        salt: salt,
+        preferences: {
+          defaultTenant: 'default',
+          theme: 'light',
+          language: 'en'
+        }
+      };
+      await fs.writeFile(USERS_FILE, JSON.stringify([defaultAdmin], null, 2));
+    }
 
-    await fs.writeFile(USERS_FILE, JSON.stringify([defaultAdmin], null, 2));
-  }
+    try {
+      await copyFileIfNotExists(path.join(SOURCE_DATA_DIR, 'sessions.json'), SESSIONS_FILE);
+    } catch {
+      await fs.writeFile(SESSIONS_FILE, JSON.stringify([], null, 2));
+    }
+  } else {
+    // Local development - create files if they don't exist
+    try {
+      await fs.access(TENANTS_FILE);
+    } catch {
+      const defaultTenant = createDefaultTenant('system', 'Default Organization', 'individual');
+      defaultTenant.id = 'default';
+      await fs.writeFile(TENANTS_FILE, JSON.stringify([defaultTenant], null, 2));
+    }
 
-  try {
-    await fs.access(SESSIONS_FILE);
-  } catch {
-    await fs.writeFile(SESSIONS_FILE, JSON.stringify([], null, 2));
+    try {
+      await fs.access(USERS_FILE);
+    } catch {
+      const { hash, salt } = hashPassword('admin123');
+      const defaultAdmin: UserWithPassword = {
+        id: generateId(),
+        email: 'admin@upsc.local',
+        name: 'System Administrator',
+        role: 'admin',
+        tenantId: 'default',
+        tenantRole: 'owner',
+        tenants: ['default'],
+        createdAt: new Date().toISOString(),
+        isActive: true,
+        passwordHash: hash,
+        salt: salt,
+        preferences: {
+          defaultTenant: 'default',
+          theme: 'light',
+          language: 'en'
+        }
+      };
+      await fs.writeFile(USERS_FILE, JSON.stringify([defaultAdmin], null, 2));
+    }
+
+    try {
+      await fs.access(SESSIONS_FILE);
+    } catch {
+      await fs.writeFile(SESSIONS_FILE, JSON.stringify([], null, 2));
+    }
   }
 }
 
