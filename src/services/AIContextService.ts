@@ -410,15 +410,15 @@ class AIContextService {
 
   private getUserProfile() {
     if (typeof window === 'undefined') return {};
-    
+
     const profile = localStorage.getItem('upsc-user-profile');
     return profile ? JSON.parse(profile) : {
-      name: 'UPSC Aspirant',
-      targetExam: 'UPSC CSE',
-      preparationStage: 'intermediate',
+      name: '',
+      targetExam: '',
+      preparationStage: '',
       weakSubjects: [],
       strongSubjects: [],
-      dailyStudyHours: 8,
+      dailyStudyHours: 0,
       examDate: null
     };
   }

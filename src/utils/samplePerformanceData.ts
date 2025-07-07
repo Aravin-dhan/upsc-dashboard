@@ -1,8 +1,12 @@
 import PerformanceService, { PerformanceMetric } from '@/services/PerformanceService';
 
 export function generateSamplePerformanceData(): void {
+  // Disabled for production - no sample data generation
+  console.warn('Sample data generation is disabled in production');
+  return;
+
   const performanceService = PerformanceService.getInstance();
-  
+
   // Clear existing data first
   performanceService.clearAllData();
   
@@ -134,6 +138,10 @@ export function generateSamplePerformanceData(): void {
 
 // Function to add a few recent sessions for immediate visibility
 export function addRecentSampleSessions(): void {
+  // Disabled for production - no sample data generation
+  console.warn('Sample session generation is disabled in production');
+  return;
+
   const performanceService = PerformanceService.getInstance();
   
   const today = new Date();

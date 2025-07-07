@@ -112,20 +112,7 @@ export default function KnowledgeBasePage() {
     }
   ];
 
-  const getDefaultAnswers = (): AnswerPractice[] => [
-    {
-      id: '1',
-      question: 'Discuss the role of Judicial Review in Indian Democracy.',
-      answer: 'Judicial Review is a fundamental aspect of Indian democracy...',
-      topic: 'Polity',
-      examType: 'mains',
-      timeSpent: 45,
-      wordCount: 312,
-      createdAt: '2025-01-08T16:00:00Z',
-      lastModified: '2025-01-08T16:00:00Z',
-      score: 8.5
-    }
-  ];
+  const getDefaultAnswers = (): AnswerPractice[] => [];
 
   const saveNotes = (notesToSave: Note[]) => {
     if (typeof window !== 'undefined') {

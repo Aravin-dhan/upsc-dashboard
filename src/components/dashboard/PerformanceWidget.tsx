@@ -6,7 +6,7 @@ import {
   BarChart3, Activity, Zap, Calendar, ArrowRight, RefreshCw
 } from 'lucide-react';
 import { usePerformance } from '@/hooks/usePerformance';
-import { generateSamplePerformanceData, addRecentSampleSessions } from '@/utils/samplePerformanceData';
+
 import toast from 'react-hot-toast';
 
 interface PerformanceWidgetProps {
@@ -120,16 +120,7 @@ export default function PerformanceWidget({ className = '' }: PerformanceWidgetP
             >
               Record Practice
             </button>
-            <button
-              onClick={() => {
-                generateSamplePerformanceData();
-                setTimeout(() => refreshAnalytics(), 500);
-                toast.success('Sample performance data generated!');
-              }}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
-            >
-              Generate Sample Data
-            </button>
+
           </div>
         </div>
       </div>

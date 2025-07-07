@@ -107,6 +107,10 @@ export default function SyllabusNavigator({
   };
 
   const generateMockQuestions = (node: SyllabusNode): EnhancedQuestion[] => {
+    // Disabled for production - no mock questions generated
+    console.warn('Mock question generation is disabled in production');
+    return [];
+
     // This would normally fetch from a question bank
     // For now, generating mock questions based on the topic
     const questionCount = Math.min(node.previousYearQuestions || 5, 10);

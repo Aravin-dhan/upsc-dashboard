@@ -1,0 +1,217 @@
+'use client';
+
+import Link from 'next/link';
+import { 
+  BookOpen, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Facebook, 
+  Twitter, 
+  Instagram, 
+  Linkedin,
+  Youtube,
+  ArrowRight
+} from 'lucide-react';
+
+export default function Footer() {
+  const currentYear = new Date().getFullYear();
+
+  const footerSections = [
+    {
+      title: 'Platform',
+      links: [
+        { name: 'Features', href: '#features' },
+        { name: 'Pricing', href: '#pricing' },
+        { name: 'Success Stories', href: '#testimonials' },
+        { name: 'Demo', href: '/demo' },
+        { name: 'API Documentation', href: '/docs' }
+      ]
+    },
+    {
+      title: 'Resources',
+      links: [
+        { name: 'Study Materials', href: '/resources/materials' },
+        { name: 'Mock Tests', href: '/resources/tests' },
+        { name: 'Current Affairs', href: '/resources/current-affairs' },
+        { name: 'Previous Papers', href: '/resources/papers' },
+        { name: 'Study Guides', href: '/resources/guides' }
+      ]
+    },
+    {
+      title: 'Support',
+      links: [
+        { name: 'Help Center', href: '/support' },
+        { name: 'Contact Us', href: '/contact' },
+        { name: 'Community Forum', href: '/community' },
+        { name: 'Live Chat', href: '/chat' },
+        { name: 'System Status', href: '/status' }
+      ]
+    },
+    {
+      title: 'Company',
+      links: [
+        { name: 'About Us', href: '/about' },
+        { name: 'Careers', href: '/careers' },
+        { name: 'Press Kit', href: '/press' },
+        { name: 'Partners', href: '/partners' },
+        { name: 'Affiliate Program', href: '/affiliate' }
+      ]
+    }
+  ];
+
+  const socialLinks = [
+    { name: 'Facebook', icon: Facebook, href: 'https://facebook.com/upscdashboard' },
+    { name: 'Twitter', icon: Twitter, href: 'https://twitter.com/upscdashboard' },
+    { name: 'Instagram', icon: Instagram, href: 'https://instagram.com/upscdashboard' },
+    { name: 'LinkedIn', icon: Linkedin, href: 'https://linkedin.com/company/upscdashboard' },
+    { name: 'YouTube', icon: Youtube, href: 'https://youtube.com/upscdashboard' }
+  ];
+
+  const legalLinks = [
+    { name: 'Privacy Policy', href: '/privacy' },
+    { name: 'Terms of Service', href: '/terms' },
+    { name: 'Cookie Policy', href: '/cookies' },
+    { name: 'Data Protection', href: '/data-protection' },
+    { name: 'Refund Policy', href: '/refund' }
+  ];
+
+  return (
+    <footer className="bg-gray-900 text-white">
+      {/* Newsletter Section */}
+      <div className="border-b border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid lg:grid-cols-2 gap-8 items-center">
+            <div>
+              <h3 className="text-2xl font-bold mb-4">Stay Updated with UPSC Insights</h3>
+              <p className="text-gray-300 text-lg">
+                Get weekly study tips, current affairs updates, and exclusive content delivered to your inbox.
+              </p>
+            </div>
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <input
+                  type="email"
+                  placeholder="Enter your email address"
+                  className="flex-1 px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <button className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 flex items-center justify-center">
+                  Subscribe
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </button>
+              </div>
+              <p className="text-sm text-gray-400">
+                Join 25,000+ UPSC aspirants. Unsubscribe anytime.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Footer Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid lg:grid-cols-6 gap-8">
+          {/* Brand Section */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="flex items-center space-x-3">
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-3 rounded-lg">
+                <BookOpen className="h-8 w-8 text-white" />
+              </div>
+              <span className="text-2xl font-bold">UPSC Dashboard</span>
+            </div>
+            <p className="text-gray-300 text-lg leading-relaxed">
+              Empowering UPSC aspirants with AI-driven insights, comprehensive study tools, 
+              and personalized learning experiences to achieve their civil services dreams.
+            </p>
+            
+            {/* Contact Info */}
+            <div className="space-y-3">
+              <div className="flex items-center space-x-3 text-gray-300">
+                <Mail className="h-5 w-5 text-blue-400" />
+                <span>support@upscdashboard.com</span>
+              </div>
+              <div className="flex items-center space-x-3 text-gray-300">
+                <Phone className="h-5 w-5 text-blue-400" />
+                <span>+91 98765 43210</span>
+              </div>
+              <div className="flex items-center space-x-3 text-gray-300">
+                <MapPin className="h-5 w-5 text-blue-400" />
+                <span>New Delhi, India</span>
+              </div>
+            </div>
+
+            {/* Social Links */}
+            <div className="flex space-x-4">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.name}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
+                  aria-label={social.name}
+                >
+                  <social.icon className="h-5 w-5 text-gray-300 hover:text-white" />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Footer Links */}
+          {footerSections.map((section) => (
+            <div key={section.title} className="space-y-4">
+              <h4 className="text-lg font-semibold text-white">{section.title}</h4>
+              <ul className="space-y-3">
+                {section.links.map((link) => (
+                  <li key={link.name}>
+                    <Link
+                      href={link.href}
+                      className="text-gray-300 hover:text-white transition-colors"
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Bottom Bar */}
+      <div className="border-t border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col lg:flex-row justify-between items-center space-y-4 lg:space-y-0">
+            {/* Copyright */}
+            <div className="text-gray-400">
+              © {currentYear} UPSC Dashboard. All rights reserved.
+            </div>
+
+            {/* Legal Links */}
+            <div className="flex flex-wrap justify-center lg:justify-end gap-6">
+              {legalLinks.map((link) => (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className="text-gray-400 hover:text-white transition-colors text-sm"
+                >
+                  {link.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Additional Info */}
+          <div className="mt-8 pt-8 border-t border-gray-800 text-center">
+            <p className="text-gray-400 text-sm">
+              Made with ❤️ for UPSC aspirants across India. 
+              <span className="text-blue-400 ml-2">
+                Trusted by 10,000+ successful candidates
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}

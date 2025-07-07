@@ -152,17 +152,21 @@ export class UPSCQuestionParser {
       updatedAt: new Date()
     };
 
-    // Generate mock questions based on paper type
-    questionPaper.questions = this.generateMockQuestions(paperInfo, 20);
-    questionPaper.totalQuestions = questionPaper.questions.length;
+    // Initialize empty questions array - questions will be parsed from actual content
+    questionPaper.questions = [];
+    questionPaper.totalQuestions = 0;
 
     return questionPaper;
   }
 
   /**
-   * Generate mock questions for demonstration
+   * Generate mock questions for demonstration (disabled for production)
    */
   private generateMockQuestions(paperInfo: any, count: number): Question[] {
+    // Disabled for production - no mock questions generated
+    console.warn('Mock question generation is disabled in production');
+    return [];
+
     const questions: Question[] = [];
     const subjects = UPSC_SUBJECTS[paperInfo.paperType] || ['General Studies'];
     
