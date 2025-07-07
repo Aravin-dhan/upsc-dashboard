@@ -40,12 +40,12 @@ export default function HeroSection() {
             <div className="space-y-4">
               <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight">
                 Master UPSC with
-                <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"> AI Intelligence</span>
+                <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"> Smart Preparation</span>
               </h1>
               <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
-                Transform your UPSC preparation with our comprehensive AI-powered platform. 
-                Get personalized study plans, real-time analytics, and interactive learning tools 
-                designed by successful IAS officers.
+                Transform your UPSC preparation with our comprehensive platform featuring
+                practice tests, current affairs, study materials, progress tracking, and an AI assistant
+                to help you navigate and get quick answers.
               </p>
             </div>
 
@@ -132,16 +132,16 @@ export default function HeroSection() {
                   ))}
                 </div>
 
-                {/* AI Assistant Preview */}
-                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                {/* Progress Insight Preview */}
+                <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800">
                   <div className="flex items-start space-x-3">
-                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                      <Brain className="h-4 w-4 text-white" />
+                    <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
+                      <TrendingUp className="h-4 w-4 text-white" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm text-blue-800 dark:text-blue-200">
-                        "Based on your progress, I recommend focusing on Modern History this week. 
-                        You're 15% behind your target schedule."
+                      <p className="text-sm text-green-800 dark:text-green-200">
+                        "You've completed 85% of Polity syllabus this month.
+                        Great progress! Consider taking a mock test to assess retention."
                       </p>
                     </div>
                   </div>

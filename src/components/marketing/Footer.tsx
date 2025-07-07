@@ -120,8 +120,8 @@ export default function Footer() {
               <span className="text-2xl font-bold">UPSC Dashboard</span>
             </div>
             <p className="text-gray-300 text-lg leading-relaxed">
-              Empowering UPSC aspirants with AI-driven insights, comprehensive study tools, 
-              and personalized learning experiences to achieve their civil services dreams.
+              Empowering UPSC aspirants with comprehensive study tools, practice tests,
+              current affairs, progress tracking, and an AI assistant to help navigate your preparation journey.
             </p>
             
             {/* Contact Info */}

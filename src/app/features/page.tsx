@@ -14,12 +14,20 @@ export default function FeaturesPage() {
 
   const mainFeatures = [
     {
-      id: 'ai-assistant',
-      icon: Brain,
-      title: 'AI-Powered Study Assistant',
-      description: 'Get personalized study guidance, doubt resolution, and smart recommendations powered by advanced AI.',
-      benefits: ['24/7 doubt resolution', 'Personalized study plans', 'Smart content recommendations', 'Progress analysis'],
-      demo: 'Interactive AI chat with UPSC-specific knowledge base'
+      id: 'practice-tests',
+      icon: BookOpen,
+      title: 'Comprehensive Practice Tests',
+      description: 'Master UPSC with extensive mock tests, previous year questions, and detailed performance analysis.',
+      benefits: ['420+ parsed questions', 'Year-wise categorization', 'Detailed solutions', 'Performance tracking'],
+      demo: 'Take practice tests with instant feedback and analysis'
+    },
+    {
+      id: 'current-affairs',
+      icon: MessageSquare,
+      title: 'Current Affairs Hub',
+      description: 'Stay updated with curated current affairs from trusted sources with UPSC relevance scoring.',
+      benefits: ['Daily updates', 'Source verification', 'UPSC relevance scoring', 'Topic categorization'],
+      demo: 'Live current affairs feed with filtering options'
     },
     {
       id: 'interactive-maps',
@@ -68,6 +76,7 @@ export default function FeaturesPage() {
     { icon: Clock, title: 'Time Management Tools', description: 'Pomodoro timers, study session tracking, and productivity insights' },
     { icon: Award, title: 'Achievement System', description: 'Gamified learning with badges, streaks, and milestone rewards' },
     { icon: Users, title: 'Community Features', description: 'Connect with fellow aspirants, share resources, and collaborate' },
+    { icon: Brain, title: 'AI Study Assistant', description: 'Get quick answers and navigation help - a helpful supplementary tool for your preparation' },
     { icon: Zap, title: 'Quick Actions', description: 'Voice commands, keyboard shortcuts, and rapid navigation' },
     { icon: Shield, title: 'Data Security', description: 'Enterprise-grade security with encrypted data and privacy protection' }
   ];
@@ -88,12 +97,12 @@ export default function FeaturesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-              Powerful Features for
-              <span className="text-blue-600 dark:text-blue-400"> UPSC Success</span>
+              Complete UPSC Preparation
+              <span className="text-blue-600 dark:text-blue-400"> Platform</span>
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
-              Discover how our comprehensive platform combines AI technology, interactive learning, 
-              and proven study methodologies to accelerate your UPSC preparation.
+              Master UPSC with our comprehensive platform featuring practice tests, current affairs,
+              study materials, progress tracking, and interactive learning tools designed for success.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a 

@@ -16,14 +16,15 @@ export default function PricingSection() {
       icon: Star,
       features: [
         '7-day full access',
-        'Basic AI Assistant (10 queries/day)',
-        'Limited progress tracking',
         'Access to study materials',
+        'Basic practice tests',
+        'Limited progress tracking',
         'Basic analytics dashboard',
+        'AI Assistant (10 queries/day)',
         'Community forum access'
       ],
       limitations: [
-        'Limited AI interactions',
+        'Limited practice tests',
         'Basic analytics only',
         'No custom study plans'
       ],
@@ -38,16 +39,16 @@ export default function PricingSection() {
       badge: 'Most Popular',
       icon: Zap,
       features: [
-        'Unlimited AI Assistant access',
+        'Unlimited practice tests & mock series',
         'Personalized study plans',
         'Advanced progress analytics',
         'Interactive India map',
-        'Mock test series (50+ tests)',
+        'Current affairs with UPSC relevance',
         'Performance predictions',
-        'Priority support',
-        'Offline content access',
         'Custom revision schedules',
-        'Peer comparison analytics'
+        'Offline content access',
+        'Unlimited AI Assistant access',
+        'Priority support'
       ],
       limitations: [],
       cta: 'Start Pro Plan',
