@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
       return createValidationErrorResponse(validation.errors);
     }
 
-    const { email, password } = validation.sanitizedData!;
+    const { email, password, rememberMe } = validation.sanitizedData!;
 
     // Email format is already validated by the schema
 
@@ -138,13 +138,14 @@ export async function POST(request: NextRequest) {
       userAgent: request.headers.get('user-agent') || 'unknown'
     });
 
-    // Set HTTP-only cookie
+    // Set HTTP-only cookie with appropriate expiration
     const cookieStore = await cookies();
+    const maxAge = rememberMe ? 30 * 24 * 60 * 60 : 7 * 24 * 60 * 60; // 30 days if remember me, otherwise 7 days
     cookieStore.set('upsc-auth-token', sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60, // 7 days
+      maxAge: maxAge,
       path: '/'
     });
 

@@ -19,17 +19,26 @@ interface AuthError {
 export default function LoginForm({ onSuccess, redirectTo = '/' }: LoginFormProps) {
   const [formData, setFormData] = useState({
     email: '',
-    password: ''
+    password: '',
+    rememberMe: false
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<AuthError | null>(null);
   const [networkError, setNetworkError] = useState(false);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   const router = useRouter();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Prevent double submission
+    if (isLoading || submitAttempted) {
+      return;
+    }
+
+    setSubmitAttempted(true);
     setIsLoading(true);
     setError(null);
     setNetworkError(false);
@@ -66,7 +75,8 @@ export default function LoginForm({ onSuccess, redirectTo = '/' }: LoginFormProp
         },
         body: JSON.stringify({
           email: formData.email.trim(),
-          password: formData.password
+          password: formData.password,
+          rememberMe: formData.rememberMe
         }),
         signal: controller.signal,
       });
@@ -116,6 +126,8 @@ export default function LoginForm({ onSuccess, redirectTo = '/' }: LoginFormProp
       }
     } finally {
       setIsLoading(false);
+      // Reset submit attempt after a delay to allow for proper error handling
+      setTimeout(() => setSubmitAttempted(false), 1000);
     }
   };
   
@@ -128,6 +140,7 @@ export default function LoginForm({ onSuccess, redirectTo = '/' }: LoginFormProp
     if (error) {
       setError(null);
       setNetworkError(false);
+      setSubmitAttempted(false);
     }
   };
   
@@ -229,10 +242,31 @@ export default function LoginForm({ onSuccess, redirectTo = '/' }: LoginFormProp
               </button>
             </div>
           </div>
-          
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <input
+                id="rememberMe"
+                name="rememberMe"
+                type="checkbox"
+                checked={formData.rememberMe}
+                onChange={(e) => setFormData(prev => ({ ...prev, rememberMe: e.target.checked }))}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                Remember me
+              </label>
+            </div>
+            <div className="text-sm">
+              <a href="/forgot-password" className="text-blue-600 hover:text-blue-700 font-medium">
+                Forgot password?
+              </a>
+            </div>
+          </div>
+
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || submitAttempted}
             className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? (
