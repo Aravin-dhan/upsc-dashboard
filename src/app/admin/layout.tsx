@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import AdminErrorBoundary from '@/components/admin/AdminErrorBoundary';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import { Loader2 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -68,17 +67,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     );
   }
 
-  // Render admin content with sidebar and error boundary
+  // Render admin content with error boundary (sidebar is handled globally)
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <AdminSidebar />
-      <div className="lg:ml-64 transition-all duration-300">
-        <main className="p-6">
-          <AdminErrorBoundary>
-            {children}
-          </AdminErrorBoundary>
-        </main>
-      </div>
-    </div>
+    <AdminErrorBoundary>
+      {children}
+    </AdminErrorBoundary>
   );
 }

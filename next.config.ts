@@ -203,7 +203,7 @@ const nextConfig: NextConfig = {
   // Output optimization
   output: 'standalone',
 
-  // Headers for better caching
+  // Headers for better caching and MIME type fixes
   async headers() {
     return [
       {
@@ -226,6 +226,34 @@ const nextConfig: NextConfig = {
       {
         source: '/static/(.*)',
         headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // Fix CSS MIME type issues
+      {
+        source: '/_next/static/css/(.*)',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'text/css; charset=utf-8',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // Fix JS MIME type issues
+      {
+        source: '/_next/static/chunks/(.*)',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/javascript; charset=utf-8',
+          },
           {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable',

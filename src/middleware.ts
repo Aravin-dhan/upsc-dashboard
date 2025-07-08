@@ -62,6 +62,8 @@ const publicRoutes = [
   '/api/auth/login',
   '/api/auth/register',
   '/api/auth/logout',
+  '/api/auth/me',
+  '/api/auth/refresh',
   '/api/debug/simple-auth',
   '/api/debug/auth',
   '/api/health',

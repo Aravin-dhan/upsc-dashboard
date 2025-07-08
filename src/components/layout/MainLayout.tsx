@@ -3,7 +3,7 @@
 import { ReactNode, useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import Sidebar from './Sidebar';
+import GlobalSidebar from './GlobalSidebar';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -43,10 +43,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
   // For protected routes, use sidebar layout
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-      {showSidebar && <Sidebar />}
+      {showSidebar && <GlobalSidebar />}
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Main Content Area - adjusted for GlobalSidebar */}
+      <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ${showSidebar ? 'lg:ml-64' : ''}`}>
         {/* Mobile Header Space - only show if sidebar is present */}
         {showSidebar && (
           <div className="lg:hidden h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700" />
