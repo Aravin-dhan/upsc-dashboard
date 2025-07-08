@@ -118,28 +118,73 @@ export async function POST(request: NextRequest) {
     
     const { name, email, role, planType } = await request.json();
 
-    // Validate input
-    if (!name || !email) {
+    // Comprehensive validation
+    const validationErrors: Record<string, string> = {};
+
+    // Name validation
+    if (!name?.trim()) {
+      validationErrors.name = 'Name is required';
+    } else if (name.trim().length < 2) {
+      validationErrors.name = 'Name must be at least 2 characters';
+    } else if (name.trim().length > 100) {
+      validationErrors.name = 'Name must be less than 100 characters';
+    }
+
+    // Email validation
+    if (!email?.trim()) {
+      validationErrors.email = 'Email is required';
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email.trim())) {
+        validationErrors.email = 'Please enter a valid email address';
+      } else if (email.trim().length > 255) {
+        validationErrors.email = 'Email must be less than 255 characters';
+      }
+    }
+
+    // Role validation
+    const validRoles = ['admin', 'teacher', 'student'];
+    if (role && !validRoles.includes(role)) {
+      validationErrors.role = 'Please select a valid role';
+    }
+
+    // Plan type validation
+    const validPlanTypes = ['free', 'trial', 'pro'];
+    if (planType && !validPlanTypes.includes(planType)) {
+      validationErrors.planType = 'Please select a valid plan type';
+    }
+
+    // Return validation errors if any
+    if (Object.keys(validationErrors).length > 0) {
+      const firstError = Object.entries(validationErrors)[0];
       return NextResponse.json(
-        { error: 'Name and email are required' },
+        {
+          error: firstError[1],
+          field: firstError[0],
+          validationErrors
+        },
         { status: 400 }
       );
     }
-    
-    // Validate role
-    const validRoles = ['admin', 'teacher', 'student'];
-    if (role && !validRoles.includes(role)) {
+
+    // Check for email uniqueness (mock check)
+    const normalizedEmail = email.trim().toLowerCase();
+    // In a real implementation, you would check the database here
+    if (normalizedEmail === 'admin@upsc.local' || normalizedEmail === 'test@example.com') {
       return NextResponse.json(
-        { error: 'Invalid role specified' },
-        { status: 400 }
+        {
+          error: 'Email address is already in use',
+          field: 'email'
+        },
+        { status: 409 }
       );
     }
     
     // Mock user creation (replace with actual database call)
     const newUser = {
       id: Date.now().toString(),
-      name,
-      email,
+      name: name.trim(),
+      email: normalizedEmail,
       role: role || 'student',
       planType: planType || 'free',
       tenantId: session.user.tenantId || 'default',
@@ -148,7 +193,8 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString(),
       lastLogin: null,
       hasActivity: false,
-      accountAge: 0
+      accountAge: 0,
+      subscriptionStatus: planType === 'pro' ? 'active' : planType === 'trial' ? 'trial' : 'free'
     };
 
     return NextResponse.json({
