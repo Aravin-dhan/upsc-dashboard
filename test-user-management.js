@@ -52,6 +52,7 @@ async function testUserManagement() {
   console.log('==================================================\n');
 
   let cookies = '';
+  let createdUserId = null;
   let testResults = {
     authentication: false,
     userList: false,
@@ -103,7 +104,7 @@ async function testUserManagement() {
     console.log('\n3️⃣  Testing User Creation...');
     const newUserData = {
       name: 'Test User',
-      email: 'testuser@example.com',
+      email: `testuser${Date.now()}@example.com`, // Use unique email
       role: 'student',
       planType: 'free'
     };
@@ -118,8 +119,10 @@ async function testUserManagement() {
 
     if (createResponse.status === 200) {
       testResults.userCreate = true;
+      createdUserId = createResponse.body.user?.id;
       console.log('   ✅ User creation working');
       console.log(`   Created user: ${createResponse.body.user?.name} (${createResponse.body.user?.email})`);
+      console.log(`   User ID: ${createdUserId}`);
     } else {
       console.log('   ❌ User creation failed');
       console.log(`   Status: ${createResponse.status}`);
@@ -156,13 +159,14 @@ async function testUserManagement() {
     console.log('\n5️⃣  Testing User Update...');
     const updateData = {
       name: 'Updated Test User',
-      email: 'updated@example.com',
+      email: `updated${Date.now()}@example.com`,
       role: 'teacher',
       planType: 'pro',
       isActive: true
     };
 
-    const updateResponse = await makeRequest(`${PRODUCTION_URL}/api/admin/users/test-user-id`, {
+    const testUserId = createdUserId || '2'; // Use created user ID or fallback to user 2
+    const updateResponse = await makeRequest(`${PRODUCTION_URL}/api/admin/users/${testUserId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -187,7 +191,7 @@ async function testUserManagement() {
       role: 'invalid-role'
     };
 
-    const updateValidationResponse = await makeRequest(`${PRODUCTION_URL}/api/admin/users/test-user-id`, {
+    const updateValidationResponse = await makeRequest(`${PRODUCTION_URL}/api/admin/users/${testUserId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -206,7 +210,7 @@ async function testUserManagement() {
 
     // Step 7: Test User Deletion
     console.log('\n7️⃣  Testing User Deletion...');
-    const deleteResponse = await makeRequest(`${PRODUCTION_URL}/api/admin/users/test-user-id`, {
+    const deleteResponse = await makeRequest(`${PRODUCTION_URL}/api/admin/users/${testUserId}`, {
       method: 'DELETE',
       headers: { 'Cookie': cookies }
     });
