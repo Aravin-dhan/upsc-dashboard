@@ -15,7 +15,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect non-admin users
+    // Redirect non-admin users (but only after authentication is complete)
     if (!isLoading && user && user.role !== 'admin') {
       console.log('Non-admin user attempting to access admin area, redirecting...');
       router.push('/dashboard');

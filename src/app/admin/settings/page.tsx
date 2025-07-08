@@ -55,6 +55,7 @@ export default function AdminSettingsPage() {
     try {
       const response = await fetch('/api/admin/settings', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },

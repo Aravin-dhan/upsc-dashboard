@@ -54,15 +54,24 @@ function UserManagementPage() {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('/api/admin/users');
+      const response = await fetch('/api/admin/users', {
+        credentials: 'include',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setUsers(data.users);
+        setError(''); // Clear any previous errors
       } else {
-        setError('Failed to fetch users');
+        const errorData = await response.json().catch(() => ({}));
+        setError(errorData.error || 'Failed to fetch users');
+        console.error('Failed to fetch users:', response.status, errorData);
       }
     } catch (error) {
-      setError('Network error');
+      setError('Network error while fetching users');
+      console.error('Network error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -119,6 +128,7 @@ function UserManagementPage() {
     try {
       const response = await fetch('/api/admin/users', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -177,6 +187,7 @@ function UserManagementPage() {
     try {
       const response = await fetch(`/api/admin/users/${editUser.id}`, {
         method: 'PUT',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -230,6 +241,7 @@ function UserManagementPage() {
     try {
       const response = await fetch(`/api/admin/users/${userId}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
 
       if (response.ok) {
@@ -248,10 +260,17 @@ function UserManagementPage() {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('/api/admin/subscriptions/stats');
+      const response = await fetch('/api/admin/subscriptions/stats', {
+        credentials: 'include',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setStats(data.stats);
+      } else {
+        console.error('Failed to fetch stats:', response.status);
       }
     } catch (error) {
       console.error('Failed to fetch stats:', error);
@@ -262,6 +281,7 @@ function UserManagementPage() {
     try {
       const response = await fetch(`/api/admin/subscriptions`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
         },
