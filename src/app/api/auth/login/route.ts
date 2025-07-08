@@ -129,8 +129,17 @@ export async function POST(request: NextRequest) {
     // Get tenant information
     const tenant = await TenantDatabase.findById(userWithoutPassword.tenantId);
 
-    // Create session with tenant info
-    const sessionToken = await createSession(userWithoutPassword, tenant || undefined);
+    // Calculate session duration based on remember me setting
+    const maxAge = rememberMe ? 30 * 24 * 60 * 60 : 7 * 24 * 60 * 60; // 30 days if remember me, otherwise 7 days
+    const sessionDuration = maxAge * 1000; // Convert to milliseconds
+
+    // Create session with tenant info and custom duration
+    const sessionToken = await createSession(
+      userWithoutPassword,
+      tenant || undefined,
+      request,
+      sessionDuration
+    );
 
     // Log session for tracking
     await SessionDatabase.logSession(user.id, {
@@ -140,13 +149,27 @@ export async function POST(request: NextRequest) {
 
     // Set HTTP-only cookie with appropriate expiration
     const cookieStore = await cookies();
-    const maxAge = rememberMe ? 30 * 24 * 60 * 60 : 7 * 24 * 60 * 60; // 30 days if remember me, otherwise 7 days
+
+    // Enhanced cookie configuration for better persistence
     cookieStore.set('upsc-auth-token', sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: maxAge,
-      path: '/'
+      path: '/',
+      // Add explicit expires date for better browser compatibility
+      expires: new Date(Date.now() + maxAge * 1000),
+      // Ensure cookie persists across browser sessions
+      priority: 'high'
+    });
+
+    // Log session creation for debugging
+    console.log('Session created:', {
+      userId: user.id,
+      email: user.email,
+      rememberMe,
+      maxAge: maxAge,
+      expiresAt: new Date(Date.now() + maxAge * 1000).toISOString()
     });
 
     return NextResponse.json({

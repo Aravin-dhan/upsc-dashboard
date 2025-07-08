@@ -85,11 +85,12 @@ const COOKIE_NAME = 'upsc-auth-token';
 // JWT utilities
 const secret = new TextEncoder().encode(JWT_SECRET);
 
-export async function createJWT(payload: any): Promise<string> {
+export async function createJWT(payload: any, customExpiration?: string): Promise<string> {
+  const expiration = customExpiration || '7d';
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: JWT_ALGORITHM })
     .setIssuedAt()
-    .setExpirationTime('7d')
+    .setExpirationTime(expiration)
     .sign(secret);
 }
 
@@ -131,10 +132,12 @@ const activeSessions = new Map<string, AuthSession>();
 export async function createSession(
   user: User,
   tenant?: Tenant,
-  request?: NextRequest
+  request?: NextRequest,
+  customDuration?: number // Custom session duration in milliseconds
 ): Promise<string> {
   const sessionId = generateSessionId();
   const now = Date.now();
+  const sessionDuration = customDuration || SESSION_DURATION;
 
   const sessionData = {
     userId: user.id,
@@ -154,10 +157,12 @@ export async function createSession(
       displayName: tenant.displayName,
       settings: tenant.settings
     } : undefined,
-    exp: Math.floor((Date.now() + SESSION_DURATION) / 1000)
+    exp: Math.floor((Date.now() + sessionDuration) / 1000)
   };
 
-  const token = await createJWT(sessionData);
+  // Create JWT with custom expiration based on session duration
+  const jwtExpiration = sessionDuration === SESSION_DURATION ? '7d' : '30d';
+  const token = await createJWT(sessionData, jwtExpiration);
 
   // Store session in memory (in production, use persistent storage)
   const session: AuthSession = {

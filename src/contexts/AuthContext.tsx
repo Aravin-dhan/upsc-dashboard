@@ -60,18 +60,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   
   const checkAuth = async () => {
     try {
+      console.log('🔍 Checking authentication status...');
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
 
       const response = await fetch('/api/auth/me', {
         credentials: 'include',
         signal: controller.signal,
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
       });
 
       clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
+        console.log('✅ Session restored successfully:', {
+          user: data.user.email,
+          role: data.user.role,
+          expires: data.expires,
+          isExpiringSoon: data.isExpiringSoon
+        });
+
         setUser(data.user);
         setTenant(data.tenant);
 
@@ -93,13 +105,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Log session expiry warning if applicable
         if (data.isExpiringSoon) {
-          console.warn('Session expires soon:', data.expires);
+          console.warn('⚠️ Session expires soon:', data.expires);
         }
       } else {
         const errorData = await response.json().catch(() => ({}));
 
         // Enhanced error logging for session validation failures
-        console.error('Session validation failed:', {
+        console.warn('❌ Session validation failed:', {
           error: errorData.error,
           code: errorData.code,
           details: errorData.details,
@@ -113,11 +125,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error: any) {
       if (error.name === 'AbortError') {
-        console.error('Session check timeout:', error);
+        console.error('⏱️ Session check timeout:', error);
       } else if (error instanceof TypeError && error.message.includes('fetch')) {
-        console.error('Network error during session check:', error);
+        console.error('🌐 Network error during session check:', error);
       } else {
-        console.error('Unexpected auth check error:', error);
+        console.error('💥 Unexpected auth check error:', error);
       }
 
       setUser(null);
@@ -292,8 +304,65 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
   
   const refreshUser = async (): Promise<void> => {
+    console.log('🔄 Refreshing user session...');
     await checkAuth();
   };
+
+  // Auto-refresh session when it's about to expire
+  useEffect(() => {
+    if (!user) return;
+
+    const refreshSession = async () => {
+      try {
+        console.log('🔄 Attempting session refresh...');
+        const response = await fetch('/api/auth/refresh', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Cache-Control': 'no-cache' }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.refreshed) {
+            console.log('✅ Session refreshed successfully');
+            setUser(data.user);
+            setTenant(data.tenant);
+          }
+        } else {
+          console.log('❌ Session refresh failed, user may need to re-login');
+        }
+      } catch (error) {
+        console.error('Failed to refresh session:', error);
+      }
+    };
+
+    const checkSessionExpiry = async () => {
+      try {
+        const response = await fetch('/api/auth/me', {
+          credentials: 'include',
+          headers: { 'Cache-Control': 'no-cache' }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.isExpiringSoon) {
+            console.log('⚠️ Session expiring soon, refreshing...');
+            await refreshSession();
+          }
+        }
+      } catch (error) {
+        console.error('Failed to check session expiry:', error);
+      }
+    };
+
+    // Check session expiry every 30 minutes
+    const interval = setInterval(checkSessionExpiry, 30 * 60 * 1000);
+
+    // Also check immediately if session is expiring soon
+    checkSessionExpiry();
+
+    return () => clearInterval(interval);
+  }, [user]);
 
   const switchTenant = async (tenantId: string): Promise<boolean> => {
     try {
