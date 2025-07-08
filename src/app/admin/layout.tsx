@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import AdminErrorBoundary from '@/components/admin/AdminErrorBoundary';
+import AdminSidebar from '@/components/admin/AdminSidebar';
 import { Loader2 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -13,17 +14,22 @@ interface AdminLayoutProps {
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const { user, isLoading } = useAuth();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Redirect non-admin users (but only after authentication is complete)
-    if (!isLoading && user && user.role !== 'admin') {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    // Only redirect after component is mounted and authentication is complete
+    if (mounted && !isLoading && user && user.role !== 'admin') {
       console.log('Non-admin user attempting to access admin area, redirecting...');
       router.push('/dashboard');
     }
-  }, [user, isLoading, router]);
+  }, [mounted, user, isLoading, router]);
 
-  // Show loading state while checking authentication
-  if (isLoading) {
+  // Show loading state while checking authentication or during SSR
+  if (!mounted || isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
@@ -34,8 +40,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     );
   }
 
-  // Show access denied for non-admin users
-  if (!user || user.role !== 'admin') {
+  // Show access denied for non-admin users (only after mounting and auth check)
+  if (mounted && !isLoading && (!user || user.role !== 'admin')) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
@@ -46,8 +52,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             You don't have permission to access the admin panel.
           </p>
           <button
+            onClick={() => router.push('/login')}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mr-2"
+          >
+            Login
+          </button>
+          <button
             onClick={() => router.push('/dashboard')}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
           >
             Go to Dashboard
           </button>
@@ -56,10 +68,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     );
   }
 
-  // Render admin content with error boundary
+  // Render admin content with sidebar and error boundary
   return (
-    <AdminErrorBoundary>
-      {children}
-    </AdminErrorBoundary>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <AdminSidebar />
+      <div className="lg:ml-64 transition-all duration-300">
+        <main className="p-6">
+          <AdminErrorBoundary>
+            {children}
+          </AdminErrorBoundary>
+        </main>
+      </div>
+    </div>
   );
 }
