@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -37,28 +37,56 @@ interface GlobalSidebarProps {
   className?: string;
 }
 
-// Navigation items for different user roles
+// Navigation items based on original Sidebar.tsx structure
 const getNavigationItems = (userRole: string) => {
   const baseItems = [
     {
       title: 'Dashboard',
-      href: '/dashboard',
+      href: '/',
       icon: LayoutDashboard,
       description: 'Overview and progress',
       roles: ['student', 'teacher', 'admin']
     },
     {
-      title: 'Learning',
+      title: 'Learning Center',
       href: '/learning',
       icon: BookOpen,
       description: 'Study materials and courses',
       roles: ['student', 'teacher', 'admin']
     },
     {
-      title: 'Practice',
-      href: '/practice',
-      icon: Target,
-      description: 'Mock tests and practice',
+      title: 'Syllabus',
+      href: '/syllabus',
+      icon: FileText,
+      description: 'Complete UPSC syllabus',
+      roles: ['student', 'teacher', 'admin']
+    },
+    {
+      title: 'Dictionary',
+      href: '/dictionary',
+      icon: HelpCircle,
+      description: 'Terms and definitions',
+      roles: ['student', 'teacher', 'admin']
+    },
+    {
+      title: 'Schedule & Calendar',
+      href: '/schedule',
+      icon: Calendar,
+      description: 'Study schedule and events',
+      roles: ['student', 'teacher', 'admin']
+    },
+    {
+      title: 'Analytics',
+      href: '/analytics',
+      icon: BarChart3,
+      description: 'Performance insights',
+      roles: ['student', 'teacher', 'admin']
+    },
+    {
+      title: 'Revision',
+      href: '/revision',
+      icon: Clock,
+      description: 'Revision materials',
       roles: ['student', 'teacher', 'admin']
     },
     {
@@ -69,24 +97,10 @@ const getNavigationItems = (userRole: string) => {
       roles: ['student', 'teacher', 'admin']
     },
     {
-      title: 'Calendar',
-      href: '/calendar',
-      icon: Calendar,
-      description: 'Schedule and events',
-      roles: ['student', 'teacher', 'admin']
-    },
-    {
-      title: 'Analytics',
-      href: '/analytics',
-      icon: TrendingUp,
-      description: 'Performance insights',
-      roles: ['student', 'teacher', 'admin']
-    },
-    {
-      title: 'AI Assistant',
-      href: '/ai-assistant',
-      icon: Brain,
-      description: 'AI-powered help',
+      title: 'Knowledge Base',
+      href: '/knowledge-base',
+      icon: Database,
+      description: 'Study resources',
       roles: ['student', 'teacher', 'admin']
     },
     {
@@ -97,10 +111,38 @@ const getNavigationItems = (userRole: string) => {
       roles: ['student', 'teacher', 'admin']
     },
     {
-      title: 'Chat',
-      href: '/chat',
+      title: 'Answer Analysis',
+      href: '/answer-analysis',
       icon: MessageSquare,
-      description: 'Community discussions',
+      description: 'Answer evaluation',
+      roles: ['student', 'teacher', 'admin']
+    },
+    {
+      title: 'Practice Arena',
+      href: '/practice',
+      icon: Target,
+      description: 'Mock tests and practice',
+      roles: ['student', 'teacher', 'admin']
+    },
+    {
+      title: 'Wellness',
+      href: '/wellness',
+      icon: Award,
+      description: 'Mental health and wellness',
+      roles: ['student', 'teacher', 'admin']
+    },
+    {
+      title: 'Quick Links',
+      href: '/quick-links',
+      icon: Map,
+      description: 'External resources',
+      roles: ['student', 'teacher', 'admin']
+    },
+    {
+      title: 'AI Assistant',
+      href: '/ai-assistant',
+      icon: Brain,
+      description: 'AI-powered help',
       roles: ['student', 'teacher', 'admin']
     }
   ];
@@ -124,17 +166,17 @@ const getNavigationItems = (userRole: string) => {
 
   const adminItems = [
     {
+      title: 'Admin Dashboard',
+      href: '/admin',
+      icon: Shield,
+      description: 'Admin overview',
+      roles: ['admin']
+    },
+    {
       title: 'User Management',
       href: '/admin/users',
       icon: Users,
       description: 'Manage all users',
-      roles: ['admin']
-    },
-    {
-      title: 'System Analytics',
-      href: '/admin/analytics',
-      icon: BarChart3,
-      description: 'System-wide analytics',
       roles: ['admin']
     },
     {
@@ -145,22 +187,22 @@ const getNavigationItems = (userRole: string) => {
       roles: ['admin']
     },
     {
-      title: 'Subscriptions',
-      href: '/admin/subscriptions',
-      icon: CreditCard,
-      description: 'Subscription management',
+      title: 'Analytics',
+      href: '/admin/analytics',
+      icon: BarChart3,
+      description: 'System-wide analytics',
       roles: ['admin']
     },
     {
-      title: 'Coupons',
+      title: 'Coupon Management',
       href: '/admin/coupons',
-      icon: Database,
+      icon: CreditCard,
       description: 'Coupon management',
       roles: ['admin']
     },
     {
-      title: 'Email Campaigns',
-      href: '/admin/email-subscriptions',
+      title: 'Email Subscriptions',
+      href: '/admin/subscriptions',
       icon: Mail,
       description: 'Email marketing',
       roles: ['admin']
@@ -181,30 +223,60 @@ const getNavigationItems = (userRole: string) => {
     }
   ];
 
-  let allItems = [...baseItems];
-  
+  const bottomItems = [
+    {
+      title: 'Profile',
+      href: '/profile',
+      icon: Users,
+      description: 'User profile',
+      roles: ['student', 'teacher', 'admin']
+    },
+    {
+      title: 'Settings',
+      href: '/settings',
+      icon: Settings,
+      description: 'User settings',
+      roles: ['student', 'teacher', 'admin']
+    }
+  ];
+
+  let mainItems = [...baseItems];
+  let adminSection = [];
+  let bottomSection = [...bottomItems];
+
   if (userRole === 'teacher' || userRole === 'admin') {
-    allItems = [...allItems, ...teacherItems];
-  }
-  
-  if (userRole === 'admin') {
-    allItems = [...allItems, ...adminItems];
+    mainItems = [...mainItems, ...teacherItems];
   }
 
-  return allItems.filter(item => item.roles.includes(userRole));
+  if (userRole === 'admin') {
+    adminSection = [...adminItems];
+  }
+
+  return {
+    main: mainItems.filter(item => item.roles.includes(userRole)),
+    admin: adminSection.filter(item => item.roles.includes(userRole)),
+    bottom: bottomSection.filter(item => item.roles.includes(userRole))
+  };
 };
 
 export default function GlobalSidebar({ className }: GlobalSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading } = useAuth();
 
-  if (!user) {
-    return null; // Don't show sidebar for unauthenticated users
+  // Fix visibility issue - ensure component mounts properly
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Don't render until mounted and user is loaded
+  if (!mounted || isLoading || !user) {
+    return null;
   }
 
-  const navigationItems = getNavigationItems(user.role);
+  const navigationSections = getNavigationItems(user.role);
 
   const handleLogout = async () => {
     try {
@@ -266,118 +338,176 @@ export default function GlobalSidebar({ className }: GlobalSidebarProps) {
       <aside
         className={cn(
           'fixed left-0 top-0 h-full bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 z-40',
-          isCollapsed ? 'w-16' : 'w-64',
+          isCollapsed ? 'w-16' : 'w-80 sm:w-72 lg:w-64',
           isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+          'shadow-xl lg:shadow-none',
           className
         )}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-          {!isCollapsed && (
-            <div className="flex items-center space-x-2">
-              <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", 
-                user.role === 'admin' ? 'bg-red-600' : 
-                user.role === 'teacher' ? 'bg-blue-600' : 'bg-green-600')}>
-                <span className="text-white font-bold text-sm">
-                  {user.role === 'admin' ? 'A' : user.role === 'teacher' ? 'T' : 'S'}
+        <div className="flex flex-col h-full">
+          {/* Header - Fixed */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+            {!isCollapsed && (
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">U</span>
+                </div>
+                <span className="ml-3 text-xl font-semibold text-gray-900 dark:text-white">
+                  UPSC Dashboard
                 </span>
               </div>
-              <div>
-                <h1 className="text-lg font-bold text-gray-900 dark:text-white">UPSC Dashboard</h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user.role} Panel</p>
+            )}
+
+            {/* Collapse button - desktop only */}
+            <button
+              onClick={toggleCollapse}
+              className="hidden lg:flex p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            >
+              {isCollapsed ? (
+                <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+              ) : (
+                <ChevronLeft className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+              )}
+            </button>
+          </div>
+
+          {/* Navigation - Scrollable */}
+          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+            {/* Main Navigation */}
+            {navigationSections.main.map((item) => {
+              const isActive = pathname === item.href;
+              const Icon = item.icon;
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setIsMobileOpen(false)}
+                  className={cn(
+                    'group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 transform hover:scale-105 active:scale-95',
+                    isActive
+                      ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-200 shadow-sm'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white',
+                    isCollapsed && 'justify-center px-2'
+                  )}
+                  title={isCollapsed ? item.title : undefined}
+                >
+                  <Icon className={cn(
+                    'h-5 w-5 flex-shrink-0',
+                    isCollapsed ? 'mr-0' : 'mr-3',
+                    isActive ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300'
+                  )} />
+                  {!isCollapsed && item.title}
+                </Link>
+              );
+            })}
+
+            {/* Admin Navigation Section - Only visible to admin users */}
+            {user.role === 'admin' && navigationSections.admin.length > 0 && (
+              <>
+                <div className="pt-4 pb-2">
+                  {!isCollapsed && (
+                    <div className="px-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Administration
+                    </div>
+                  )}
+                </div>
+                {navigationSections.admin.map((item) => {
+                  const isActive = pathname === item.href;
+                  const Icon = item.icon;
+
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setIsMobileOpen(false)}
+                      className={cn(
+                        'group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 transform hover:scale-105 active:scale-95',
+                        isActive
+                          ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-200 shadow-sm'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300',
+                        isCollapsed && 'justify-center px-2'
+                      )}
+                      title={isCollapsed ? item.title : undefined}
+                    >
+                      <Icon className={cn(
+                        'h-5 w-5 flex-shrink-0',
+                        isCollapsed ? 'mr-0' : 'mr-3',
+                        isActive ? 'text-red-500' : 'text-gray-400 group-hover:text-red-500'
+                      )} />
+                      {!isCollapsed && item.title}
+                    </Link>
+                  );
+                })}
+              </>
+            )}
+          </nav>
+
+          {/* Bottom navigation - Fixed */}
+          <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-4 space-y-1 flex-shrink-0">
+            {navigationSections.bottom.map((item) => {
+              const isActive = pathname === item.href;
+              const Icon = item.icon;
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setIsMobileOpen(false)}
+                  className={cn(
+                    'group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 transform hover:scale-105 active:scale-95',
+                    isActive
+                      ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-200 shadow-sm'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white',
+                    isCollapsed && 'justify-center px-2'
+                  )}
+                  title={isCollapsed ? item.title : undefined}
+                >
+                  <Icon className={cn(
+                    'h-5 w-5 flex-shrink-0',
+                    isCollapsed ? 'mr-0' : 'mr-3',
+                    isActive ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300'
+                  )} />
+                  {!isCollapsed && item.title}
+                </Link>
+              );
+            })}
+
+            {/* Logout button */}
+            <button
+              onClick={handleLogout}
+              className={cn(
+                'group flex items-center w-full px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 transform hover:scale-105 active:scale-95 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white',
+                isCollapsed && 'justify-center px-2'
+              )}
+              title={isCollapsed ? 'Logout' : undefined}
+            >
+              <LogOut className={cn(
+                'h-5 w-5 flex-shrink-0 text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300',
+                isCollapsed ? 'mr-0' : 'mr-3'
+              )} />
+              {!isCollapsed && 'Logout'}
+            </button>
+          </div>
+
+          {/* User info - Fixed */}
+          {!isCollapsed && (
+            <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-4 flex-shrink-0">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
+                  <Users className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                    {user.name || 'UPSC Aspirant'}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {user.role ? `Role: ${user.role.charAt(0).toUpperCase() + user.role.slice(1)}` : 'Target: 2027'}
+                  </p>
+                </div>
               </div>
             </div>
           )}
-          
-          {/* Collapse button - desktop only */}
-          <button
-            onClick={toggleCollapse}
-            className="hidden lg:flex p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          >
-            {isCollapsed ? (
-              <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-            ) : (
-              <ChevronLeft className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-            )}
-          </button>
-        </div>
-
-        {/* User info */}
-        {!isCollapsed && user && (
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex items-center space-x-3">
-              <div className={cn("w-10 h-10 rounded-full flex items-center justify-center",
-                user.role === 'admin' ? 'bg-red-100 dark:bg-red-900' :
-                user.role === 'teacher' ? 'bg-blue-100 dark:bg-blue-900' : 'bg-green-100 dark:bg-green-900')}>
-                <span className={cn("font-semibold text-sm", getAccentColor(user.role))}>
-                  {user.name.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                  {user.name}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                  {user.email}
-                </p>
-                <span className={cn("inline-flex items-center px-2 py-0.5 rounded text-xs font-medium", getRoleColor(user.role))}>
-                  {user.role}
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          {navigationItems.map((item) => {
-            const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
-            const Icon = item.icon;
-            const accentColor = getAccentColor(user.role);
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setIsMobileOpen(false)}
-                className={cn(
-                  'flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-colors group',
-                  isActive
-                    ? `${user.role === 'admin' ? 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300' :
-                        user.role === 'teacher' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300' :
-                        'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300'}`
-                    : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800',
-                  isCollapsed && 'justify-center px-2'
-                )}
-                title={isCollapsed ? item.title : undefined}
-              >
-                <Icon className={cn('w-5 h-5 flex-shrink-0', isActive ? accentColor : '')} />
-                {!isCollapsed && (
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{item.title}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                      {item.description}
-                    </p>
-                  </div>
-                )}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Logout button */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-          <button
-            onClick={handleLogout}
-            className={cn(
-              'flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors',
-              isCollapsed && 'justify-center px-2'
-            )}
-            title={isCollapsed ? 'Logout' : undefined}
-          >
-            <LogOut className="w-5 h-5 flex-shrink-0" />
-            {!isCollapsed && <span className="text-sm font-medium">Logout</span>}
-          </button>
         </div>
       </aside>
     </>

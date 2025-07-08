@@ -7,6 +7,7 @@ import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AnalyticsProvider } from "@/contexts/AnalyticsContext";
+import { DashboardCustomizationProvider } from "@/contexts/DashboardCustomizationContext";
 import MainLayout from "@/components/layout/MainLayout";
 import ThemeScript from "@/components/ui/ThemeScript";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -39,9 +40,11 @@ export default function RootLayout({
           >
             <AuthProvider>
               <AnalyticsProvider>
-                <MainLayout>
-                  {children}
-                </MainLayout>
+                <DashboardCustomizationProvider>
+                  <MainLayout>
+                    {children}
+                  </MainLayout>
+                </DashboardCustomizationProvider>
                 <Toaster position="top-right" />
               </AnalyticsProvider>
             </AuthProvider>
