@@ -177,8 +177,21 @@ export async function POST(request: NextRequest) {
         note: "This is a fallback response. AI service is currently unavailable."
       });
     }
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+    let genAI, model;
+    try {
+      genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+      model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    } catch (initError) {
+      console.warn('Failed to initialize Gemini AI. Providing fallback response.');
+      const fallbackResponse = generateFallbackResponse(userMessage);
+
+      return NextResponse.json({
+        response: fallbackResponse,
+        fallback: true,
+        note: "This is a fallback response. AI service is currently unavailable."
+      });
+    }
 
     // Prepare history for Gemini API, ensuring it starts with a user message
     const geminiHistory = processedHistory.map((msg: any) => ({
@@ -221,7 +234,13 @@ export async function POST(request: NextRequest) {
     let errorMessage = 'Failed to generate response due to an unexpected error.';
     if (error.message) {
       if (error.message.includes('API key')) {
-        errorMessage = 'Invalid or missing GEMINI_API_KEY. Please check your environment variables.';
+        // Provide fallback response for API key issues
+        const fallbackResponse = generateFallbackResponse(userMessage || 'general help');
+        return NextResponse.json({
+          response: fallbackResponse,
+          fallback: true,
+          note: "AI service is currently unavailable, but here's some helpful information!"
+        });
       } else if (error.message.includes('quota')) {
         errorMessage = 'AI API quota exceeded. Please try again later or check your Google Cloud project.';
       } else if (error.message.includes('model')) {
