@@ -5,6 +5,14 @@ import { cookies } from 'next/headers';
 
 export const runtime = 'nodejs';
 
+// Add GET method for compatibility
+export async function GET(request: NextRequest) {
+  return NextResponse.json(
+    { error: 'Use POST method for session refresh' },
+    { status: 405 }
+  );
+}
+
 export async function POST(request: NextRequest) {
   try {
     console.log('🔄 Session refresh requested');
