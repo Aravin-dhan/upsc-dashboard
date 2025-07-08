@@ -164,9 +164,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if API key is available and provide fallback if not
-    if (!process.env.GEMINI_API_KEY) {
-      console.warn('GEMINI_API_KEY is not set in environment variables. Providing fallback response.');
+    // Use the provided API key or fallback
+    const apiKey = process.env.GEMINI_API_KEY || 'AIzaSyDhuFGySigse5Yk8K2dMcQ8Jxv8_Je1bRA';
+
+    if (!apiKey) {
+      console.warn('GEMINI_API_KEY is not available. Providing fallback response.');
 
       // Provide a helpful fallback response based on the user's question
       const fallbackResponse = generateFallbackResponse(userMessage);
@@ -180,7 +182,7 @@ export async function POST(request: NextRequest) {
 
     let genAI, model;
     try {
-      genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+      genAI = new GoogleGenerativeAI(apiKey);
       model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     } catch (initError) {
       console.warn('Failed to initialize Gemini AI. Providing fallback response.');

@@ -21,6 +21,7 @@ import toast from 'react-hot-toast';
 
 // Import standalone navigation handler
 import { NavigationCommandHandler } from '@/services/NavigationCommandHandler';
+import { enhancedAICommandParser } from '@/services/EnhancedAICommandParser';
 
 interface AIContext {
   currentPage: string;
@@ -123,6 +124,9 @@ export default function ChatBot() {
   const [selectedTheme] = useState<'auto' | 'light' | 'dark'>('auto');
   const [typingIndicator] = useState(false);
   const [collapsedMessages, setCollapsedMessages] = useState<Set<string>>(new Set());
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
+  const [conversations, setConversations] = useState<any[]>([]);
+  const [showConversationHistory, setShowConversationHistory] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -139,6 +143,51 @@ export default function ChatBot() {
   const saveMessages = (newMessages: Message[]) => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('upsc-chat-messages', JSON.stringify(newMessages));
+    }
+  };
+
+  // Save conversation to database
+  const saveConversation = async (messages: Message[], title?: string) => {
+    try {
+      const response = await fetch('/api/ai/conversations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          conversationId: currentConversationId,
+          messages: messages.map(msg => ({
+            id: msg.id,
+            role: msg.role,
+            content: msg.content,
+            timestamp: msg.timestamp.toISOString(),
+            metadata: msg.metadata
+          })),
+          title: title || `Conversation ${new Date().toLocaleDateString()}`
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (!currentConversationId) {
+          setCurrentConversationId(result.conversation.id);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to save conversation:', error);
+    }
+  };
+
+  // Load conversations
+  const loadConversations = async () => {
+    try {
+      const response = await fetch('/api/ai/conversations');
+      if (response.ok) {
+        const result = await response.json();
+        setConversations(result.conversations || []);
+      }
+    } catch (error) {
+      console.error('Failed to load conversations:', error);
     }
   };
 
@@ -309,6 +358,10 @@ export default function ChatBot() {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    loadConversations();
+  }, []);
+
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
@@ -324,7 +377,26 @@ export default function ChatBot() {
     saveMessages(updatedMessages);
     const currentInput = input;
 
-    // Check for navigation commands first
+    // Check for quick responses first
+    const quickResponse = enhancedAICommandParser.getQuickResponse(currentInput);
+    if (quickResponse) {
+      const quickResponseMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: quickResponse,
+        role: 'assistant',
+        timestamp: new Date(),
+        suggestions: ['Open calendar', 'Show analytics', 'Go to practice', 'Current affairs']
+      };
+
+      const finalMessages = [...updatedMessages, quickResponseMessage];
+      setMessages(finalMessages);
+      saveMessages(finalMessages);
+      await saveConversation(finalMessages);
+      setInput('');
+      return;
+    }
+
+    // Check for navigation commands
     if (navigationHandler.isNavigationCommand(currentInput)) {
       const result = navigationHandler.handleNavigationCommand(currentInput);
 
@@ -342,12 +414,34 @@ export default function ChatBot() {
       const finalMessages = [...updatedMessages, navigationResponse];
       setMessages(finalMessages);
       saveMessages(finalMessages);
+      await saveConversation(finalMessages);
       setInput('');
-      return; // Don't proceed to API call for navigation commands
+      return;
     }
 
-    // AI command parsing temporarily disabled for debugging
-    console.log('Would parse command:', currentInput);
+    // Try enhanced command parsing
+    try {
+      const enhancedCommand = await enhancedAICommandParser.parseEnhancedCommand(currentInput, context);
+
+      if (enhancedCommand.confidence > 0.7 && enhancedCommand.response) {
+        const commandResponse: Message = {
+          id: (Date.now() + 1).toString(),
+          content: enhancedCommand.response,
+          role: 'assistant',
+          timestamp: new Date(),
+          suggestions: enhancedCommand.suggestions || []
+        };
+
+        const finalMessages = [...updatedMessages, commandResponse];
+        setMessages(finalMessages);
+        saveMessages(finalMessages);
+        await saveConversation(finalMessages);
+        setInput('');
+        return;
+      }
+    } catch (error) {
+      console.error('Enhanced command parsing failed:', error);
+    }
 
     setInput('');
     setIsLoading(true);
@@ -387,6 +481,7 @@ export default function ChatBot() {
       const finalMessages = [...updatedMessages, assistantMessage];
       setMessages(finalMessages);
       saveMessages(finalMessages);
+      await saveConversation(finalMessages);
 
     } catch (error) {
       console.error('Error sending message:', error);
@@ -399,6 +494,7 @@ export default function ChatBot() {
       const errorMessages = [...updatedMessages, errorMessage];
       setMessages(errorMessages);
       saveMessages(errorMessages);
+      await saveConversation(errorMessages);
     } finally {
       setIsLoading(false);
     }
