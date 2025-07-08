@@ -400,7 +400,7 @@ function UserManagementPage() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Users</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats?.total || 0}</p>
               </div>
             </div>
           </div>
@@ -412,7 +412,7 @@ function UserManagementPage() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Users</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.active}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats?.active || 0}</p>
               </div>
             </div>
           </div>
@@ -424,7 +424,7 @@ function UserManagementPage() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Admins</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.byRole.admin || 0}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats?.byRole?.admin || 0}</p>
               </div>
             </div>
           </div>
@@ -436,7 +436,7 @@ function UserManagementPage() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Students</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.byRole.student || 0}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats?.byRole?.student || 0}</p>
               </div>
             </div>
           </div>

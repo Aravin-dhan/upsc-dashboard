@@ -105,8 +105,18 @@ function getRequiredRole(pathname: string): string | null {
 }
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  
+  const { pathname, searchParams } = request.nextUrl;
+
+  // Skip middleware for RSC (React Server Components) requests
+  if (searchParams.has('_rsc')) {
+    return NextResponse.next();
+  }
+
+  // Skip middleware for Next.js internal requests
+  if (pathname.startsWith('/_next/') || pathname.startsWith('/__nextjs_')) {
+    return NextResponse.next();
+  }
+
   // Skip middleware for public routes
   if (isPublicRoute(pathname)) {
     return NextResponse.next();
