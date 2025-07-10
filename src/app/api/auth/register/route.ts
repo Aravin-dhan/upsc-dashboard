@@ -54,9 +54,14 @@ const REGISTRATION_ERRORS: Record<string, RegistrationError> = {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json().catch(() => null);
+    console.log('🔍 /api/auth/register - Starting registration process');
+    const body = await request.json().catch((err) => {
+      console.error('❌ Failed to parse request body:', err);
+      return null;
+    });
 
     if (!body) {
+      console.log('❌ No request body provided');
       const error = REGISTRATION_ERRORS.MISSING_FIELDS;
       return NextResponse.json(
         {
@@ -68,10 +73,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log('📋 Registration request body keys:', Object.keys(body));
+
     const { email, password, name, role, tenantId, tenantName, organizationType } = body;
 
     // Validate required fields
+    console.log('🔍 Validating required fields:', { email: !!email, password: !!password, name: !!name });
     if (!email || !password || !name) {
+      console.log('❌ Missing required fields');
       const error = REGISTRATION_ERRORS.MISSING_FIELDS;
       return NextResponse.json(
         {

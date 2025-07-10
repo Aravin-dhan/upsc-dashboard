@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSidebarState, useSidebarErrorHandler } from '@/hooks/useSidebarState';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
@@ -260,16 +261,43 @@ const getNavigationItems = (userRole: string) => {
 };
 
 export default function GlobalSidebar({ className }: GlobalSidebarProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const { user, logout, isLoading } = useAuth();
+
+  // Use the new sidebar state management
+  const {
+    isCollapsed,
+    isMobileOpen,
+    isEmergencyMode,
+    toggleCollapse,
+    toggleMobile,
+    setMobileOpen,
+  } = useSidebarState();
+
+  const { handleSidebarError } = useSidebarErrorHandler();
 
   // Fix visibility issue - ensure component mounts properly
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Add error handling for sidebar rendering
+  useEffect(() => {
+    try {
+      // Test sidebar functionality
+      const sidebarElement = document.querySelector('[data-sidebar-test]');
+      if (!sidebarElement && mounted) {
+        // Add test attribute to verify sidebar is working
+        const testDiv = document.createElement('div');
+        testDiv.setAttribute('data-sidebar-test', 'true');
+        testDiv.style.display = 'none';
+        document.body.appendChild(testDiv);
+      }
+    } catch (error) {
+      handleSidebarError(error as Error);
+    }
+  }, [mounted, handleSidebarError]);
 
   // Don't render until mounted and user is loaded
   if (!mounted || isLoading || !user) {
@@ -286,13 +314,7 @@ export default function GlobalSidebar({ className }: GlobalSidebarProps) {
     }
   };
 
-  const toggleCollapse = () => {
-    setIsCollapsed(!isCollapsed);
-  };
-
-  const toggleMobile = () => {
-    setIsMobileOpen(!isMobileOpen);
-  };
+  // Remove old toggle functions since we're using the hook now
 
   const getRoleColor = (role: string) => {
     switch (role) {
@@ -382,7 +404,7 @@ export default function GlobalSidebar({ className }: GlobalSidebarProps) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  onClick={() => setIsMobileOpen(false)}
+                  onClick={() => setMobileOpen(false)}
                   className={cn(
                     'group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 transform hover:scale-105 active:scale-95',
                     isActive
@@ -420,7 +442,7 @@ export default function GlobalSidebar({ className }: GlobalSidebarProps) {
                     <Link
                       key={item.href}
                       href={item.href}
-                      onClick={() => setIsMobileOpen(false)}
+                      onClick={() => setMobileOpen(false)}
                       className={cn(
                         'group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 transform hover:scale-105 active:scale-95',
                         isActive
@@ -453,7 +475,7 @@ export default function GlobalSidebar({ className }: GlobalSidebarProps) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  onClick={() => setIsMobileOpen(false)}
+                  onClick={() => setMobileOpen(false)}
                   className={cn(
                     'group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 transform hover:scale-105 active:scale-95',
                     isActive

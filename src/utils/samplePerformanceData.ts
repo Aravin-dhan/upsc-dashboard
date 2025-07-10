@@ -1,8 +1,8 @@
 import PerformanceService, { PerformanceMetric } from '@/services/PerformanceService';
 
 export function generateSamplePerformanceData(): void {
-  // Disabled for production - no sample data generation
-  console.warn('Sample data generation is disabled in production');
+  // Completely disabled - no sample data generation in production
+  console.warn('Sample data generation is permanently disabled');
   return;
 
   const performanceService = PerformanceService.getInstance();
@@ -222,12 +222,8 @@ export function hasSampleData(): boolean {
   return metrics.length > 0;
 }
 
-// Function to initialize sample data if needed
+// Function to initialize sample data if needed - DISABLED
 export function initializeSampleDataIfNeeded(): void {
-  if (!hasSampleData()) {
-    generateSamplePerformanceData();
-    console.log('Sample performance data initialized');
-  } else {
-    console.log('Performance data already exists');
-  }
+  console.log('Sample data initialization is disabled - users must create their own data');
+  return;
 }

@@ -4,6 +4,7 @@ import { ReactNode, useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import GlobalSidebar from './GlobalSidebar';
+import SidebarErrorBoundary from './SidebarErrorBoundary';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -43,7 +44,11 @@ export default function MainLayout({ children }: MainLayoutProps) {
   // For protected routes, use sidebar layout
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-      {showSidebar && <GlobalSidebar />}
+      {showSidebar && (
+        <SidebarErrorBoundary>
+          <GlobalSidebar />
+        </SidebarErrorBoundary>
+      )}
 
       {/* Main Content Area - adjusted for GlobalSidebar */}
       <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ${showSidebar ? 'lg:ml-64' : ''}`}>

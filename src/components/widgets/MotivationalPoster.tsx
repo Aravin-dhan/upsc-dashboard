@@ -57,79 +57,52 @@ export default function MotivationalPoster() {
     }
   }, []);
 
-  const defaultQuotes: MotivationalQuote[] = [
-    {
-      id: '1',
-      text: 'Success is not final, failure is not fatal: it is the courage to continue that counts.',
-      author: 'Winston Churchill',
-      category: 'perseverance',
-      backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      textColor: '#ffffff',
-      isCustom: false,
-      isFavorite: false,
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: '2',
-      text: 'The only way to do great work is to love what you do.',
-      author: 'Steve Jobs',
-      category: 'motivation',
-      backgroundColor: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-      textColor: '#ffffff',
-      isCustom: false,
-      isFavorite: false,
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: '3',
-      text: 'UPSC is not just an exam, it\'s a journey of self-discovery and nation-building.',
-      author: 'Anonymous',
-      category: 'upsc',
-      backgroundColor: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-      textColor: '#ffffff',
-      isCustom: false,
-      isFavorite: false,
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: '4',
-      text: 'Dream big, work hard, stay focused, and surround yourself with good people.',
-      author: 'Unknown',
-      category: 'success',
-      backgroundColor: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-      textColor: '#ffffff',
-      isCustom: false,
-      isFavorite: false,
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: '5',
-      text: 'The expert in anything was once a beginner.',
-      author: 'Helen Hayes',
-      category: 'wisdom',
-      backgroundColor: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-      textColor: '#ffffff',
-      isCustom: false,
-      isFavorite: false,
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: '6',
-      text: 'Every UPSC aspirant is a future leader. Your preparation today shapes India\'s tomorrow.',
-      author: 'UPSC Mentor',
-      category: 'upsc',
-      backgroundColor: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
-      textColor: '#2d3748',
-      isCustom: false,
-      isFavorite: false,
-      createdAt: new Date().toISOString()
+  // Load quotes from localStorage or use minimal defaults
+  const getInitialQuotes = (): MotivationalQuote[] => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('upsc-motivational-quotes');
+      if (saved) {
+        try {
+          const quotes = JSON.parse(saved);
+          if (quotes.length > 0) return quotes;
+        } catch (error) {
+          console.error('Error loading quotes:', error);
+        }
+      }
     }
-  ];
+
+    // Minimal default quotes - user can add more
+    return [
+      {
+        id: '1',
+        text: 'Every expert was once a beginner. Every pro was once an amateur.',
+        author: 'Robin Sharma',
+        category: 'motivation',
+        backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        textColor: '#ffffff',
+        isCustom: false,
+        isFavorite: false,
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: '2',
+        text: 'Your preparation today shapes India\'s tomorrow.',
+        author: 'UPSC Mentor',
+        category: 'upsc',
+        backgroundColor: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+        textColor: '#2d3748',
+        isCustom: false,
+        isFavorite: false,
+        createdAt: new Date().toISOString()
+      }
+    ];
+  };
 
   const generateRandomQuote = () => {
+    const defaultQuotes = getInitialQuotes();
     const allQuotes = [...defaultQuotes, ...customQuotes];
     if (allQuotes.length === 0) return;
-    
+
     const randomIndex = Math.floor(Math.random() * allQuotes.length);
     setCurrentQuote(allQuotes[randomIndex]);
   };

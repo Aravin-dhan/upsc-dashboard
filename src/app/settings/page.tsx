@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useThemeSync } from '@/hooks/useThemeSync';
-import { Save, Moon, Sun, Monitor, Bell, Clock, RefreshCw } from 'lucide-react';
+import { Save, Moon, Sun, Monitor, Bell, Clock, RefreshCw, Heart } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function SettingsPage() {
   const { currentTheme: theme, systemTheme, setTheme, mounted: themeMounted } = useThemeSync();
   const { user } = useAuth();
+  const [prideMode, setPrideMode] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [settings, setSettings] = useState({
     theme: 'system',
@@ -30,6 +31,17 @@ export default function SettingsPage() {
     }
   }, [theme, mounted, themeMounted]);
 
+  // Load pride mode setting
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedPrideMode = localStorage.getItem('upsc-pride-mode');
+      if (savedPrideMode === 'true') {
+        setPrideMode(true);
+        document.documentElement.classList.add('pride-theme');
+      }
+    }
+  }, []);
+
   const handleSave = () => {
     // Save settings to localStorage
     localStorage.setItem('userSettings', JSON.stringify(settings));
@@ -40,6 +52,21 @@ export default function SettingsPage() {
     setTheme(newTheme);
     setSettings(prev => ({ ...prev, theme: newTheme as 'light' | 'dark' | 'system' }));
     toast.success(`Theme changed to ${newTheme === 'system' ? 'system default' : newTheme} mode!`);
+  };
+
+  const handlePrideModeToggle = () => {
+    const newPrideMode = !prideMode;
+    setPrideMode(newPrideMode);
+
+    if (newPrideMode) {
+      document.documentElement.classList.add('pride-theme');
+      localStorage.setItem('upsc-pride-mode', 'true');
+      toast.success('Pride theme enabled! 🏳️‍🌈');
+    } else {
+      document.documentElement.classList.remove('pride-theme');
+      localStorage.setItem('upsc-pride-mode', 'false');
+      toast.success('Pride theme disabled');
+    }
   };
 
   // Show loading state during hydration
@@ -99,6 +126,37 @@ export default function SettingsPage() {
                       )}
                     </button>
                   ))}
+                </div>
+              </div>
+
+              {/* Pride Theme Toggle */}
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <Heart className="h-5 w-5 text-pink-500 mr-3" />
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Pride Theme
+                      </label>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Enable rainbow accents for accessibility and inclusivity
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handlePrideModeToggle}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 ${
+                      prideMode
+                        ? 'bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 via-indigo-500 to-purple-500'
+                        : 'bg-gray-200 dark:bg-gray-600'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        prideMode ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
                 </div>
               </div>
             </div>

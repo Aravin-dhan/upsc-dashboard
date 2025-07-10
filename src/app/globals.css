@@ -202,3 +202,104 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Pride Theme Styles */
+.pride-theme {
+  --pride-red: #e40303;
+  --pride-orange: #ff8c00;
+  --pride-yellow: #ffed00;
+  --pride-green: #008018;
+  --pride-blue: #0066ff;
+  --pride-purple: #732982;
+}
+
+.pride-theme .pride-accent {
+  background: linear-gradient(90deg,
+    var(--pride-red) 0%,
+    var(--pride-orange) 16.66%,
+    var(--pride-yellow) 33.33%,
+    var(--pride-green) 50%,
+    var(--pride-blue) 66.66%,
+    var(--pride-purple) 100%);
+}
+
+.pride-theme .pride-border {
+  border-image: linear-gradient(90deg,
+    var(--pride-red) 0%,
+    var(--pride-orange) 16.66%,
+    var(--pride-yellow) 33.33%,
+    var(--pride-green) 50%,
+    var(--pride-blue) 66.66%,
+    var(--pride-purple) 100%) 1;
+}
+
+.pride-theme .pride-text {
+  background: linear-gradient(90deg,
+    var(--pride-red) 0%,
+    var(--pride-orange) 16.66%,
+    var(--pride-yellow) 33.33%,
+    var(--pride-green) 50%,
+    var(--pride-blue) 66.66%,
+    var(--pride-purple) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Apply pride theme to specific elements */
+.pride-theme .bg-blue-600,
+.pride-theme .bg-blue-500 {
+  background: linear-gradient(135deg,
+    var(--pride-red) 0%,
+    var(--pride-orange) 20%,
+    var(--pride-yellow) 40%,
+    var(--pride-green) 60%,
+    var(--pride-blue) 80%,
+    var(--pride-purple) 100%) !important;
+}
+
+.pride-theme .border-blue-600,
+.pride-theme .border-blue-500 {
+  border-color: var(--pride-blue) !important;
+}
+
+.pride-theme .text-blue-600,
+.pride-theme .text-blue-500 {
+  color: var(--pride-blue) !important;
+}
+
+.pride-theme .ring-blue-500 {
+  --tw-ring-color: var(--pride-blue) !important;
+}
+
+/* Pride theme for admin red accents */
+.pride-theme .bg-red-600,
+.pride-theme .bg-red-500 {
+  background: linear-gradient(135deg,
+    var(--pride-red) 0%,
+    var(--pride-orange) 25%,
+    var(--pride-yellow) 50%,
+    var(--pride-green) 75%,
+    var(--pride-blue) 100%) !important;
+}
+
+.pride-theme .border-red-600,
+.pride-theme .border-red-500 {
+  border-color: var(--pride-red) !important;
+}
+
+.pride-theme .text-red-600,
+.pride-theme .text-red-500 {
+  color: var(--pride-red) !important;
+}
+
+/* Subtle pride accents for better accessibility */
+.pride-theme .pride-subtle {
+  background: linear-gradient(90deg,
+    rgba(228, 3, 3, 0.1) 0%,
+    rgba(255, 140, 0, 0.1) 16.66%,
+    rgba(255, 237, 0, 0.1) 33.33%,
+    rgba(0, 128, 24, 0.1) 50%,
+    rgba(0, 102, 255, 0.1) 66.66%,
+    rgba(115, 41, 130, 0.1) 100%);
+}

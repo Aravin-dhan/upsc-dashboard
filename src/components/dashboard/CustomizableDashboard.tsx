@@ -33,7 +33,8 @@ import {
   GripVertical,
   Maximize2,
   Minimize2,
-  Square
+  Square,
+  X
 } from 'lucide-react';
 
 interface SortableWidgetProps {
@@ -43,7 +44,7 @@ interface SortableWidgetProps {
 }
 
 function SortableWidget({ widget, children, isCustomizing }: SortableWidgetProps) {
-  const { updateWidget } = useDashboardCustomization();
+  const { updateWidget, toggleWidgetVisibility } = useDashboardCustomization();
   const {
     attributes,
     listeners,
@@ -114,7 +115,16 @@ function SortableWidget({ widget, children, isCustomizing }: SortableWidgetProps
           >
             <Minimize2 className="w-3 h-3" />
           </button>
-          
+
+          {/* Remove widget button */}
+          <button
+            onClick={() => toggleWidgetVisibility(widget.id)}
+            className="p-1 bg-white dark:bg-gray-700 rounded shadow-sm hover:bg-red-50 dark:hover:bg-red-900 text-red-500"
+            title="Remove widget"
+          >
+            <X className="w-3 h-3" />
+          </button>
+
           {/* Drag handle */}
           <div
             {...attributes}

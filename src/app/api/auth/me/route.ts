@@ -40,16 +40,22 @@ const SESSION_ERRORS: Record<string, SessionError> = {
 
 export async function GET(request: NextRequest) {
   try {
+    // Add debug logging for session validation
+    console.log('🔍 /api/auth/me - Starting session validation');
+
     const session = await getSession(request);
+    console.log('📋 Session result:', session ? 'Found' : 'Not found');
 
     if (!session) {
+      console.log('❌ No session found, returning 401');
       const error = SESSION_ERRORS.NOT_AUTHENTICATED;
       return NextResponse.json(
         {
           error: error.userMessage,
           code: error.code,
           details: error.message,
-          requiresLogin: true
+          requiresLogin: true,
+          authenticated: false
         },
         { status: error.status }
       );
@@ -61,8 +67,11 @@ export async function GET(request: NextRequest) {
     const oneHour = 60 * 60 * 1000;
     const isExpiringSoon = (expiresAt.getTime() - now.getTime()) < oneHour;
 
+    console.log('✅ Session validated successfully for user:', session.user.email);
+
     return NextResponse.json({
       success: true,
+      authenticated: true,
       user: session.user,
       tenant: session.tenant,
       expires: session.expires,
