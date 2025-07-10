@@ -14,8 +14,8 @@ const nextConfig: NextConfig = {
       // Advanced optimization settings
       config.optimization = {
         ...config.optimization,
-        // Disable minification for faster dev builds
-        minimize: false,
+        // Enable minification in production, disable in dev for faster builds
+        minimize: !dev,
         // Advanced module concatenation
         concatenateModules: true,
 
@@ -234,7 +234,7 @@ const nextConfig: NextConfig = {
       },
       // Fix CSS MIME type issues
       {
-        source: '/_next/static/css/(.*)',
+        source: '/_next/static/css/(.*\\.css)',
         headers: [
           {
             key: 'Content-Type',
@@ -244,15 +244,50 @@ const nextConfig: NextConfig = {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable',
           },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
         ],
       },
       // Fix JS MIME type issues
       {
-        source: '/_next/static/chunks/(.*)',
+        source: '/_next/static/chunks/(.*\\.js)',
         headers: [
           {
             key: 'Content-Type',
             value: 'application/javascript; charset=utf-8',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+        ],
+      },
+      // Fix additional static assets
+      {
+        source: '/_next/static/(.*\\.woff2?)',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'font/woff2',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/_next/static/(.*\\.json)',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/json; charset=utf-8',
           },
           {
             key: 'Cache-Control',

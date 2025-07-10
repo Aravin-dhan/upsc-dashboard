@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { BookOpen, Search, Plus, FileText, ArrowRight, X, Edit3 } from 'lucide-react';
+import { BookOpen, Search, Plus, FileText, ArrowRight, X, Edit3, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import ContentRecoveryService from '@/services/ContentRecoveryService';
 import toast from 'react-hot-toast';
 
 interface KnowledgeItem {
@@ -13,6 +14,8 @@ interface KnowledgeItem {
   lastModified: string;
   type: 'note' | 'answer' | 'resource';
   tags: string[];
+  isDefault?: boolean; // Track if this is a default item
+  createdAt: string;
 }
 
 export default function KnowledgeBase() {
@@ -20,6 +23,8 @@ export default function KnowledgeBase() {
   const [knowledgeItems, setKnowledgeItems] = useState<KnowledgeItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [deletedItemIds, setDeletedItemIds] = useState<Set<string>>(new Set());
+  const recoveryService = ContentRecoveryService.getInstance();
   const [newItem, setNewItem] = useState({
     title: '',
     topic: '',
@@ -28,25 +33,146 @@ export default function KnowledgeBase() {
     tags: ''
   });
 
-  // Load knowledge items from localStorage
+  // Initialize with default items and load user data
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      // Load deleted item IDs first
+      const deletedIds = localStorage.getItem('upsc-knowledge-base-deleted');
+      if (deletedIds) {
+        try {
+          setDeletedItemIds(new Set(JSON.parse(deletedIds)));
+        } catch (error) {
+          console.error('Error loading deleted IDs:', error);
+        }
+      }
+
+      // Load user knowledge items
       const saved = localStorage.getItem('upsc-knowledge-base');
+      let userItems: KnowledgeItem[] = [];
       if (saved) {
         try {
-          setKnowledgeItems(JSON.parse(saved));
+          userItems = JSON.parse(saved);
         } catch (error) {
           console.error('Error loading knowledge base:', error);
         }
       }
-    }
-  }, []);
 
-  // Save knowledge items to localStorage
+      // Default knowledge items (only add if not deleted)
+      const defaultItems: KnowledgeItem[] = [
+        {
+          id: 'default-1',
+          title: 'Indian Constitution - Fundamental Rights',
+          topic: 'Polity',
+          content: 'Articles 12-35 of the Indian Constitution deal with Fundamental Rights. These are justiciable rights that protect citizens from arbitrary state action.',
+          lastModified: new Date().toLocaleDateString(),
+          type: 'note',
+          tags: ['Constitution', 'Fundamental Rights', 'Polity'],
+          isDefault: true,
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'default-2',
+          title: 'Economic Survey Key Points',
+          topic: 'Economy',
+          content: 'The Economic Survey is an annual document that reviews the economic performance of the country and provides policy recommendations.',
+          lastModified: new Date().toLocaleDateString(),
+          type: 'resource',
+          tags: ['Economy', 'Economic Survey', 'Policy'],
+          isDefault: true,
+          createdAt: new Date().toISOString()
+        }
+      ];
+
+      // Filter out deleted default items and combine with user items
+      const activeDefaultItems = defaultItems.filter(item => !deletedItemIds.has(item.id));
+      const allItems = [...activeDefaultItems, ...userItems];
+
+      setKnowledgeItems(allItems);
+    }
+  }, [deletedItemIds]);
+
+  // Save knowledge items to localStorage (only user items, not defaults)
   const saveKnowledgeItems = (items: KnowledgeItem[]) => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('upsc-knowledge-base', JSON.stringify(items));
+      const userItems = items.filter(item => !item.isDefault);
+      localStorage.setItem('upsc-knowledge-base', JSON.stringify(userItems));
     }
+  };
+
+  // Save deleted item IDs to localStorage
+  const saveDeletedItemIds = (deletedIds: Set<string>) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('upsc-knowledge-base-deleted', JSON.stringify(Array.from(deletedIds)));
+    }
+  };
+
+  // Delete an item (move to recovery system)
+  const deleteItem = (item: KnowledgeItem) => {
+    if (confirm(`Are you sure you want to delete "${item.title}"?`)) {
+      // Add to recovery system
+      recoveryService.addDeletedItem(
+        'knowledge-base',
+        item.title,
+        item,
+        'Knowledge Base Widget',
+        {
+          tags: item.tags,
+          category: item.topic,
+          originalId: item.id
+        }
+      );
+
+      // Remove from current items
+      const updatedItems = knowledgeItems.filter(i => i.id !== item.id);
+      setKnowledgeItems(updatedItems);
+
+      // If it's a default item, add to deleted IDs
+      if (item.isDefault) {
+        const newDeletedIds = new Set(deletedItemIds);
+        newDeletedIds.add(item.id);
+        setDeletedItemIds(newDeletedIds);
+        saveDeletedItemIds(newDeletedIds);
+      } else {
+        // If it's a user item, save the updated list
+        saveKnowledgeItems(updatedItems);
+      }
+
+      toast.success(`"${item.title}" moved to Recently Deleted`);
+    }
+  };
+
+  // Add new item
+  const addItem = () => {
+    if (!newItem.title.trim() || !newItem.content.trim()) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    const item: KnowledgeItem = {
+      id: `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      title: newItem.title,
+      topic: newItem.topic || 'General',
+      content: newItem.content,
+      lastModified: new Date().toLocaleDateString(),
+      type: newItem.type,
+      tags: newItem.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+      isDefault: false,
+      createdAt: new Date().toISOString()
+    };
+
+    const updatedItems = [...knowledgeItems, item];
+    setKnowledgeItems(updatedItems);
+    saveKnowledgeItems(updatedItems);
+
+    setNewItem({
+      title: '',
+      topic: '',
+      content: '',
+      type: 'note',
+      tags: ''
+    });
+    setShowAddForm(false);
+    toast.success('Knowledge item added successfully!');
   };
 
   // Filter items based on search
@@ -90,17 +216,32 @@ export default function KnowledgeBase() {
           </div>
         ) : (
           filteredItems.slice(0, 3).map((item) => (
-            <div key={item.id} className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+            <div key={item.id} className="group p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
               <div className="flex items-start justify-between">
-                <div className="flex-1">
+                <div className="flex-1 cursor-pointer" onClick={() => router.push('/knowledge-base')}>
                   <h4 className="text-sm font-medium text-gray-900 mb-1">{item.title}</h4>
                   <p className="text-xs text-gray-600 mb-1 line-clamp-1">{item.content}</p>
                   <div className="flex items-center text-xs text-gray-500">
                     <span className="px-2 py-1 bg-gray-100 rounded-full mr-2">{item.topic}</span>
                     <span>{item.lastModified}</span>
+                    {item.isDefault && (
+                      <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">Default</span>
+                    )}
                   </div>
                 </div>
-                <FileText className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteItem(item);
+                    }}
+                    className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors"
+                    title="Delete item"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                  <FileText className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                </div>
               </div>
             </div>
           ))

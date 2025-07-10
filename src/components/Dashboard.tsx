@@ -8,11 +8,9 @@ import DashboardCustomizer from './dashboard/DashboardCustomizer';
 import QuickSettings from './dashboard/QuickSettings';
 import CustomizableDashboard from './dashboard/CustomizableDashboard';
 import SimplifiedLayoutSystem, { SimplifiedWidget, SimplifiedLayout } from './dashboard/SimplifiedLayoutSystem';
-import { OnboardingTour, HelpModal } from './dashboard/UserGuidance';
-import { useCalendarSync } from '@/hooks/useCalendarSync';
 import { useDashboardLayout } from '@/hooks/useDashboardLayout';
 import { useDashboardCustomization } from '@/contexts/DashboardCustomizationContext';
-import { useKeyboardShortcuts, useTouchGestures } from '@/hooks/useKeyboardShortcuts';
+import ErrorBoundary, { ComponentErrorBoundary } from './ErrorBoundary';
 import toast from 'react-hot-toast';
 
 // Import synchronized components
@@ -53,89 +51,34 @@ export default function Dashboard() {
     resetLayout
   } = useDashboardCustomization();
 
-  // Simplified widget configuration
-  const simplifiedWidgets: SimplifiedWidget[] = [
-    {
-      id: 'command-center',
-      name: 'Command Center',
-      component: CommandCenter,
-      size: 'large',
-      visible: true,
-      order: 0
-    },
-    {
-      id: 'todays-schedule',
-      name: "Today's Schedule",
-      component: TodaysSchedule,
-      size: 'medium',
-      visible: true,
-      order: 1
-    },
-    {
-      id: 'performance-widget',
-      name: 'Performance Overview',
-      component: PerformanceWidget,
-      size: 'medium',
-      visible: true,
-      order: 2
-    },
-    {
-      id: 'syllabus-tracker',
-      name: 'Syllabus Progress',
-      component: SyllabusTracker,
-      size: 'medium',
-      visible: true,
-      order: 3
-    },
-    {
-      id: 'performance-analytics',
-      name: 'Performance Analytics',
-      component: PerformanceAnalytics,
-      size: 'large',
-      visible: true,
-      order: 4
-    },
-    {
-      id: 'revision-engine',
-      name: 'Revision Engine',
-      component: RevisionEngine,
-      size: 'medium',
-      visible: true,
-      order: 5
-    },
-    {
-      id: 'current-affairs',
-      name: 'Current Affairs',
-      component: CurrentAffairsHub,
-      size: 'medium',
-      visible: true,
-      order: 6
-    },
-    {
-      id: 'knowledge-base',
-      name: 'Knowledge Base',
-      component: KnowledgeBase,
-      size: 'medium',
-      visible: true,
-      order: 7
-    },
-    {
-      id: 'wellness-corner',
-      name: 'Wellness Corner',
-      component: WellnessCorner,
-      size: 'small',
-      visible: true,
-      order: 8
-    },
-    {
-      id: 'motivational-poster',
-      name: 'Daily Motivation',
-      component: MotivationalPoster,
-      size: 'small',
-      visible: true,
-      order: 9
+  // Simplified widget configuration with error handling
+  const createSafeWidget = (id: string, name: string, component: any, size: 'small' | 'medium' | 'large', order: number): SimplifiedWidget | null => {
+    if (!component) {
+      console.warn(`Component for widget ${id} is undefined`);
+      return null;
     }
-  ];
+    return {
+      id,
+      name,
+      component,
+      size,
+      visible: true,
+      order
+    };
+  };
+
+  const simplifiedWidgets: SimplifiedWidget[] = [
+    createSafeWidget('command-center', 'Command Center', CommandCenter, 'large', 0),
+    createSafeWidget('todays-schedule', "Today's Schedule", TodaysSchedule, 'medium', 1),
+    createSafeWidget('performance-widget', 'Performance Overview', PerformanceWidget, 'medium', 2),
+    createSafeWidget('syllabus-tracker', 'Syllabus Progress', SyllabusTracker, 'medium', 3),
+    createSafeWidget('performance-analytics', 'Performance Analytics', PerformanceAnalytics, 'large', 4),
+    createSafeWidget('revision-engine', 'Revision Engine', RevisionEngine, 'medium', 5),
+    createSafeWidget('current-affairs', 'Current Affairs', CurrentAffairsHub, 'medium', 6),
+    createSafeWidget('knowledge-base', 'Knowledge Base', KnowledgeBase, 'medium', 7),
+    createSafeWidget('wellness-corner', 'Wellness Corner', WellnessCorner, 'small', 8),
+    createSafeWidget('motivational-poster', 'Daily Motivation', MotivationalPoster, 'small', 9)
+  ].filter(Boolean) as SimplifiedWidget[];
 
   // Simplified layout change handler
   const handleLayoutChange = (newLayout: SimplifiedLayout) => {
@@ -150,7 +93,8 @@ export default function Dashboard() {
   const enabledWidgets = getEnabledWidgets();
 
   return (
-    <div className={getThemeClasses()}>
+    <ErrorBoundary>
+      <div className={getThemeClasses()}>
       {/* Page Header - Mobile Optimized */}
       <div className="mb-4 lg:mb-8 flex items-center justify-between">
         <div>
@@ -182,13 +126,15 @@ export default function Dashboard() {
       </div>
 
       {/* Simplified Dashboard Layout */}
-      <SimplifiedLayoutSystem
-        widgets={simplifiedWidgets}
-        onLayoutChange={handleLayoutChange}
-      >
-        {/* This children prop is not used in the current implementation */}
-        <div />
-      </SimplifiedLayoutSystem>
+      <ComponentErrorBoundary componentName="Dashboard Layout">
+        <SimplifiedLayoutSystem
+          widgets={simplifiedWidgets}
+          onLayoutChange={handleLayoutChange}
+        >
+          {/* This children prop is not used in the current implementation */}
+          <div />
+        </SimplifiedLayoutSystem>
+      </ComponentErrorBoundary>
 
       {/* Dashboard Customizer Modal */}
       <DashboardCustomizer
@@ -252,11 +198,12 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Onboarding Tour */}
-      <OnboardingTour
+      {/* Onboarding Tour - Disabled for production stability */}
+      {/* <OnboardingTour
         isEditMode={false}
         onClose={() => setShowOnboarding(false)}
-      />
-    </div>
+      /> */}
+      </div>
+    </ErrorBoundary>
   );
 }
