@@ -4,6 +4,7 @@ import React from 'react';
 import { Clock, CheckCircle, Circle, Plus, Calendar, ArrowRight, AlertCircle, RefreshCw, Play, Pause } from 'lucide-react';
 import Link from 'next/link';
 import { useSchedule } from '@/hooks/useSchedule';
+import { useDashboardCalendarData } from '@/hooks/useCalendarSync';
 import toast from 'react-hot-toast';
 
 export default function TodaysSchedule() {
