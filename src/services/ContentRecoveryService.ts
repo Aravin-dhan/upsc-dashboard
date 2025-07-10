@@ -25,7 +25,7 @@ export interface RecoveryStats {
   expiringSoon: number; // Expiring in next 7 days
 }
 
-class ContentRecoveryService {
+export class ContentRecoveryService {
   private static instance: ContentRecoveryService;
   private deletedItems: DeletedItem[] = [];
   private readonly RECOVERY_PERIOD_DAYS = 30;

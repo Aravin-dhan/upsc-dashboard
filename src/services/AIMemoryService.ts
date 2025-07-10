@@ -50,7 +50,7 @@ export interface AIPersonality {
   };
 }
 
-class AIMemoryService {
+export class AIMemoryService {
   private static instance: AIMemoryService;
   private userPreferences: UserPreference[] = [];
   private conversationHistory: ConversationMemory[] = [];

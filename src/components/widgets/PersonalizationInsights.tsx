@@ -96,16 +96,27 @@ export default function PersonalizationInsights() {
       const success = personalizationService.applyRecommendation(recommendationId);
       if (success) {
         toast.success('Recommendation applied!');
-      loadPersonalizationData();
-    } else {
+        loadPersonalizationData();
+      } else {
+        toast.error('Failed to apply recommendation');
+      }
+    } catch (error) {
+      console.error('Failed to apply recommendation:', error);
       toast.error('Failed to apply recommendation');
     }
   };
 
   const dismissInsight = (insightId: string) => {
-    personalizationService.dismissInsight(insightId);
-    loadPersonalizationData();
-    toast.success('Insight dismissed');
+    if (!personalizationService) return;
+
+    try {
+      personalizationService.dismissInsight(insightId);
+      loadPersonalizationData();
+      toast.success('Insight dismissed');
+    } catch (error) {
+      console.error('Failed to dismiss insight:', error);
+      toast.error('Failed to dismiss insight');
+    }
   };
 
   const dismissRecommendation = (recommendationId: string) => {
