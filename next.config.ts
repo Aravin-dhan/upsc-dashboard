@@ -232,9 +232,26 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      // Fix CSS MIME type issues
+      // Fix CSS MIME type issues - more specific patterns
       {
-        source: '/_next/static/css/(.*\\.css)',
+        source: '/_next/static/css/:path*',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'text/css; charset=utf-8',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+        ],
+      },
+      {
+        source: '/_next/static/css/(.*)',
         headers: [
           {
             key: 'Content-Type',

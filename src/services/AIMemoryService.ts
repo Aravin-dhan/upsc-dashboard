@@ -61,7 +61,14 @@ class AIMemoryService {
 
   private constructor() {
     this.aiPersonality = this.getDefaultPersonality();
-    this.loadData();
+    // Only load data in browser environment
+    if (typeof window !== 'undefined') {
+      try {
+        this.loadData();
+      } catch (error) {
+        console.warn('Failed to load AI memory data:', error);
+      }
+    }
   }
 
   static getInstance(): AIMemoryService {

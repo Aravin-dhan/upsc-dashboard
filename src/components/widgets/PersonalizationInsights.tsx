@@ -27,49 +27,75 @@ export default function PersonalizationInsights() {
   const [activeTab, setActiveTab] = useState<'insights' | 'recommendations' | 'patterns'>('insights');
   const [isLoading, setIsLoading] = useState(false);
   const [showDetails, setShowDetails] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [personalizationService, setPersonalizationService] = useState<DashboardPersonalizationService | null>(null);
 
-  const personalizationService = DashboardPersonalizationService.getInstance();
-
+  // Initialize service safely
   useEffect(() => {
-    loadPersonalizationData();
-    
-    // Listen for dashboard events to track behavior
-    const handleDashboardEvent = (event: any) => {
-      personalizationService.trackBehavior('dashboard-interaction', {
-        type: event.type,
-        timestamp: new Date().toISOString()
-      });
-    };
-
-    window.addEventListener('click', handleDashboardEvent);
-    window.addEventListener('dashboardRecommendationApplied', loadPersonalizationData);
-
-    return () => {
-      window.removeEventListener('click', handleDashboardEvent);
-      window.removeEventListener('dashboardRecommendationApplied', loadPersonalizationData);
-    };
+    try {
+      const service = DashboardPersonalizationService.getInstance();
+      setPersonalizationService(service);
+    } catch (error) {
+      console.error('Failed to initialize personalization service:', error);
+      setError('Failed to load personalization features');
+    }
   }, []);
 
+  useEffect(() => {
+    if (personalizationService) {
+      loadPersonalizationData();
+
+      // Listen for dashboard events to track behavior
+      const handleDashboardEvent = (event: any) => {
+        personalizationService.trackBehavior('dashboard-interaction', {
+          type: event.type,
+          timestamp: new Date().toISOString()
+        });
+      };
+
+      window.addEventListener('click', handleDashboardEvent);
+      window.addEventListener('dashboardRecommendationApplied', loadPersonalizationData);
+
+      return () => {
+        window.removeEventListener('click', handleDashboardEvent);
+        window.removeEventListener('dashboardRecommendationApplied', loadPersonalizationData);
+      };
+    }
+  }, [personalizationService]);
+
   const loadPersonalizationData = () => {
-    setInsights(personalizationService.getPersonalizationInsights());
-    setRecommendations(personalizationService.getDashboardRecommendations());
+    if (!personalizationService) return;
+
+    try {
+      setInsights(personalizationService.getPersonalizationInsights());
+      setRecommendations(personalizationService.getDashboardRecommendations());
+      setError(null);
+    } catch (error) {
+      console.error('Failed to load personalization data:', error);
+      setError('Failed to load personalization data');
+    }
   };
 
   const refreshInsights = async () => {
+    if (!personalizationService) return;
+
     setIsLoading(true);
-    
+
     // Simulate AI processing time
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     loadPersonalizationData();
     setIsLoading(false);
     toast.success('Insights refreshed!');
   };
 
   const applyRecommendation = (recommendationId: string) => {
-    const success = personalizationService.applyRecommendation(recommendationId);
-    if (success) {
-      toast.success('Recommendation applied!');
+    if (!personalizationService) return;
+
+    try {
+      const success = personalizationService.applyRecommendation(recommendationId);
+      if (success) {
+        toast.success('Recommendation applied!');
       loadPersonalizationData();
     } else {
       toast.error('Failed to apply recommendation');
@@ -83,9 +109,16 @@ export default function PersonalizationInsights() {
   };
 
   const dismissRecommendation = (recommendationId: string) => {
-    personalizationService.dismissRecommendation(recommendationId);
-    loadPersonalizationData();
-    toast.success('Recommendation dismissed');
+    if (!personalizationService) return;
+
+    try {
+      personalizationService.dismissRecommendation(recommendationId);
+      loadPersonalizationData();
+      toast.success('Recommendation dismissed');
+    } catch (error) {
+      console.error('Failed to dismiss recommendation:', error);
+      toast.error('Failed to dismiss recommendation');
+    }
   };
 
   const getInsightIcon = (type: string) => {
@@ -124,6 +157,47 @@ export default function PersonalizationInsights() {
     if (confidence >= 0.6) return 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20';
     return 'text-red-600 bg-red-100 dark:bg-red-900/20';
   };
+
+  // Show error state if service failed to initialize
+  if (error) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 h-full">
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <X className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              Personalization Unavailable
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              {error}
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Reload Page
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state if service is not yet initialized
+  if (!personalizationService) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 h-full">
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <RefreshCw className="h-8 w-8 text-blue-500 mx-auto mb-4 animate-spin" />
+            <p className="text-gray-600 dark:text-gray-400">
+              Loading personalization features...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 h-full">

@@ -45,9 +45,16 @@ export class DashboardPersonalizationService {
   private recommendations: DashboardRecommendation[] = [];
 
   private constructor() {
-    this.aiMemoryService = AIMemoryService.getInstance();
-    this.loadStoredData();
-    this.startBehaviorAnalysis();
+    // Only initialize in browser environment
+    if (typeof window !== 'undefined') {
+      try {
+        this.aiMemoryService = AIMemoryService.getInstance();
+        this.loadStoredData();
+        this.startBehaviorAnalysis();
+      } catch (error) {
+        console.warn('Failed to initialize DashboardPersonalizationService:', error);
+      }
+    }
   }
 
   static getInstance(): DashboardPersonalizationService {
