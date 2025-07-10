@@ -1,8 +1,19 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getSession } from '@/lib/auth';
-import { canUserAccessRoute, getUnauthorizedRedirect } from '@/lib/auth/routing';
-import { logSecurityEvent, AUDIT_ACTIONS } from '@/lib/auth/audit';
+
+// Use edge-compatible auth functions only
+async function getSessionFromRequest(request: NextRequest) {
+  try {
+    const token = request.cookies.get('upsc-auth-token')?.value;
+    if (!token) return null;
+
+    // Simple JWT decode for edge runtime
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload;
+  } catch {
+    return null;
+  }
+}
 
 // Define protected routes and their required roles
 const protectedRoutes = {
@@ -133,20 +144,8 @@ export async function middleware(request: NextRequest) {
   }
   
   try {
-    // Get user session with enhanced error handling
-    let session;
-    try {
-      session = await getSession(request);
-    } catch (sessionError) {
-      console.warn('Session validation error in middleware:', sessionError);
-      // For production stability, allow access to dashboard with limited functionality
-      if (pathname === '/dashboard') {
-        const response = NextResponse.next();
-        response.headers.set('x-auth-status', 'session-error');
-        response.headers.set('x-user-role', 'guest');
-        return response;
-      }
-    }
+    // Get user session with edge-compatible method
+    const session = await getSessionFromRequest(request);
 
     // If no session, handle based on route type
     if (!session) {
@@ -167,38 +166,14 @@ export async function middleware(request: NextRequest) {
       }
 
       // For other protected routes, redirect to login
-      await logSecurityEvent(
-        AUDIT_ACTIONS.UNAUTHORIZED_ACCESS,
-        {
-          route: pathname,
-          reason: 'No session found',
-          userAgent: request.headers.get('user-agent'),
-          referer: request.headers.get('referer')
-        },
-        request
-      );
-
       const loginUrl = new URL('/login', request.url);
       loginUrl.searchParams.set('redirect', pathname);
       return NextResponse.redirect(loginUrl);
     }
 
-    // Enhanced permission checking using new RBAC system
-    if (!canUserAccessRoute(session.user, pathname)) {
-      await logSecurityEvent(
-        AUDIT_ACTIONS.PERMISSION_DENIED,
-        {
-          route: pathname,
-          reason: 'Insufficient permissions',
-          userRole: session.user.role,
-          requiredRole,
-          userAgent: request.headers.get('user-agent')
-        },
-        request,
-        session.user.id,
-        session.user.email
-      );
-
+    // Simple permission checking
+    const userRole = session.user?.role || 'student';
+    if (!hasPermission(userRole, requiredRole)) {
       // Return 403 for API routes
       if (pathname.startsWith('/api/')) {
         return NextResponse.json(
@@ -208,7 +183,7 @@ export async function middleware(request: NextRequest) {
       }
 
       // Redirect to appropriate dashboard based on user role
-      const destination = getUnauthorizedRedirect(session.user, pathname);
+      const destination = userRole === 'admin' ? '/admin' : '/dashboard';
       const dashboardUrl = new URL(destination, request.url);
       return NextResponse.redirect(dashboardUrl);
     }

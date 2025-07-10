@@ -7,152 +7,36 @@ const nextConfig: NextConfig = {
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
   },
 
-  // Advanced webpack optimizations
+  // Simplified webpack configuration to prevent CSS loading issues
   webpack: (config, { dev, isServer }) => {
-    // Apply optimizations for both dev and production
+    // Only apply minimal, safe optimizations
     if (!isServer) {
-      // Advanced optimization settings
-      config.optimization = {
-        ...config.optimization,
-        // Enable minification in production, disable in dev for faster builds
-        minimize: !dev,
-        // Advanced module concatenation
-        concatenateModules: true,
-
-        splitChunks: {
-          chunks: 'all',
-          minSize: 20000,
-          maxSize: 244000,
-          maxAsyncRequests: 30,
-          maxInitialRequests: 30,
-          enforceSizeThreshold: 50000,
-          cacheGroups: {
-            // AI services chunk
-            aiServices: {
-              test: /[\\/]src[\\/]services[\\/](AI|ai-modules)[\\/]/,
-              name: 'ai-services',
-              chunks: 'all',
-              priority: 40,
-              enforce: true,
-              reuseExistingChunk: true,
-            },
-
-            // Icon libraries chunk (tree-shake lucide-react)
-            icons: {
-              test: /[\\/]node_modules[\\/](lucide-react|react-icons)[\\/]/,
-              name: 'icons',
-              chunks: 'all',
-              priority: 35,
-              enforce: true,
-              reuseExistingChunk: true,
-            },
-
-            // Heavy UI libraries chunk
-            heavyUI: {
-              test: /[\\/]node_modules[\\/](@google\/generative-ai|recharts|chart\.js|framer-motion|react-markdown)[\\/]/,
-              name: 'heavy-ui',
-              chunks: 'all',
-              priority: 30,
-              enforce: true,
-              reuseExistingChunk: true,
-            },
-
-            // Date utilities chunk
-            dateUtils: {
-              test: /[\\/]node_modules[\\/](date-fns|moment)[\\/]/,
-              name: 'date-utils',
-              chunks: 'all',
-              priority: 25,
-              enforce: true,
-              reuseExistingChunk: true,
-            },
-
-            // Form libraries chunk
-            forms: {
-              test: /[\\/]node_modules[\\/](react-hook-form|formik)[\\/]/,
-              name: 'forms',
-              chunks: 'all',
-              priority: 20,
-              enforce: true,
-              reuseExistingChunk: true,
-            },
-
-            // React ecosystem chunk
-            react: {
-              test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
-              name: 'react',
-              chunks: 'all',
-              priority: 15,
-              enforce: true,
-              reuseExistingChunk: true,
-            },
-
-            // Vendor chunk for other dependencies
-            vendor: {
-              test: /[\\/]node_modules[\\/]/,
-              name: 'vendors',
-              chunks: 'all',
-              priority: 10,
-              enforce: true,
-              reuseExistingChunk: true,
-            },
-          },
-        },
-      };
-
-      // Advanced module resolution
+      // Safe module resolution improvements
       config.resolve = {
         ...config.resolve,
-        // Faster module resolution
-        symlinks: false,
-        // Optimize extensions order
-        extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
-        // Module aliases for faster resolution
         alias: {
           ...config.resolve.alias,
           '@': require('path').resolve(__dirname, 'src'),
         },
       };
 
-      // Exclude heavy testing dependencies and client-only libraries from server bundle
+      // Safe externals for server-side
       if (isServer) {
         config.externals = config.externals || [];
         config.externals.push({
           'playwright': 'commonjs playwright',
           'puppeteer': 'commonjs puppeteer',
           '@playwright/test': 'commonjs @playwright/test',
-          'leaflet': 'commonjs leaflet',
-          'recharts': 'commonjs recharts',
         });
       }
 
-      // Add global polyfills for browser-specific variables
+      // Essential polyfills only
       config.plugins = config.plugins || [];
       config.plugins.push(
         new (require('webpack')).DefinePlugin({
-          'typeof self': JSON.stringify(isServer ? 'undefined' : 'object'),
           'typeof window': JSON.stringify(isServer ? 'undefined' : 'object'),
-          'typeof document': JSON.stringify(isServer ? 'undefined' : 'object'),
-          'typeof navigator': JSON.stringify(isServer ? 'undefined' : 'object'),
-          'self': isServer ? 'undefined' : 'self',
         })
       );
-
-      // Advanced caching for faster rebuilds
-      config.cache = {
-        type: 'filesystem',
-        buildDependencies: {
-          config: [__filename],
-        },
-        cacheDirectory: require('path').resolve(__dirname, '.next/cache/webpack'),
-      };
-
-      // Performance hints
-      config.performance = {
-        hints: false, // Disable warnings for dev
-        maxEntrypointSize: 512000,
-        maxAssetSize: 512000,
-      };
     }
 
     return config;
@@ -200,8 +84,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
 
-  // Output optimization
-  output: 'standalone',
+  // Remove standalone output to fix CSS loading issues
 
   // Headers for better caching and MIME type fixes
   async headers() {

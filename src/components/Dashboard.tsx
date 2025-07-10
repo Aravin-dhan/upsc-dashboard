@@ -17,15 +17,15 @@ import toast from 'react-hot-toast';
 import TodaysSchedule from './dashboard/TodaysSchedule';
 import PerformanceWidget from './dashboard/PerformanceWidget';
 
-// Lazy load heavy components
-const SyllabusTracker = lazy(() => import('./widgets/SyllabusTracker'));
-const PerformanceAnalytics = lazy(() => import('./widgets/PerformanceAnalytics'));
-const RevisionEngine = lazy(() => import('./widgets/RevisionEngine'));
-const CurrentAffairsHub = lazy(() => import('./widgets/CurrentAffairsHub'));
-const KnowledgeBase = lazy(() => import('./widgets/KnowledgeBase'));
-const WellnessCorner = lazy(() => import('./widgets/WellnessCorner'));
-const MotivationalPoster = lazy(() => import('./widgets/MotivationalPoster'));
-const PersonalizationInsights = lazy(() => import('./widgets/PersonalizationInsights'));
+// Lazy load heavy components with error handling
+const SyllabusTracker = lazy(() => import('./widgets/SyllabusTracker').catch(() => ({ default: () => <div>Error loading SyllabusTracker</div> })));
+const PerformanceAnalytics = lazy(() => import('./widgets/PerformanceAnalytics').catch(() => ({ default: () => <div>Error loading PerformanceAnalytics</div> })));
+const RevisionEngine = lazy(() => import('./widgets/RevisionEngine').catch(() => ({ default: () => <div>Error loading RevisionEngine</div> })));
+const CurrentAffairsHub = lazy(() => import('./widgets/CurrentAffairsHub').catch(() => ({ default: () => <div>Error loading CurrentAffairsHub</div> })));
+const KnowledgeBase = lazy(() => import('./widgets/KnowledgeBase').catch(() => ({ default: () => <div>Error loading KnowledgeBase</div> })));
+const WellnessCorner = lazy(() => import('./widgets/WellnessCorner').catch(() => ({ default: () => <div>Error loading WellnessCorner</div> })));
+const MotivationalPoster = lazy(() => import('./widgets/MotivationalPoster').catch(() => ({ default: () => <div>Error loading MotivationalPoster</div> })));
+const PersonalizationInsights = lazy(() => import('./widgets/PersonalizationInsights').catch(() => ({ default: () => <div>Error loading PersonalizationInsights</div> })));
 
 export default function Dashboard() {
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);

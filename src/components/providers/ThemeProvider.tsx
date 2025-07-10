@@ -12,13 +12,11 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
     setMounted(true);
   }, []);
 
-  // Show loading state during hydration to prevent flash
+  // Show minimal loading state during hydration to prevent flash
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-white">
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
+      <div className="min-h-screen bg-white dark:bg-gray-900" suppressHydrationWarning>
+        {children}
       </div>
     );
   }
