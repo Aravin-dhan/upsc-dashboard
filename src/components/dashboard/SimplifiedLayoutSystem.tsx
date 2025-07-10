@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { DashboardPersonalizationService } from '@/services/DashboardPersonalizationService';
+import { ComponentErrorBoundary } from '@/components/ErrorBoundary';
 
 export type LayoutPreset = '1-column' | '2-column' | '3-column';
 export type WidgetSize = 'small' | 'medium' | 'large';
@@ -609,7 +610,7 @@ export default function SimplifiedLayoutSystem({
           const WidgetComponent = widget.component;
           const sizeClass = WIDGET_SIZES[widget.size].class;
 
-          // Simplified validation for React Error #130: Only check for null/undefined
+          // Enhanced validation for React Error #130: Check for invalid component types
           if (!WidgetComponent) {
             console.error(`❌ Component for widget ${widget.id} is null/undefined:`, WidgetComponent);
             return (
@@ -631,8 +632,35 @@ export default function SimplifiedLayoutSystem({
             );
           }
 
+          // Additional validation to prevent React Error #130
+          const componentType = typeof WidgetComponent;
+          const hasValidReactType = WidgetComponent.$$typeof === Symbol.for('react.lazy') ||
+                                   WidgetComponent.$$typeof === Symbol.for('react.element') ||
+                                   componentType === 'function';
+
+          if (!hasValidReactType && componentType === 'object' && !WidgetComponent.$$typeof) {
+            console.error(`❌ Component for widget ${widget.id} is an invalid object:`, WidgetComponent);
+            return (
+              <div
+                key={widget.id}
+                className={`${sizeClass} bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-lg p-4`}
+              >
+                <div className="text-center text-red-600 dark:text-red-400">
+                  <div className="text-sm font-medium">Dashboard Layout Error</div>
+                  <div className="text-xs mt-1">This component failed to load. Please refresh the page.</div>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="mt-2 px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700"
+                  >
+                    Refresh Page
+                  </button>
+                </div>
+              </div>
+            );
+          }
+
           // Log successful component rendering
-          console.log(`✅ Rendering widget ${widget.id}:`, typeof WidgetComponent, WidgetComponent.$$typeof || 'no $$typeof');
+          console.log(`✅ Rendering widget ${widget.id}:`, componentType, WidgetComponent.$$typeof || 'no $$typeof');
 
           return (
             <div
@@ -675,13 +703,30 @@ export default function SimplifiedLayoutSystem({
                 </>
               )}
 
-              {/* Safe component rendering with error boundary */}
+              {/* Safe component rendering with comprehensive error boundary */}
               <React.Suspense fallback={
                 <div className="flex items-center justify-center h-32">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
                 </div>
               }>
-                <WidgetComponent />
+                <ComponentErrorBoundary
+                  fallback={
+                    <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                      <div className="text-center text-red-600 dark:text-red-400">
+                        <div className="text-sm font-medium">Component Error</div>
+                        <div className="text-xs mt-1">{widget.name} failed to render</div>
+                        <button
+                          onClick={() => window.location.reload()}
+                          className="mt-2 px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700"
+                        >
+                          Reload Page
+                        </button>
+                      </div>
+                    </div>
+                  }
+                >
+                  <WidgetComponent />
+                </ComponentErrorBoundary>
               </React.Suspense>
             </div>
           );

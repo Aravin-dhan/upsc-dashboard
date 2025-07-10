@@ -24,20 +24,26 @@ const createLazyComponent = (name: string, importPath: string) => {
           console.error(`❌ ${name} has no default export`);
           throw new Error(`${name} has no default export`);
         }
+        // Validate that the default export is a valid React component
+        if (typeof module.default !== 'function' && typeof module.default !== 'object') {
+          console.error(`❌ ${name} default export is not a valid React component:`, typeof module.default);
+          throw new Error(`${name} default export is not a valid React component`);
+        }
         return module;
       })
       .catch((error) => {
         console.error(`❌ Failed to load ${name}:`, error);
-        return {
-          default: () => (
-            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-              <div className="text-red-600 dark:text-red-400 text-sm">
-                <div className="font-medium">Failed to load {name}</div>
-                <div className="text-xs mt-1">{error.message}</div>
-              </div>
+        // Create a proper React component function, not just an object
+        const ErrorComponent = () => (
+          <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <div className="text-red-600 dark:text-red-400 text-sm">
+              <div className="font-medium">Failed to load {name}</div>
+              <div className="text-xs mt-1">{error.message}</div>
             </div>
-          )
-        };
+          </div>
+        );
+        // Ensure we return a proper module structure
+        return { default: ErrorComponent };
       })
   );
 };
@@ -80,7 +86,7 @@ export default function Dashboard() {
     resetLayout
   } = useDashboardCustomization();
 
-  // Simplified widget configuration - less aggressive validation
+  // Enhanced widget configuration with comprehensive validation
   const createSafeWidget = (id: string, name: string, component: any, size: 'small' | 'medium' | 'large', order: number): SimplifiedWidget | null => {
     // Basic validation to prevent React Error #130
     if (!component) {
@@ -92,6 +98,20 @@ export default function Dashboard() {
     if (typeof component !== 'function' && typeof component !== 'object') {
       console.error(`❌ Component for widget ${id} is not a valid React component:`, typeof component, component);
       return null;
+    }
+
+    // Additional validation for objects to ensure they're valid React components
+    if (typeof component === 'object') {
+      // Check if it's a lazy component or has valid React symbols
+      const hasValidReactType = component.$$typeof === Symbol.for('react.lazy') ||
+                               component.$$typeof === Symbol.for('react.element') ||
+                               component.$$typeof === Symbol.for('react.forward_ref') ||
+                               component.$$typeof === Symbol.for('react.memo');
+
+      if (!hasValidReactType) {
+        console.error(`❌ Component for widget ${id} is an invalid object (missing React $$typeof):`, component);
+        return null;
+      }
     }
 
     // Log successful widget creation
