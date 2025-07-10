@@ -609,9 +609,9 @@ export default function SimplifiedLayoutSystem({
           const WidgetComponent = widget.component;
           const sizeClass = WIDGET_SIZES[widget.size].class;
 
-          // Critical fix for React Error #130: Check if component is valid
-          if (!WidgetComponent || typeof WidgetComponent !== 'function') {
-            console.error(`Invalid component for widget ${widget.id}:`, WidgetComponent);
+          // Simplified validation for React Error #130: Only check for null/undefined
+          if (!WidgetComponent) {
+            console.error(`❌ Component for widget ${widget.id} is null/undefined:`, WidgetComponent);
             return (
               <div
                 key={widget.id}
@@ -630,6 +630,9 @@ export default function SimplifiedLayoutSystem({
               </div>
             );
           }
+
+          // Log successful component rendering
+          console.log(`✅ Rendering widget ${widget.id}:`, typeof WidgetComponent, WidgetComponent.$$typeof || 'no $$typeof');
 
           return (
             <div

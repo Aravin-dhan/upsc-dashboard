@@ -2,7 +2,6 @@
 
 import { useState, lazy, Suspense } from 'react';
 import { Settings, Sliders, HelpCircle } from 'lucide-react';
-import CommandCenter from './widgets/CommandCenter';
 import LoadingSpinner from './LoadingSpinner';
 import DashboardCustomizer from './dashboard/DashboardCustomizer';
 import QuickSettings from './dashboard/QuickSettings';
@@ -13,9 +12,7 @@ import { useDashboardCustomization } from '@/contexts/DashboardCustomizationCont
 import ErrorBoundary, { ComponentErrorBoundary } from './ErrorBoundary';
 import toast from 'react-hot-toast';
 
-// Import synchronized components
-import TodaysSchedule from './dashboard/TodaysSchedule';
-import PerformanceWidget from './dashboard/PerformanceWidget';
+// All components will be loaded as lazy components for consistency
 
 // Enhanced lazy loading with comprehensive error handling and debugging
 const createLazyComponent = (name: string, importPath: string) => {
@@ -45,6 +42,10 @@ const createLazyComponent = (name: string, importPath: string) => {
   );
 };
 
+// Load all components as lazy components for consistency
+const CommandCenter = createLazyComponent('CommandCenter', './widgets/CommandCenter');
+const TodaysSchedule = createLazyComponent('TodaysSchedule', './dashboard/TodaysSchedule');
+const PerformanceWidget = createLazyComponent('PerformanceWidget', './dashboard/PerformanceWidget');
 const SyllabusTracker = createLazyComponent('SyllabusTracker', './widgets/SyllabusTracker');
 const PerformanceAnalytics = createLazyComponent('PerformanceAnalytics', './widgets/PerformanceAnalytics');
 const RevisionEngine = createLazyComponent('RevisionEngine', './widgets/RevisionEngine');
@@ -79,24 +80,22 @@ export default function Dashboard() {
     resetLayout
   } = useDashboardCustomization();
 
-  // Enhanced widget configuration with comprehensive error handling
+  // Simplified widget configuration - less aggressive validation
   const createSafeWidget = (id: string, name: string, component: any, size: 'small' | 'medium' | 'large', order: number): SimplifiedWidget | null => {
-    // Critical validation to prevent React Error #130
+    // Basic validation to prevent React Error #130
     if (!component) {
-      console.error(`Component for widget ${id} is undefined or null`);
+      console.error(`❌ Component for widget ${id} is undefined or null`);
       return null;
     }
 
+    // Accept both functions (regular components) and objects (lazy components)
     if (typeof component !== 'function' && typeof component !== 'object') {
-      console.error(`Component for widget ${id} is not a valid React component:`, typeof component);
+      console.error(`❌ Component for widget ${id} is not a valid React component:`, typeof component, component);
       return null;
     }
 
-    // For lazy components, check if they have a $$typeof property (React element)
-    if (component.$$typeof && component.$$typeof !== Symbol.for('react.lazy')) {
-      console.error(`Component for widget ${id} has invalid React type:`, component.$$typeof);
-      return null;
-    }
+    // Log successful widget creation
+    console.log(`✅ Created widget ${id}:`, typeof component, component.$$typeof || 'no $$typeof');
 
     return {
       id,
