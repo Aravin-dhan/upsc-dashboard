@@ -17,15 +17,42 @@ import toast from 'react-hot-toast';
 import TodaysSchedule from './dashboard/TodaysSchedule';
 import PerformanceWidget from './dashboard/PerformanceWidget';
 
-// Lazy load heavy components with error handling
-const SyllabusTracker = lazy(() => import('./widgets/SyllabusTracker').catch(() => ({ default: () => <div>Error loading SyllabusTracker</div> })));
-const PerformanceAnalytics = lazy(() => import('./widgets/PerformanceAnalytics').catch(() => ({ default: () => <div>Error loading PerformanceAnalytics</div> })));
-const RevisionEngine = lazy(() => import('./widgets/RevisionEngine').catch(() => ({ default: () => <div>Error loading RevisionEngine</div> })));
-const CurrentAffairsHub = lazy(() => import('./widgets/CurrentAffairsHub').catch(() => ({ default: () => <div>Error loading CurrentAffairsHub</div> })));
-const KnowledgeBase = lazy(() => import('./widgets/KnowledgeBase').catch(() => ({ default: () => <div>Error loading KnowledgeBase</div> })));
-const WellnessCorner = lazy(() => import('./widgets/WellnessCorner').catch(() => ({ default: () => <div>Error loading WellnessCorner</div> })));
-const MotivationalPoster = lazy(() => import('./widgets/MotivationalPoster').catch(() => ({ default: () => <div>Error loading MotivationalPoster</div> })));
-const PersonalizationInsights = lazy(() => import('./widgets/PersonalizationInsights').catch(() => ({ default: () => <div>Error loading PersonalizationInsights</div> })));
+// Enhanced lazy loading with comprehensive error handling and debugging
+const createLazyComponent = (name: string, importPath: string) => {
+  return lazy(() =>
+    import(importPath)
+      .then((module) => {
+        console.log(`✅ Successfully loaded ${name}:`, module);
+        if (!module.default) {
+          console.error(`❌ ${name} has no default export`);
+          throw new Error(`${name} has no default export`);
+        }
+        return module;
+      })
+      .catch((error) => {
+        console.error(`❌ Failed to load ${name}:`, error);
+        return {
+          default: () => (
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <div className="text-red-600 dark:text-red-400 text-sm">
+                <div className="font-medium">Failed to load {name}</div>
+                <div className="text-xs mt-1">{error.message}</div>
+              </div>
+            </div>
+          )
+        };
+      })
+  );
+};
+
+const SyllabusTracker = createLazyComponent('SyllabusTracker', './widgets/SyllabusTracker');
+const PerformanceAnalytics = createLazyComponent('PerformanceAnalytics', './widgets/PerformanceAnalytics');
+const RevisionEngine = createLazyComponent('RevisionEngine', './widgets/RevisionEngine');
+const CurrentAffairsHub = createLazyComponent('CurrentAffairsHub', './widgets/CurrentAffairsHub');
+const KnowledgeBase = createLazyComponent('KnowledgeBase', './widgets/KnowledgeBase');
+const WellnessCorner = createLazyComponent('WellnessCorner', './widgets/WellnessCorner');
+const MotivationalPoster = createLazyComponent('MotivationalPoster', './widgets/MotivationalPoster');
+const PersonalizationInsights = createLazyComponent('PersonalizationInsights', './widgets/PersonalizationInsights');
 
 export default function Dashboard() {
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
@@ -52,12 +79,25 @@ export default function Dashboard() {
     resetLayout
   } = useDashboardCustomization();
 
-  // Simplified widget configuration with error handling
+  // Enhanced widget configuration with comprehensive error handling
   const createSafeWidget = (id: string, name: string, component: any, size: 'small' | 'medium' | 'large', order: number): SimplifiedWidget | null => {
+    // Critical validation to prevent React Error #130
     if (!component) {
-      console.warn(`Component for widget ${id} is undefined`);
+      console.error(`Component for widget ${id} is undefined or null`);
       return null;
     }
+
+    if (typeof component !== 'function' && typeof component !== 'object') {
+      console.error(`Component for widget ${id} is not a valid React component:`, typeof component);
+      return null;
+    }
+
+    // For lazy components, check if they have a $$typeof property (React element)
+    if (component.$$typeof && component.$$typeof !== Symbol.for('react.lazy')) {
+      console.error(`Component for widget ${id} has invalid React type:`, component.$$typeof);
+      return null;
+    }
+
     return {
       id,
       name,
@@ -68,19 +108,29 @@ export default function Dashboard() {
     };
   };
 
-  const simplifiedWidgets: SimplifiedWidget[] = [
-    createSafeWidget('command-center', 'Command Center', CommandCenter, 'large', 0),
-    createSafeWidget('todays-schedule', "Today's Schedule", TodaysSchedule, 'medium', 1),
-    createSafeWidget('performance-widget', 'Performance Overview', PerformanceWidget, 'medium', 2),
-    createSafeWidget('syllabus-tracker', 'Syllabus Progress', SyllabusTracker, 'medium', 3),
-    createSafeWidget('performance-analytics', 'Performance Analytics', PerformanceAnalytics, 'large', 4),
-    createSafeWidget('revision-engine', 'Revision Engine', RevisionEngine, 'medium', 5),
-    createSafeWidget('current-affairs', 'Current Affairs', CurrentAffairsHub, 'medium', 6),
-    createSafeWidget('knowledge-base', 'Knowledge Base', KnowledgeBase, 'medium', 7),
-    createSafeWidget('wellness-corner', 'Wellness Corner', WellnessCorner, 'small', 8),
-    createSafeWidget('motivational-poster', 'Daily Motivation', MotivationalPoster, 'small', 9),
-    createSafeWidget('personalization-insights', 'AI Personalization', PersonalizationInsights, 'medium', 10)
-  ].filter(Boolean) as SimplifiedWidget[];
+  // Create widgets with enhanced debugging
+  const widgetConfigs = [
+    { id: 'command-center', name: 'Command Center', component: CommandCenter, size: 'large' as const, order: 0 },
+    { id: 'todays-schedule', name: "Today's Schedule", component: TodaysSchedule, size: 'medium' as const, order: 1 },
+    { id: 'performance-widget', name: 'Performance Overview', component: PerformanceWidget, size: 'medium' as const, order: 2 },
+    { id: 'syllabus-tracker', name: 'Syllabus Progress', component: SyllabusTracker, size: 'medium' as const, order: 3 },
+    { id: 'performance-analytics', name: 'Performance Analytics', component: PerformanceAnalytics, size: 'large' as const, order: 4 },
+    { id: 'revision-engine', name: 'Revision Engine', component: RevisionEngine, size: 'medium' as const, order: 5 },
+    { id: 'current-affairs', name: 'Current Affairs', component: CurrentAffairsHub, size: 'medium' as const, order: 6 },
+    { id: 'knowledge-base', name: 'Knowledge Base', component: KnowledgeBase, size: 'medium' as const, order: 7 },
+    { id: 'wellness-corner', name: 'Wellness Corner', component: WellnessCorner, size: 'small' as const, order: 8 },
+    { id: 'motivational-poster', name: 'Daily Motivation', component: MotivationalPoster, size: 'small' as const, order: 9 },
+    { id: 'personalization-insights', name: 'AI Personalization', component: PersonalizationInsights, size: 'medium' as const, order: 10 }
+  ];
+
+  const simplifiedWidgets: SimplifiedWidget[] = widgetConfigs
+    .map(config => {
+      console.log(`🔧 Creating widget ${config.id}:`, config.component);
+      return createSafeWidget(config.id, config.name, config.component, config.size, config.order);
+    })
+    .filter(Boolean) as SimplifiedWidget[];
+
+  console.log(`📊 Dashboard widgets created: ${simplifiedWidgets.length}/${widgetConfigs.length}`);
 
   // Simplified layout change handler
   const handleLayoutChange = (newLayout: SimplifiedLayout) => {

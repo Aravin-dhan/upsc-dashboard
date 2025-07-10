@@ -609,6 +609,28 @@ export default function SimplifiedLayoutSystem({
           const WidgetComponent = widget.component;
           const sizeClass = WIDGET_SIZES[widget.size].class;
 
+          // Critical fix for React Error #130: Check if component is valid
+          if (!WidgetComponent || typeof WidgetComponent !== 'function') {
+            console.error(`Invalid component for widget ${widget.id}:`, WidgetComponent);
+            return (
+              <div
+                key={widget.id}
+                className={`${sizeClass} bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-lg p-4`}
+              >
+                <div className="text-center text-red-600 dark:text-red-400">
+                  <div className="text-sm font-medium">Widget Error</div>
+                  <div className="text-xs mt-1">Failed to load {widget.name}</div>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="mt-2 px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700"
+                  >
+                    Reload Page
+                  </button>
+                </div>
+              </div>
+            );
+          }
+
           return (
             <div
               key={widget.id}
@@ -649,7 +671,15 @@ export default function SimplifiedLayoutSystem({
                   </div>
                 </>
               )}
-              <WidgetComponent />
+
+              {/* Safe component rendering with error boundary */}
+              <React.Suspense fallback={
+                <div className="flex items-center justify-center h-32">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                </div>
+              }>
+                <WidgetComponent />
+              </React.Suspense>
             </div>
           );
         })}
