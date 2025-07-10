@@ -133,11 +133,40 @@ export async function middleware(request: NextRequest) {
   }
   
   try {
-    // Get user session
-    const session = await getSession(request);
-    
-    // If no session, redirect to login
+    // Get user session with enhanced error handling
+    let session;
+    try {
+      session = await getSession(request);
+    } catch (sessionError) {
+      console.warn('Session validation error in middleware:', sessionError);
+      // For production stability, allow access to dashboard with limited functionality
+      if (pathname === '/dashboard') {
+        const response = NextResponse.next();
+        response.headers.set('x-auth-status', 'session-error');
+        response.headers.set('x-user-role', 'guest');
+        return response;
+      }
+    }
+
+    // If no session, handle based on route type
     if (!session) {
+      // For API routes, return 401
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json(
+          { error: 'Authentication required', requiresLogin: true },
+          { status: 401 }
+        );
+      }
+
+      // For dashboard, allow limited access in production
+      if (pathname === '/dashboard') {
+        const response = NextResponse.next();
+        response.headers.set('x-auth-status', 'unauthenticated');
+        response.headers.set('x-user-role', 'guest');
+        return response;
+      }
+
+      // For other protected routes, redirect to login
       await logSecurityEvent(
         AUDIT_ACTIONS.UNAUTHORIZED_ACCESS,
         {

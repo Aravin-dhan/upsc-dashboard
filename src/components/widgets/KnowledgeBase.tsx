@@ -57,27 +57,16 @@ export default function KnowledgeBase() {
         }
       }
 
-      // Default knowledge items (only add if not deleted)
+      // Single starter item to help users get started (only add if not deleted)
       const defaultItems: KnowledgeItem[] = [
         {
-          id: 'default-1',
-          title: 'Indian Constitution - Fundamental Rights',
-          topic: 'Polity',
-          content: 'Articles 12-35 of the Indian Constitution deal with Fundamental Rights. These are justiciable rights that protect citizens from arbitrary state action.',
+          id: 'starter-1',
+          title: 'Welcome to Your Knowledge Base',
+          topic: 'Getting Started',
+          content: 'This is your personal knowledge repository. Add notes, important facts, and study materials here. Click the + button to create your first knowledge item!',
           lastModified: new Date().toLocaleDateString(),
           type: 'note',
-          tags: ['Constitution', 'Fundamental Rights', 'Polity'],
-          isDefault: true,
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 'default-2',
-          title: 'Economic Survey Key Points',
-          topic: 'Economy',
-          content: 'The Economic Survey is an annual document that reviews the economic performance of the country and provides policy recommendations.',
-          lastModified: new Date().toLocaleDateString(),
-          type: 'resource',
-          tags: ['Economy', 'Economic Survey', 'Policy'],
+          tags: ['Welcome', 'Getting Started'],
           isDefault: true,
           createdAt: new Date().toISOString()
         }

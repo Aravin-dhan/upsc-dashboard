@@ -26,6 +26,51 @@ interface AIAssistantResponse {
 
 async function processAIRequest(request: AIAssistantRequest): Promise<AIAssistantResponse> {
   const message = request.message.toLowerCase();
+
+  // Dashboard management commands
+  if (message.includes('dashboard') || message.includes('customize') || message.includes('widget')) {
+    if (message.includes('customize') || message.includes('edit') || message.includes('change layout')) {
+      return {
+        message: "I can help you customize your dashboard! You can drag widgets to reorder them, resize them, or hide/show widgets. Would you like me to enable edit mode?",
+        actions: [
+          { type: 'TOGGLE_DASHBOARD_EDIT_MODE', payload: {} },
+          { type: 'NAVIGATE', payload: { url: '/' } }
+        ],
+        suggestions: ["Enable edit mode", "Show widget options", "Reset to default layout"]
+      };
+    }
+
+    if (message.includes('reset') || message.includes('default')) {
+      return {
+        message: "I can reset your dashboard to the default layout. This will restore all widgets to their original positions and sizes. Should I proceed?",
+        actions: [{ type: 'RESET_DASHBOARD_LAYOUT', payload: {} }],
+        suggestions: ["Reset dashboard", "Keep current layout", "Show layout options"]
+      };
+    }
+
+    return {
+      message: "Your dashboard is fully customizable! You can rearrange widgets, change their sizes, and personalize your study experience. What would you like to do?",
+      actions: [{ type: 'NAVIGATE', payload: { url: '/' } }],
+      suggestions: ["Customize dashboard", "Reset layout", "Show widget options"]
+    };
+  }
+
+  // Bookmark management
+  if (message.includes('bookmark') || message.includes('save') || message.includes('favorite')) {
+    return {
+      message: "I can help you manage your bookmarks! Save important articles, notes, or resources for quick access later.",
+      actions: [{ type: 'NAVIGATE', payload: { url: '/bookmarks' } }],
+      suggestions: ["View bookmarks", "Add current page", "Organize bookmarks"]
+    };
+  }
+
+  // Memory and context commands
+  if (message.includes('remember') || message.includes('recall') || message.includes('history')) {
+    return {
+      message: "I remember our conversations and your study patterns! I can recall previous discussions, track your progress, and provide personalized recommendations based on your learning history.",
+      suggestions: ["Show conversation history", "View study patterns", "Get personalized tips"]
+    };
+  }
   
   // Simple pattern matching for common requests
   if (message.includes('dictionary') || message.includes('vocabulary') || message.includes('word')) {

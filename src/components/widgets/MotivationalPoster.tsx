@@ -71,26 +71,15 @@ export default function MotivationalPoster() {
       }
     }
 
-    // Minimal default quotes - user can add more
+    // Single starter quote - user can add more
     return [
       {
-        id: '1',
-        text: 'Every expert was once a beginner. Every pro was once an amateur.',
-        author: 'Robin Sharma',
+        id: 'starter-1',
+        text: 'Add your own motivational quotes to personalize your dashboard!',
+        author: 'UPSC Dashboard',
         category: 'motivation',
         backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         textColor: '#ffffff',
-        isCustom: false,
-        isFavorite: false,
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: '2',
-        text: 'Your preparation today shapes India\'s tomorrow.',
-        author: 'UPSC Mentor',
-        category: 'upsc',
-        backgroundColor: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
-        textColor: '#2d3748',
         isCustom: false,
         isFavorite: false,
         createdAt: new Date().toISOString()

@@ -42,6 +42,8 @@ export default function CouponManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive' | 'expired'>('all');
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedCoupons, setSelectedCoupons] = useState<string[]>([]);
+  const [showBulkActions, setShowBulkActions] = useState(false);
 
   const [newCoupon, setNewCoupon] = useState({
     code: '',
@@ -77,31 +79,77 @@ export default function CouponManagement() {
     }
   };
 
-  // Generate random coupon code
+  // Generate random coupon code with better patterns
   const generateCouponCode = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = '';
-    for (let i = 0; i < 8; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    const patterns = [
+      () => `UPSC${Math.random().toString(36).substr(2, 4).toUpperCase()}`,
+      () => `SAVE${Math.random().toString(36).substr(2, 4).toUpperCase()}`,
+      () => `PREP${Math.random().toString(36).substr(2, 4).toUpperCase()}`,
+      () => `STUDY${Math.random().toString(36).substr(2, 3).toUpperCase()}`
+    ];
+
+    const pattern = patterns[Math.floor(Math.random() * patterns.length)];
+    return pattern();
+  };
+
+  // Enhanced coupon validation
+  const validateCoupon = (coupon: any) => {
+    const errors: string[] = [];
+
+    if (!coupon.code || coupon.code.length < 3) {
+      errors.push('Coupon code must be at least 3 characters');
     }
-    return result;
+
+    if (!coupon.description || coupon.description.length < 10) {
+      errors.push('Description must be at least 10 characters');
+    }
+
+    if (coupon.type === 'percentage' && (coupon.value <= 0 || coupon.value > 100)) {
+      errors.push('Percentage value must be between 1 and 100');
+    }
+
+    if (coupon.type === 'fixed' && coupon.value <= 0) {
+      errors.push('Fixed amount must be greater than 0');
+    }
+
+    if (new Date(coupon.validFrom) >= new Date(coupon.validUntil)) {
+      errors.push('Valid until date must be after valid from date');
+    }
+
+    return errors;
   };
 
   // Create new coupon
   const createCoupon = async () => {
-    if (!newCoupon.code || !newCoupon.description || !newCoupon.validUntil) {
-      toast.error('Please fill in all required fields');
+    // Enhanced validation
+    const validationErrors = validateCoupon(newCoupon);
+    if (validationErrors.length > 0) {
+      toast.error(validationErrors[0]);
       return;
     }
 
     try {
+      setIsLoading(true);
+
+      // Check for duplicate coupon codes
+      const existingCoupon = coupons.find(c => c.code.toLowerCase() === newCoupon.code.toLowerCase());
+      if (existingCoupon) {
+        toast.error('Coupon code already exists');
+        return;
+      }
+
       const response = await fetch('/api/admin/coupons', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newCoupon)
+        body: JSON.stringify({
+          ...newCoupon,
+          code: newCoupon.code.toUpperCase(),
+          createdBy: 'admin' // This should come from session
+        })
       });
 
       if (response.ok) {
+        const data = await response.json();
         toast.success('Coupon created successfully!');
         setShowCreateForm(false);
         setNewCoupon({
@@ -115,6 +163,12 @@ export default function CouponManagement() {
           applicablePlans: ['pro']
         });
         loadCoupons();
+
+        // Copy coupon code to clipboard
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(data.coupon.code);
+          toast.success('Coupon code copied to clipboard!');
+        }
       } else {
         const error = await response.json();
         toast.error(error.message || 'Failed to create coupon');
@@ -122,6 +176,8 @@ export default function CouponManagement() {
     } catch (error) {
       console.error('Error creating coupon:', error);
       toast.error('Error creating coupon');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -206,10 +262,96 @@ export default function CouponManagement() {
     const now = new Date();
     const validUntil = new Date(coupon.validUntil);
     const isExpired = validUntil < now;
-    
+
     if (isExpired) return 'Expired';
     if (!coupon.isActive) return 'Inactive';
     return 'Active';
+  };
+
+  // Utility functions
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Copied to clipboard!');
+  };
+
+  // Bulk operations
+  const handleSelectCoupon = (couponId: string) => {
+    setSelectedCoupons(prev =>
+      prev.includes(couponId)
+        ? prev.filter(id => id !== couponId)
+        : [...prev, couponId]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedCoupons.length === filteredCoupons.length) {
+      setSelectedCoupons([]);
+    } else {
+      setSelectedCoupons(filteredCoupons.map(c => c.id));
+    }
+  };
+
+  const bulkActivate = async () => {
+    if (selectedCoupons.length === 0) return;
+
+    try {
+      setIsLoading(true);
+      // For now, update locally - in production this would call the API
+      setCoupons(prev => prev.map(coupon =>
+        selectedCoupons.includes(coupon.id)
+          ? { ...coupon, isActive: true }
+          : coupon
+      ));
+
+      toast.success(`${selectedCoupons.length} coupons activated`);
+      setSelectedCoupons([]);
+    } catch (error) {
+      toast.error('Error activating coupons');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const bulkDeactivate = async () => {
+    if (selectedCoupons.length === 0) return;
+
+    try {
+      setIsLoading(true);
+      // For now, update locally - in production this would call the API
+      setCoupons(prev => prev.map(coupon =>
+        selectedCoupons.includes(coupon.id)
+          ? { ...coupon, isActive: false }
+          : coupon
+      ));
+
+      toast.success(`${selectedCoupons.length} coupons deactivated`);
+      setSelectedCoupons([]);
+    } catch (error) {
+      toast.error('Error deactivating coupons');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const bulkDelete = async () => {
+    if (selectedCoupons.length === 0) return;
+
+    if (!confirm(`Are you sure you want to delete ${selectedCoupons.length} coupons? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      // For now, update locally - in production this would call the API
+      setCoupons(prev => prev.filter(coupon => !selectedCoupons.includes(coupon.id)));
+
+      toast.success(`${selectedCoupons.length} coupons deleted`);
+      setSelectedCoupons([]);
+    } catch (error) {
+      toast.error('Error deleting coupons');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

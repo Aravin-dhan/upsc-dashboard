@@ -25,6 +25,7 @@ const CurrentAffairsHub = lazy(() => import('./widgets/CurrentAffairsHub'));
 const KnowledgeBase = lazy(() => import('./widgets/KnowledgeBase'));
 const WellnessCorner = lazy(() => import('./widgets/WellnessCorner'));
 const MotivationalPoster = lazy(() => import('./widgets/MotivationalPoster'));
+const PersonalizationInsights = lazy(() => import('./widgets/PersonalizationInsights'));
 
 export default function Dashboard() {
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
@@ -77,7 +78,8 @@ export default function Dashboard() {
     createSafeWidget('current-affairs', 'Current Affairs', CurrentAffairsHub, 'medium', 6),
     createSafeWidget('knowledge-base', 'Knowledge Base', KnowledgeBase, 'medium', 7),
     createSafeWidget('wellness-corner', 'Wellness Corner', WellnessCorner, 'small', 8),
-    createSafeWidget('motivational-poster', 'Daily Motivation', MotivationalPoster, 'small', 9)
+    createSafeWidget('motivational-poster', 'Daily Motivation', MotivationalPoster, 'small', 9),
+    createSafeWidget('personalization-insights', 'AI Personalization', PersonalizationInsights, 'medium', 10)
   ].filter(Boolean) as SimplifiedWidget[];
 
   // Simplified layout change handler

@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "../styles/mobile-optimized.css";
+@import "../styles/pride-theme.css";
 
 :root {
   --background: #ffffff;

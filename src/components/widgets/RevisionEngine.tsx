@@ -1,8 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { RefreshCw, Calendar, CheckCircle, Plus, X, Edit3 } from 'lucide-react';
+import {
+  RefreshCw, Calendar, CheckCircle, Plus, X, Edit3,
+  Trash2, MoreVertical, Filter, Search, Archive,
+  RotateCcw, Settings, Download, Upload
+} from 'lucide-react';
 import toast from 'react-hot-toast';
+import { ContentRecoveryService } from '@/services/ContentRecoveryService';
 
 interface RevisionItem {
   id: string;
@@ -11,14 +16,28 @@ interface RevisionItem {
   priority: 'high' | 'medium' | 'low';
   completed: boolean;
   createdAt: string;
+  subject?: string;
+  notes?: string;
+  tags?: string[];
+  lastModified?: string;
 }
 
 export default function RevisionEngine() {
   const [revisionQueue, setRevisionQueue] = useState<RevisionItem[]>([]);
+  const [filteredQueue, setFilteredQueue] = useState<RevisionItem[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newTopic, setNewTopic] = useState('');
   const [newDueDate, setNewDueDate] = useState('');
   const [newPriority, setNewPriority] = useState<'high' | 'medium' | 'low'>('medium');
+  const [newSubject, setNewSubject] = useState('');
+  const [newNotes, setNewNotes] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('active');
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [showBulkActions, setShowBulkActions] = useState(false);
+
+  const recoveryService = ContentRecoveryService.getInstance();
 
   // Load revision items from localStorage
   useEffect(() => {
@@ -41,6 +60,35 @@ export default function RevisionEngine() {
     }
   };
 
+  // Filter and search functionality
+  useEffect(() => {
+    let filtered = revisionQueue;
+
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(item =>
+        item.topic.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+
+    // Priority filter
+    if (priorityFilter !== 'all') {
+      filtered = filtered.filter(item => item.priority === priorityFilter);
+    }
+
+    // Status filter
+    if (statusFilter === 'active') {
+      filtered = filtered.filter(item => !item.completed);
+    } else if (statusFilter === 'completed') {
+      filtered = filtered.filter(item => item.completed);
+    }
+
+    setFilteredQueue(filtered);
+  }, [revisionQueue, searchTerm, priorityFilter, statusFilter]);
+
   // Add new revision item
   const addRevisionItem = () => {
     if (!newTopic.trim()) {
@@ -54,7 +102,11 @@ export default function RevisionEngine() {
       dueDate: newDueDate || 'No due date',
       priority: newPriority,
       completed: false,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      subject: newSubject.trim() || undefined,
+      notes: newNotes.trim() || undefined,
+      tags: newNotes.trim() ? newNotes.split(',').map(tag => tag.trim()).filter(tag => tag) : undefined,
+      lastModified: new Date().toISOString()
     };
 
     const updatedQueue = [...revisionQueue, newItem];
@@ -65,8 +117,116 @@ export default function RevisionEngine() {
     setNewTopic('');
     setNewDueDate('');
     setNewPriority('medium');
+    setNewSubject('');
+    setNewNotes('');
     setShowAddForm(false);
     toast.success('Revision item added!');
+  };
+
+  // Enhanced delete with recovery system
+  const deleteItem = (item: RevisionItem) => {
+    if (!confirm(`Are you sure you want to delete "${item.topic}"?`)) {
+      return;
+    }
+
+    // Add to recovery system
+    recoveryService.addDeletedItem(
+      'revision-item',
+      item.topic,
+      item,
+      'Revision Engine Widget',
+      {
+        tags: item.tags,
+        category: item.subject,
+        priority: item.priority,
+        originalId: item.id
+      }
+    );
+
+    const updatedQueue = revisionQueue.filter(i => i.id !== item.id);
+    setRevisionQueue(updatedQueue);
+    saveRevisionQueue(updatedQueue);
+    toast.success('Revision item deleted! You can recover it from the recovery system.');
+  };
+
+  // Bulk operations
+  const handleSelectItem = (itemId: string) => {
+    setSelectedItems(prev =>
+      prev.includes(itemId)
+        ? prev.filter(id => id !== itemId)
+        : [...prev, itemId]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedItems.length === filteredQueue.length) {
+      setSelectedItems([]);
+    } else {
+      setSelectedItems(filteredQueue.map(item => item.id));
+    }
+  };
+
+  const bulkMarkCompleted = () => {
+    if (selectedItems.length === 0) return;
+
+    const updatedQueue = revisionQueue.map(item =>
+      selectedItems.includes(item.id)
+        ? { ...item, completed: true, lastModified: new Date().toISOString() }
+        : item
+    );
+
+    setRevisionQueue(updatedQueue);
+    saveRevisionQueue(updatedQueue);
+    setSelectedItems([]);
+    toast.success(`${selectedItems.length} items marked as completed!`);
+  };
+
+  const bulkDelete = () => {
+    if (selectedItems.length === 0) return;
+
+    if (!confirm(`Are you sure you want to delete ${selectedItems.length} revision items?`)) {
+      return;
+    }
+
+    // Add all selected items to recovery system
+    selectedItems.forEach(itemId => {
+      const item = revisionQueue.find(i => i.id === itemId);
+      if (item) {
+        recoveryService.addDeletedItem(
+          'revision-item',
+          item.topic,
+          item,
+          'Revision Engine Widget',
+          {
+            tags: item.tags,
+            category: item.subject,
+            priority: item.priority,
+            originalId: item.id
+          }
+        );
+      }
+    });
+
+    const updatedQueue = revisionQueue.filter(item => !selectedItems.includes(item.id));
+    setRevisionQueue(updatedQueue);
+    saveRevisionQueue(updatedQueue);
+    setSelectedItems([]);
+    toast.success(`${selectedItems.length} items deleted! You can recover them from the recovery system.`);
+  };
+
+  const bulkChangePriority = (priority: 'high' | 'medium' | 'low') => {
+    if (selectedItems.length === 0) return;
+
+    const updatedQueue = revisionQueue.map(item =>
+      selectedItems.includes(item.id)
+        ? { ...item, priority, lastModified: new Date().toISOString() }
+        : item
+    );
+
+    setRevisionQueue(updatedQueue);
+    saveRevisionQueue(updatedQueue);
+    setSelectedItems([]);
+    toast.success(`Priority updated for ${selectedItems.length} items!`);
   };
 
   // Mark item as completed
@@ -79,12 +239,12 @@ export default function RevisionEngine() {
     toast.success('Topic marked as revised!');
   };
 
-  // Remove item
+  // Legacy remove item function - now uses enhanced delete
   const removeItem = (id: string) => {
-    const updatedQueue = revisionQueue.filter(item => item.id !== id);
-    setRevisionQueue(updatedQueue);
-    saveRevisionQueue(updatedQueue);
-    toast.success('Revision item removed!');
+    const item = revisionQueue.find(i => i.id === id);
+    if (item) {
+      deleteItem(item);
+    }
   };
 
   const getPriorityColor = (priority: string) => {

@@ -27,12 +27,43 @@ interface State {
   retryCount: number;
 }
 
-// Emergency navigation items - minimal but functional
+// Emergency navigation items - comprehensive but functional
 const emergencyNavItems = [
-  { name: 'Dashboard', href: '/', icon: Home },
-  { name: 'Learning', href: '/learning', icon: BookOpen },
-  { name: 'Schedule', href: '/schedule', icon: Calendar },
-  { name: 'Settings', href: '/settings', icon: Settings },
+  { name: 'Dashboard', href: '/', icon: Home, priority: 1 },
+  { name: 'Learning', href: '/learning', icon: BookOpen, priority: 2 },
+  { name: 'Schedule', href: '/schedule', icon: Calendar, priority: 3 },
+  { name: 'Analytics', href: '/analytics', icon: ChevronRight, priority: 4 },
+  { name: 'Current Affairs', href: '/current-affairs', icon: ChevronRight, priority: 5 },
+  { name: 'Settings', href: '/settings', icon: Settings, priority: 6 },
+];
+
+// Emergency actions for recovery
+const emergencyActions = [
+  {
+    name: 'Reload Page',
+    action: () => window.location.reload(),
+    icon: RefreshCw,
+    description: 'Refresh the entire page'
+  },
+  {
+    name: 'Clear Cache',
+    action: () => {
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.reload();
+    },
+    icon: X,
+    description: 'Clear all cached data and reload'
+  },
+  {
+    name: 'Safe Mode',
+    action: () => {
+      localStorage.setItem('upsc-safe-mode', 'true');
+      window.location.href = '/?safe=true';
+    },
+    icon: AlertTriangle,
+    description: 'Load in safe mode with minimal features'
+  }
 ];
 
 // Emergency Navigation Component
@@ -101,16 +132,27 @@ function EmergencyNavigation() {
           {/* Emergency Navigation */}
           <nav className="flex-1 px-4 py-6 space-y-2">
             <div className="mb-4 p-3 bg-red-100 dark:bg-red-800/30 rounded-lg">
-              <p className="text-xs text-red-700 dark:text-red-300 mb-2">
-                The main navigation encountered an error. Use these emergency links:
+              <p className="text-xs text-red-700 dark:text-red-300 mb-3">
+                The main navigation encountered an error. Use these emergency options:
               </p>
-              <button
-                onClick={() => window.location.reload()}
-                className="w-full flex items-center justify-center px-3 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition-colors"
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Reload Page
-              </button>
+
+              {/* Emergency Actions */}
+              <div className="space-y-2">
+                {emergencyActions.map((action) => {
+                  const Icon = action.icon;
+                  return (
+                    <button
+                      key={action.name}
+                      onClick={action.action}
+                      className="w-full flex items-center px-3 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition-colors"
+                      title={action.description}
+                    >
+                      <Icon className="h-4 w-4 mr-2" />
+                      {action.name}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {emergencyNavItems.map((item) => {

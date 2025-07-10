@@ -125,8 +125,46 @@ export function verifyPassword(password: string, hash: string, salt: string): bo
          timingSafeEqual(expectedBuffer, actualBuffer);
 }
 
-// In-memory session store (in production, use Redis or database)
+// Session storage - Use localStorage for client-side persistence in serverless environment
 const activeSessions = new Map<string, AuthSession>();
+
+// Enhanced session persistence for serverless environments
+function getSessionStorage() {
+  if (typeof window !== 'undefined') {
+    // Client-side: use localStorage
+    return {
+      get: (key: string) => {
+        try {
+          const data = localStorage.getItem(`session_${key}`);
+          return data ? JSON.parse(data) : null;
+        } catch {
+          return null;
+        }
+      },
+      set: (key: string, value: AuthSession) => {
+        try {
+          localStorage.setItem(`session_${key}`, JSON.stringify(value));
+        } catch {
+          // Ignore storage errors
+        }
+      },
+      delete: (key: string) => {
+        try {
+          localStorage.removeItem(`session_${key}`);
+        } catch {
+          // Ignore storage errors
+        }
+      }
+    };
+  }
+
+  // Server-side: use in-memory with fallback
+  return {
+    get: (key: string) => activeSessions.get(key) || null,
+    set: (key: string, value: AuthSession) => activeSessions.set(key, value),
+    delete: (key: string) => activeSessions.delete(key)
+  };
+}
 
 // Session management
 export async function createSession(
@@ -175,6 +213,9 @@ export async function createSession(
     userAgent: sessionData.userAgent
   };
 
+  // Store session using enhanced storage
+  const storage = getSessionStorage();
+  storage.set(sessionId, session);
   activeSessions.set(sessionId, session);
 
   // Log session creation

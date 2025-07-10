@@ -323,6 +323,67 @@ class AIMemoryService {
       const currentCount = this.getUserPreference('study', `subject-access-${context.subject}`) || 0;
       this.setUserPreference('study', `subject-access-${context.subject}`, currentCount + 1, 'behavior-analysis');
     }
+
+    // Learn dashboard preferences
+    if (action === 'dashboard-widget-moved' && context.widgetId) {
+      this.setUserPreference('dashboard', `widget-${context.widgetId}-position`, context.position, 'user-action');
+    }
+
+    if (action === 'dashboard-widget-resized' && context.widgetId) {
+      this.setUserPreference('dashboard', `widget-${context.widgetId}-size`, context.size, 'user-action');
+    }
+
+    if (action === 'dashboard-layout-changed') {
+      this.setUserPreference('dashboard', 'preferred-layout', context.layout, 'user-action');
+    }
+
+    // Learn bookmark patterns
+    if (action === 'bookmark-added' && context.category) {
+      const currentCount = this.getUserPreference('bookmarks', `category-${context.category}`) || 0;
+      this.setUserPreference('bookmarks', `category-${context.category}`, currentCount + 1, 'behavior-analysis');
+    }
+  }
+
+  // Dashboard management methods
+  getDashboardPreferences(): any {
+    return {
+      preferredLayout: this.getUserPreference('dashboard', 'preferred-layout'),
+      widgetPositions: this.userPreferences
+        .filter(p => p.category === 'dashboard' && p.key.includes('position'))
+        .reduce((acc, p) => {
+          const widgetId = p.key.replace('widget-', '').replace('-position', '');
+          acc[widgetId] = p.value;
+          return acc;
+        }, {} as Record<string, any>),
+      widgetSizes: this.userPreferences
+        .filter(p => p.category === 'dashboard' && p.key.includes('size'))
+        .reduce((acc, p) => {
+          const widgetId = p.key.replace('widget-', '').replace('-size', '');
+          acc[widgetId] = p.value;
+          return acc;
+        }, {} as Record<string, any>)
+    };
+  }
+
+  // Bookmark integration methods
+  getBookmarkInsights(): any {
+    const bookmarkPrefs = this.userPreferences.filter(p => p.category === 'bookmarks');
+    const categoryStats = bookmarkPrefs.reduce((acc, p) => {
+      if (p.key.startsWith('category-')) {
+        const category = p.key.replace('category-', '');
+        acc[category] = p.value;
+      }
+      return acc;
+    }, {} as Record<string, number>);
+
+    return {
+      favoriteCategories: Object.entries(categoryStats)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 3)
+        .map(([category]) => category),
+      totalBookmarks: Object.values(categoryStats).reduce((sum, count) => sum + count, 0),
+      categoryDistribution: categoryStats
+    };
   }
 
   // Clear all data (for privacy/reset)

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import ThemeToggle from '../ui/ThemeToggle';
@@ -27,7 +27,8 @@ import {
   Shield,
   Users,
   Mail,
-  Ticket
+  Ticket,
+  AlertTriangle
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -72,6 +73,91 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { user, isLoading } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [sidebarError, setSidebarError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+
+  // Enhanced error handling and recovery
+  useEffect(() => {
+    const handleSidebarError = (error: Error) => {
+      console.error('Sidebar error:', error);
+      setSidebarError(error.message);
+
+      // Auto-retry up to 3 times
+      if (retryCount < 3) {
+        setTimeout(() => {
+          setSidebarError(null);
+          setRetryCount(prev => prev + 1);
+        }, 2000);
+      }
+    };
+
+    // Add global error listener for sidebar
+    const errorHandler = (event: ErrorEvent) => {
+      if (event.filename?.includes('Sidebar') || event.message?.includes('sidebar')) {
+        handleSidebarError(new Error(event.message));
+      }
+    };
+
+    window.addEventListener('error', errorHandler);
+
+    return () => {
+      window.removeEventListener('error', errorHandler);
+    };
+  }, [retryCount]);
+
+  // Persist mobile menu state
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedState = localStorage.getItem('upsc-mobile-menu-state');
+      if (savedState === 'true') {
+        setIsMobileMenuOpen(true);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('upsc-mobile-menu-state', isMobileMenuOpen.toString());
+    }
+  }, [isMobileMenuOpen]);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
+
+  // Emergency navigation fallback
+  if (sidebarError && retryCount >= 3) {
+    return (
+      <div className="fixed inset-y-0 left-0 z-50 w-64 bg-red-50 dark:bg-red-900/20 border-r border-red-200 dark:border-red-800">
+        <div className="flex flex-col h-full p-4">
+          <div className="flex items-center mb-4">
+            <AlertTriangle className="h-5 w-5 text-red-600 mr-2" />
+            <span className="text-sm font-medium text-red-800 dark:text-red-200">
+              Navigation Error
+            </span>
+          </div>
+          <div className="space-y-2">
+            <Link href="/" className="block p-2 text-sm text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-800/30 rounded">
+              Dashboard
+            </Link>
+            <Link href="/learning" className="block p-2 text-sm text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-800/30 rounded">
+              Learning
+            </Link>
+            <Link href="/schedule" className="block p-2 text-sm text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-800/30 rounded">
+              Schedule
+            </Link>
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full p-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+            >
+              Reload Page
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

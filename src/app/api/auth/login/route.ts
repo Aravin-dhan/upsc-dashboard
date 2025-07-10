@@ -150,17 +150,31 @@ export async function POST(request: NextRequest) {
     // Set HTTP-only cookie with appropriate expiration
     const cookieStore = await cookies();
 
-    // Enhanced cookie configuration for better persistence
-    cookieStore.set('upsc-auth-token', sessionToken, {
+    // Enhanced cookie configuration for better persistence and production compatibility
+    const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'lax' as const,
       maxAge: maxAge,
       path: '/',
       // Add explicit expires date for better browser compatibility
       expires: new Date(Date.now() + maxAge * 1000),
-      // Ensure cookie persists across browser sessions
-      priority: 'high'
+      // Production domain handling
+      ...(process.env.NODE_ENV === 'production' && {
+        domain: process.env.COOKIE_DOMAIN || undefined
+      })
+    };
+
+    cookieStore.set('upsc-auth-token', sessionToken, cookieOptions);
+
+    // Also set a client-accessible flag for auth state (without sensitive data)
+    cookieStore.set('upsc-auth-state', 'authenticated', {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax' as const,
+      maxAge: maxAge,
+      path: '/',
+      expires: new Date(Date.now() + maxAge * 1000)
     });
 
     // Log session creation for debugging

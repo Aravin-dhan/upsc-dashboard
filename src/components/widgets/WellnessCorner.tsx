@@ -5,9 +5,11 @@ import {
   Heart, Zap, Moon, Smile, TrendingUp, Play, Pause,
   RotateCcw, Plus, Minus, Clock, Brain, Activity,
   Coffee, Target, AlertCircle, CheckCircle, Timer,
-  BarChart3, Calendar, Settings, BookOpen
+  BarChart3, Calendar, Settings, BookOpen, Lightbulb,
+  Award, Droplets, Wind, Sun
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { AIMemoryService } from '@/services/AIMemoryService';
 
 interface WellnessData {
   sleep: number;
@@ -19,6 +21,20 @@ interface WellnessData {
   studyBreaks: number;
   pomodoroSessions: number;
   date: string;
+  eyeRest: number;
+  posture: number;
+  nutrition: number;
+  socialConnection: number;
+}
+
+interface AIRecommendation {
+  id: string;
+  type: 'wellness' | 'study' | 'break' | 'health';
+  title: string;
+  description: string;
+  action?: string;
+  priority: 'low' | 'medium' | 'high';
+  icon: string;
 }
 
 interface PomodoroState {
@@ -49,9 +65,17 @@ export default function WellnessCorner() {
       waterIntake: 0,
       studyBreaks: 0,
       pomodoroSessions: 0,
+      eyeRest: 0,
+      posture: 3,
+      nutrition: 3,
+      socialConnection: 3,
       date: new Date().toISOString().split('T')[0]
     };
   });
+
+  const [aiRecommendations, setAiRecommendations] = useState<AIRecommendation[]>([]);
+  const [showRecommendations, setShowRecommendations] = useState(false);
+  const aiMemoryService = AIMemoryService.getInstance();
 
   const [pomodoroState, setPomodoroState] = useState<PomodoroState>({
     isRunning: false,
@@ -63,10 +87,78 @@ export default function WellnessCorner() {
   const [showSettings, setShowSettings] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'pomodoro' | 'tracking' | 'tips'>('overview');
 
-  // Save data to localStorage
+  // Save data to localStorage and generate AI recommendations
   useEffect(() => {
     localStorage.setItem('upsc-wellness-data', JSON.stringify(wellnessData));
+
+    // Learn from wellness patterns
+    aiMemoryService.learnFromBehavior('wellness-data-updated', {
+      wellnessData,
+      timestamp: new Date().toISOString()
+    });
+
+    // Generate AI recommendations
+    generateAIRecommendations();
   }, [wellnessData]);
+
+  const generateAIRecommendations = () => {
+    const recommendations: AIRecommendation[] = [];
+    const currentHour = new Date().getHours();
+
+    // Sleep recommendations
+    if (wellnessData.sleep < 7) {
+      recommendations.push({
+        id: 'sleep-1',
+        type: 'health',
+        title: 'Improve Sleep Quality',
+        description: 'You\'re getting less than 7 hours of sleep. Consider setting a bedtime routine for better UPSC preparation.',
+        action: 'set_sleep_reminder',
+        priority: 'high',
+        icon: '🌙'
+      });
+    }
+
+    // Study break recommendations
+    if (wellnessData.studyBreaks < 3 && currentHour > 12) {
+      recommendations.push({
+        id: 'break-1',
+        type: 'study',
+        title: 'Take More Breaks',
+        description: 'Regular breaks improve retention. Try the 50/10 rule: 50 minutes study, 10 minutes break.',
+        action: 'start_break_timer',
+        priority: 'medium',
+        icon: '⏰'
+      });
+    }
+
+    // Water intake recommendations
+    if (wellnessData.waterIntake < 6) {
+      recommendations.push({
+        id: 'water-1',
+        type: 'health',
+        title: 'Stay Hydrated',
+        description: 'Proper hydration improves cognitive function. Aim for 8-10 glasses of water daily.',
+        action: 'set_water_reminder',
+        priority: 'medium',
+        icon: '💧'
+      });
+    }
+
+    // Stress management
+    if (wellnessData.stress > 3) {
+      recommendations.push({
+        id: 'stress-1',
+        type: 'wellness',
+        title: 'Manage Stress',
+        description: 'High stress can impact learning. Try 5 minutes of deep breathing or meditation.',
+        action: 'start_meditation',
+        priority: 'high',
+        icon: '🧘'
+      });
+    }
+
+    setAiRecommendations(recommendations.slice(0, 3)); // Show top 3 recommendations
+  };
 
   // Pomodoro timer effect
   useEffect(() => {

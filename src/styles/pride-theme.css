@@ -1,0 +1,286 @@
+/* Pride Theme Accessibility Styles */
+/* Provides rainbow accents for inclusivity and accessibility */
+
+.pride-theme {
+  /* Pride gradient variables */
+  --pride-gradient: linear-gradient(
+    90deg,
+    #e40303 0%,
+    #ff8c00 16.66%,
+    #ffed00 33.33%,
+    #008018 50%,
+    #0066ff 66.66%,
+    #8b00ff 83.33%,
+    #e40303 100%
+  );
+  
+  --pride-gradient-subtle: linear-gradient(
+    90deg,
+    rgba(228, 3, 3, 0.1) 0%,
+    rgba(255, 140, 0, 0.1) 16.66%,
+    rgba(255, 237, 0, 0.1) 33.33%,
+    rgba(0, 128, 24, 0.1) 50%,
+    rgba(0, 102, 255, 0.1) 66.66%,
+    rgba(139, 0, 255, 0.1) 83.33%,
+    rgba(228, 3, 3, 0.1) 100%
+  );
+
+  /* Individual pride colors for specific elements */
+  --pride-red: #e40303;
+  --pride-orange: #ff8c00;
+  --pride-yellow: #ffed00;
+  --pride-green: #008018;
+  --pride-blue: #0066ff;
+  --pride-purple: #8b00ff;
+}
+
+/* Pride theme active styles */
+.pride-theme .bg-blue-600 {
+  background: var(--pride-gradient) !important;
+}
+
+.pride-theme .bg-blue-500 {
+  background: var(--pride-gradient) !important;
+}
+
+.pride-theme .text-blue-600 {
+  background: var(--pride-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.pride-theme .text-blue-500 {
+  background: var(--pride-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.pride-theme .border-blue-600 {
+  border-image: var(--pride-gradient) 1;
+}
+
+.pride-theme .border-blue-500 {
+  border-image: var(--pride-gradient) 1;
+}
+
+/* Pride theme for buttons */
+.pride-theme button.bg-blue-600,
+.pride-theme button.bg-blue-500 {
+  background: var(--pride-gradient) !important;
+  color: white !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.pride-theme button.bg-blue-600:hover,
+.pride-theme button.bg-blue-500:hover {
+  background: var(--pride-gradient) !important;
+  filter: brightness(1.1);
+}
+
+/* Pride theme for links */
+.pride-theme a.text-blue-600,
+.pride-theme a.text-blue-500 {
+  background: var(--pride-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 600;
+}
+
+/* Pride theme for active navigation items */
+.pride-theme .bg-blue-100 {
+  background: var(--pride-gradient-subtle) !important;
+}
+
+.pride-theme .bg-blue-50 {
+  background: var(--pride-gradient-subtle) !important;
+}
+
+/* Pride theme for progress bars */
+.pride-theme .progress-bar {
+  background: var(--pride-gradient) !important;
+}
+
+/* Pride theme for focus states */
+.pride-theme *:focus {
+  outline: 2px solid transparent;
+  box-shadow: 0 0 0 2px var(--pride-blue), 0 0 0 4px var(--pride-gradient-subtle);
+}
+
+/* Pride theme for checkboxes and radio buttons */
+.pride-theme input[type="checkbox"]:checked,
+.pride-theme input[type="radio"]:checked {
+  background: var(--pride-gradient) !important;
+  border-color: var(--pride-blue) !important;
+}
+
+/* Pride theme for toggle switches */
+.pride-theme .toggle-switch.active {
+  background: var(--pride-gradient) !important;
+}
+
+/* Pride theme for badges and tags */
+.pride-theme .badge,
+.pride-theme .tag {
+  background: var(--pride-gradient-subtle) !important;
+  border: 1px solid var(--pride-blue);
+}
+
+/* Pride theme for cards and panels */
+.pride-theme .card-header {
+  border-bottom: 2px solid transparent;
+  border-image: var(--pride-gradient) 1;
+}
+
+/* Pride theme for loading spinners */
+.pride-theme .spinner {
+  border-top-color: var(--pride-red) !important;
+  border-right-color: var(--pride-orange) !important;
+  border-bottom-color: var(--pride-yellow) !important;
+  border-left-color: var(--pride-green) !important;
+}
+
+/* Pride theme for scrollbars */
+.pride-theme ::-webkit-scrollbar-thumb {
+  background: var(--pride-gradient) !important;
+  border-radius: 10px;
+}
+
+/* Pride theme for selection */
+.pride-theme ::selection {
+  background: var(--pride-gradient-subtle) !important;
+  color: var(--pride-purple) !important;
+}
+
+/* Pride theme for tooltips */
+.pride-theme .tooltip {
+  background: var(--pride-gradient) !important;
+  color: white !important;
+}
+
+/* Pride theme for dashboard widgets */
+.pride-theme .widget-header {
+  border-bottom: 2px solid transparent;
+  border-image: var(--pride-gradient) 1;
+}
+
+.pride-theme .widget-accent {
+  background: var(--pride-gradient-subtle) !important;
+}
+
+/* Pride theme for admin sections */
+.pride-theme .admin-accent {
+  background: var(--pride-gradient) !important;
+  color: white !important;
+}
+
+/* Pride theme for success states */
+.pride-theme .success {
+  background: var(--pride-green) !important;
+}
+
+/* Pride theme for warning states */
+.pride-theme .warning {
+  background: var(--pride-orange) !important;
+}
+
+/* Pride theme for error states */
+.pride-theme .error {
+  background: var(--pride-red) !important;
+}
+
+/* Pride theme for info states */
+.pride-theme .info {
+  background: var(--pride-blue) !important;
+}
+
+/* Pride theme animations */
+.pride-theme .pride-pulse {
+  animation: pride-pulse 2s ease-in-out infinite;
+}
+
+@keyframes pride-pulse {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.pride-theme .pride-shimmer {
+  background: var(--pride-gradient);
+  background-size: 200% 200%;
+  animation: pride-shimmer 3s ease-in-out infinite;
+}
+
+@keyframes pride-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Pride theme for accessibility - high contrast mode */
+@media (prefers-contrast: high) {
+  .pride-theme {
+    --pride-gradient: linear-gradient(
+      90deg,
+      #cc0000 0%,
+      #ff6600 16.66%,
+      #ffcc00 33.33%,
+      #006600 50%,
+      #0044cc 66.66%,
+      #660099 83.33%,
+      #cc0000 100%
+    );
+  }
+}
+
+/* Pride theme for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .pride-theme .pride-pulse,
+  .pride-theme .pride-shimmer {
+    animation: none;
+  }
+}
+
+/* Pride theme for dark mode compatibility */
+.dark.pride-theme {
+  --pride-gradient-subtle: linear-gradient(
+    90deg,
+    rgba(228, 3, 3, 0.2) 0%,
+    rgba(255, 140, 0, 0.2) 16.66%,
+    rgba(255, 237, 0, 0.2) 33.33%,
+    rgba(0, 128, 24, 0.2) 50%,
+    rgba(0, 102, 255, 0.2) 66.66%,
+    rgba(139, 0, 255, 0.2) 83.33%,
+    rgba(228, 3, 3, 0.2) 100%
+  );
+}
+
+/* Pride theme indicator */
+.pride-theme::before {
+  content: "🏳️‍🌈";
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 9999;
+  font-size: 20px;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Pride theme for mobile devices */
+@media (max-width: 768px) {
+  .pride-theme::before {
+    font-size: 16px;
+    top: 5px;
+    right: 5px;
+  }
+}

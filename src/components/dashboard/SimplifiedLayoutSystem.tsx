@@ -15,6 +15,7 @@ import {
   EyeOff
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { DashboardPersonalizationService } from '@/services/DashboardPersonalizationService';
 
 export type LayoutPreset = '1-column' | '2-column' | '3-column';
 export type WidgetSize = 'small' | 'medium' | 'large';
@@ -116,12 +117,39 @@ export default function SimplifiedLayoutSystem({
 
   const [isCustomizing, setIsCustomizing] = useState(false);
   const [showPresetSelector, setShowPresetSelector] = useState(false);
+  const [resizingWidget, setResizingWidget] = useState<string | null>(null);
+  const [resizeStartPos, setResizeStartPos] = useState<{ x: number; y: number } | null>(null);
+  const [resizeStartSize, setResizeStartSize] = useState<string | null>(null);
 
-  // Save layout to localStorage whenever it changes
+  const personalizationService = DashboardPersonalizationService.getInstance();
+
+  // Save layout to localStorage and sync with API whenever it changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('upsc-simplified-layout', JSON.stringify(currentLayout));
       onLayoutChange(currentLayout);
+
+      // Debounced API sync to avoid too many requests
+      const timeoutId = setTimeout(async () => {
+        try {
+          await fetch('/api/user/preferences', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              preferences: {
+                dashboardLayout: currentLayout
+              }
+            }),
+          });
+        } catch (error) {
+          console.warn('Failed to sync layout to server:', error);
+          // Continue with local storage - don't block user experience
+        }
+      }, 1000); // 1 second debounce
+
+      return () => clearTimeout(timeoutId);
     }
   }, [currentLayout, onLayoutChange]);
 
@@ -152,7 +180,17 @@ export default function SimplifiedLayoutSystem({
     }));
     
     const widget = currentLayout.widgets.find(w => w.id === widgetId);
-    toast.success(`${widget?.name} ${widget?.visible ? 'hidden' : 'shown'}`);
+    const newVisibility = !widget?.visible;
+
+    // Track behavior
+    personalizationService.trackBehavior('widget-visibility-toggled', {
+      widgetId,
+      widgetName: widget?.name,
+      newVisibility,
+      timestamp: new Date().toISOString()
+    });
+
+    toast.success(`${widget?.name} ${newVisibility ? 'shown' : 'hidden'}`);
   };
 
   const changeWidgetSize = (widgetId: string, size: WidgetSize) => {
@@ -226,6 +264,173 @@ export default function SimplifiedLayoutSystem({
   const saveLayout = () => {
     // Layout is automatically saved, but provide user feedback
     toast.success('Layout saved successfully!');
+  };
+
+  // Enhanced drag and drop functionality
+  const handleDragStart = (e: React.DragEvent, widgetId: string) => {
+    if (!isCustomizing) return;
+
+    e.dataTransfer.setData('text/plain', widgetId);
+    e.dataTransfer.effectAllowed = 'move';
+
+    // Add visual feedback
+    const target = e.currentTarget as HTMLElement;
+    target.style.opacity = '0.5';
+  };
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    const target = e.currentTarget as HTMLElement;
+    target.style.opacity = '1';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    if (!isCustomizing) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e: React.DragEvent, targetWidgetId: string) => {
+    if (!isCustomizing) return;
+    e.preventDefault();
+
+    const draggedWidgetId = e.dataTransfer.getData('text/plain');
+    if (draggedWidgetId === targetWidgetId) return;
+
+    setCurrentLayout(prev => {
+      const widgets = [...prev.widgets];
+      const draggedIndex = widgets.findIndex(w => w.id === draggedWidgetId);
+      const targetIndex = widgets.findIndex(w => w.id === targetWidgetId);
+
+      if (draggedIndex === -1 || targetIndex === -1) return prev;
+
+      // Remove dragged widget and insert at target position
+      const [draggedWidget] = widgets.splice(draggedIndex, 1);
+      widgets.splice(targetIndex, 0, draggedWidget);
+
+      // Update order
+      widgets.forEach((widget, index) => {
+        widget.order = index;
+      });
+
+      return {
+        ...prev,
+        widgets
+      };
+    });
+
+    toast.success('Widget reordered!');
+  };
+
+  // Resize functionality
+  const handleResizeStart = (e: React.MouseEvent, widgetId: string) => {
+    if (!isCustomizing) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const widget = currentLayout.widgets.find(w => w.id === widgetId);
+    if (!widget) return;
+
+    setResizingWidget(widgetId);
+    setResizeStartPos({ x: e.clientX, y: e.clientY });
+    setResizeStartSize(widget.size);
+
+    // Add global mouse event listeners
+    document.addEventListener('mousemove', handleResizeMove);
+    document.addEventListener('mouseup', handleResizeEnd);
+  };
+
+  const handleResizeMove = (e: MouseEvent) => {
+    if (!resizingWidget || !resizeStartPos || !resizeStartSize) return;
+
+    const deltaX = e.clientX - resizeStartPos.x;
+    const deltaY = e.clientY - resizeStartPos.y;
+
+    // Determine new size based on movement
+    let newSize = resizeStartSize;
+
+    // Simple resize logic - increase size if moving right/down, decrease if moving left/up
+    const threshold = 50; // pixels
+
+    if (Math.abs(deltaX) > threshold || Math.abs(deltaY) > threshold) {
+      const sizeOrder = ['small', 'medium', 'large'];
+      const currentIndex = sizeOrder.indexOf(resizeStartSize);
+
+      if ((deltaX > threshold || deltaY > threshold) && currentIndex < sizeOrder.length - 1) {
+        newSize = sizeOrder[currentIndex + 1];
+      } else if ((deltaX < -threshold || deltaY < -threshold) && currentIndex > 0) {
+        newSize = sizeOrder[currentIndex - 1];
+      }
+    }
+
+    // Update widget size if it changed
+    if (newSize !== resizeStartSize) {
+      setCurrentLayout(prev => ({
+        ...prev,
+        widgets: prev.widgets.map(widget =>
+          widget.id === resizingWidget
+            ? { ...widget, size: newSize as 'small' | 'medium' | 'large' }
+            : widget
+        )
+      }));
+
+      setResizeStartSize(newSize);
+      setResizeStartPos({ x: e.clientX, y: e.clientY });
+    }
+  };
+
+  const handleResizeEnd = () => {
+    if (resizingWidget) {
+      toast.success('Widget resized!');
+    }
+
+    setResizingWidget(null);
+    setResizeStartPos(null);
+    setResizeStartSize(null);
+
+    // Remove global mouse event listeners
+    document.removeEventListener('mousemove', handleResizeMove);
+    document.removeEventListener('mouseup', handleResizeEnd);
+  };
+
+  // Cleanup resize listeners on unmount
+  useEffect(() => {
+    return () => {
+      document.removeEventListener('mousemove', handleResizeMove);
+      document.removeEventListener('mouseup', handleResizeEnd);
+    };
+  }, []);
+
+  // Cycle widget size (alternative to drag resize)
+  const cycleWidgetSize = (widgetId: string) => {
+    if (!isCustomizing) return;
+
+    const sizeOrder: ('small' | 'medium' | 'large')[] = ['small', 'medium', 'large'];
+    const widget = currentLayout.widgets.find(w => w.id === widgetId);
+    const currentIndex = sizeOrder.indexOf(widget?.size || 'medium');
+    const nextIndex = (currentIndex + 1) % sizeOrder.length;
+    const newSize = sizeOrder[nextIndex];
+
+    setCurrentLayout(prev => ({
+      ...prev,
+      widgets: prev.widgets.map(widget => {
+        if (widget.id === widgetId) {
+          return { ...widget, size: newSize };
+        }
+        return widget;
+      })
+    }));
+
+    // Track behavior
+    personalizationService.trackBehavior('widget-resized', {
+      widgetId,
+      widgetName: widget?.name,
+      oldSize: widget?.size,
+      newSize,
+      timestamp: new Date().toISOString()
+    });
+
+    toast.success(`Widget resized to ${newSize}!`);
   };
 
   const visibleWidgets = currentLayout.widgets
@@ -382,6 +587,16 @@ export default function SimplifiedLayoutSystem({
                     Move Down
                   </button>
                 </div>
+
+                {/* Resize Controls */}
+                <div className="flex space-x-1 mt-2">
+                  <button
+                    onClick={() => cycleWidgetSize(widget.id)}
+                    className="flex-1 px-2 py-1 text-xs bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-800/30 text-purple-700 dark:text-purple-300 rounded transition-colors"
+                  >
+                    Resize ({widget.size})
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -393,12 +608,47 @@ export default function SimplifiedLayoutSystem({
         {visibleWidgets.map((widget) => {
           const WidgetComponent = widget.component;
           const sizeClass = WIDGET_SIZES[widget.size].class;
-          
+
           return (
             <div
               key={widget.id}
-              className={`${sizeClass} transition-all duration-300 ease-in-out`}
+              draggable={isCustomizing}
+              onDragStart={(e) => handleDragStart(e, widget.id)}
+              onDragEnd={handleDragEnd}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, widget.id)}
+              className={`
+                ${sizeClass}
+                transition-all duration-300 ease-in-out relative
+                ${isCustomizing ? 'cursor-move border-2 border-dashed border-blue-300 dark:border-blue-600 hover:border-blue-500 dark:hover:border-blue-400' : ''}
+                ${isCustomizing ? 'hover:shadow-lg hover:scale-105' : ''}
+                ${resizingWidget === widget.id ? 'ring-2 ring-purple-500 ring-opacity-50' : ''}
+              `}
+              title={isCustomizing ? `Drag to reorder ${widget.name}` : undefined}
             >
+              {isCustomizing && (
+                <>
+                  <div className="absolute top-2 right-2 z-10 bg-blue-500 text-white text-xs px-2 py-1 rounded-full opacity-75">
+                    Drag me
+                  </div>
+
+                  {/* Resize Handle */}
+                  <div
+                    className="absolute bottom-2 right-2 z-10 w-4 h-4 bg-purple-500 hover:bg-purple-600 cursor-se-resize rounded-tl-lg opacity-75 hover:opacity-100 transition-all"
+                    onMouseDown={(e) => handleResizeStart(e, widget.id)}
+                    title="Drag to resize"
+                  >
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-2 h-2 border-r border-b border-white transform rotate-45"></div>
+                    </div>
+                  </div>
+
+                  {/* Size indicator */}
+                  <div className="absolute top-2 left-2 z-10 bg-purple-500 text-white text-xs px-2 py-1 rounded-full opacity-75">
+                    {widget.size}
+                  </div>
+                </>
+              )}
               <WidgetComponent />
             </div>
           );
