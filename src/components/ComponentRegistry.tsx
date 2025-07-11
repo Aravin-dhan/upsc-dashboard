@@ -1,7 +1,9 @@
 'use client';
 
 import React from 'react';
-import { Calendar, BookOpen, TrendingUp, Target, Brain, Heart, Star, Users, FileText, Zap, BarChart3, Clock } from 'lucide-react';
+import { Calendar, BookOpen, TrendingUp, Target, Brain, Heart, Star, Users, FileText, Zap, BarChart3, Clock, ArrowRight, ExternalLink } from 'lucide-react';
+import { useDashboardData } from '@/hooks/useDashboardData';
+import { useRouter } from 'next/navigation';
 
 /**
  * REVOLUTIONARY COMPONENT REGISTRY SYSTEM
@@ -10,84 +12,187 @@ import { Calendar, BookOpen, TrendingUp, Target, Brain, Heart, Star, Users, File
  * all components as simple, reliable React components that ALWAYS work.
  */
 
-// Simple, bulletproof widget components
-const CommandCenterWidget = () => (
-  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
-    <div className="flex items-center mb-4">
-      <Zap className="h-6 w-6 text-blue-600 mr-3" />
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Command Center</h2>
-    </div>
-    <div className="space-y-3">
-      <div className="flex justify-between items-center">
-        <span className="text-gray-600 dark:text-gray-400">Study Streak</span>
-        <span className="font-semibold text-green-600">7 days</span>
-      </div>
-      <div className="flex justify-between items-center">
-        <span className="text-gray-600 dark:text-gray-400">Today's Goal</span>
-        <span className="font-semibold text-blue-600">6/8 hours</span>
-      </div>
-      <div className="flex justify-between items-center">
-        <span className="text-gray-600 dark:text-gray-400">Progress</span>
-        <span className="font-semibold text-purple-600">75%</span>
-      </div>
-      <button className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md text-sm transition-colors">
-        View Details
-      </button>
-    </div>
-  </div>
-);
+// Real data-driven widget components
+const CommandCenterWidget = () => {
+  const { data, isLoading } = useDashboardData();
+  const router = useRouter();
 
-const TodaysScheduleWidget = () => (
-  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
-    <div className="flex items-center mb-4">
-      <Calendar className="h-6 w-6 text-green-600 mr-3" />
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Today's Schedule</h2>
-    </div>
-    <div className="space-y-3">
-      <div className="flex items-center">
-        <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-        <span className="text-gray-700 dark:text-gray-300">9:00 AM - History</span>
+  if (isLoading) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
+        <div className="animate-pulse">
+          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
+          <div className="space-y-3">
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          </div>
+        </div>
       </div>
-      <div className="flex items-center">
-        <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-        <span className="text-gray-700 dark:text-gray-300">11:00 AM - Polity</span>
-      </div>
-      <div className="flex items-center">
-        <div className="w-2 h-2 bg-yellow-500 rounded-full mr-3"></div>
-        <span className="text-gray-700 dark:text-gray-300">2:00 PM - Current Affairs</span>
-      </div>
-      <button className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md text-sm transition-colors">
-        Manage Schedule
-      </button>
-    </div>
-  </div>
-);
+    );
+  }
 
-const PerformanceOverviewWidget = () => (
-  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
-    <div className="flex items-center mb-4">
-      <TrendingUp className="h-6 w-6 text-purple-600 mr-3" />
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Performance Overview</h2>
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
+      <div className="flex items-center mb-4">
+        <Zap className="h-6 w-6 text-blue-600 mr-3" />
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Command Center</h2>
+      </div>
+      <div className="space-y-3">
+        <div className="flex justify-between items-center">
+          <span className="text-gray-600 dark:text-gray-400">Study Streak</span>
+          <span className="font-semibold text-green-600">{data?.studyStreak || 0} days</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-gray-600 dark:text-gray-400">Today's Goal</span>
+          <span className="font-semibold text-blue-600">
+            {data?.todayGoal.completed || 0}/{data?.todayGoal.total || 8} hours
+          </span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-gray-600 dark:text-gray-400">Overall Progress</span>
+          <span className="font-semibold text-purple-600">{data?.overallProgress || 0}%</span>
+        </div>
+        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-2">
+          <div
+            className="bg-purple-600 h-2 rounded-full transition-all duration-300"
+            style={{ width: `${data?.overallProgress || 0}%` }}
+          ></div>
+        </div>
+        <button
+          onClick={() => router.push('/analytics')}
+          className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md text-sm transition-colors flex items-center justify-center"
+        >
+          View Analytics <ArrowRight className="h-4 w-4 ml-2" />
+        </button>
+      </div>
     </div>
-    <div className="space-y-3">
-      <div className="flex justify-between items-center">
-        <span className="text-gray-600 dark:text-gray-400">Mock Tests</span>
-        <span className="font-semibold text-blue-600">12 completed</span>
+  );
+};
+
+const TodaysScheduleWidget = () => {
+  const { data, isLoading } = useDashboardData();
+  const router = useRouter();
+
+  if (isLoading) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
+        <div className="animate-pulse">
+          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
+          <div className="space-y-3">
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          </div>
+        </div>
       </div>
-      <div className="flex justify-between items-center">
-        <span className="text-gray-600 dark:text-gray-400">Average Score</span>
-        <span className="font-semibold text-green-600">78%</span>
+    );
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed': return 'bg-green-500';
+      case 'in-progress': return 'bg-blue-500';
+      case 'pending': return 'bg-yellow-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
+      <div className="flex items-center mb-4">
+        <Calendar className="h-6 w-6 text-green-600 mr-3" />
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Today's Schedule</h2>
       </div>
-      <div className="flex justify-between items-center">
-        <span className="text-gray-600 dark:text-gray-400">Rank</span>
-        <span className="font-semibold text-purple-600">#245</span>
+      <div className="space-y-3">
+        {data?.todaySchedule.slice(0, 3).map((item, index) => (
+          <div key={index} className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className={`w-2 h-2 ${getStatusColor(item.status)} rounded-full mr-3`}></div>
+              <div>
+                <span className="text-gray-700 dark:text-gray-300 text-sm">{item.time}</span>
+                <div className="text-gray-900 dark:text-white font-medium">{item.subject}</div>
+              </div>
+            </div>
+            <span className={`text-xs px-2 py-1 rounded-full ${
+              item.status === 'completed' ? 'bg-green-100 text-green-800' :
+              item.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
+              'bg-yellow-100 text-yellow-800'
+            }`}>
+              {item.status.replace('-', ' ')}
+            </span>
+          </div>
+        ))}
+        <button
+          onClick={() => router.push('/calendar')}
+          className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md text-sm transition-colors flex items-center justify-center"
+        >
+          View Full Schedule <ExternalLink className="h-4 w-4 ml-2" />
+        </button>
       </div>
-      <button className="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md text-sm transition-colors">
-        View Analytics
-      </button>
     </div>
-  </div>
-);
+  );
+};
+
+const PerformanceOverviewWidget = () => {
+  const { data, isLoading } = useDashboardData();
+  const router = useRouter();
+
+  if (isLoading) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
+        <div className="animate-pulse">
+          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
+          <div className="space-y-3">
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const getTrendIcon = (trend: string) => {
+    switch (trend) {
+      case 'up': return '↗️';
+      case 'down': return '↘️';
+      default: return '→';
+    }
+  };
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
+      <div className="flex items-center mb-4">
+        <TrendingUp className="h-6 w-6 text-purple-600 mr-3" />
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Performance Overview</h2>
+      </div>
+      <div className="space-y-3">
+        <div className="flex justify-between items-center">
+          <span className="text-gray-600 dark:text-gray-400">Mock Tests</span>
+          <span className="font-semibold text-blue-600">{data?.mockTests.completed || 0} completed</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-gray-600 dark:text-gray-400">Average Score</span>
+          <div className="flex items-center">
+            <span className="font-semibold text-green-600">{data?.mockTests.averageScore || 0}%</span>
+            <span className="ml-1">{getTrendIcon(data?.mockTests.trend || 'stable')}</span>
+          </div>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-gray-600 dark:text-gray-400">Current Rank</span>
+          <span className="font-semibold text-purple-600">#{data?.mockTests.rank || 0}</span>
+        </div>
+        <button
+          onClick={() => router.push('/analytics')}
+          className="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md text-sm transition-colors flex items-center justify-center"
+        >
+          View Detailed Analytics <BarChart3 className="h-4 w-4 ml-2" />
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const SyllabusTrackerWidget = () => (
   <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">

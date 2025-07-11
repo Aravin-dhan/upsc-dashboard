@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 
+// Enhanced AI Configuration with Gemini 2.5 Flash
+const AI_CONFIG = {
+  model: 'gemini-2.5-flash',
+  apiKey: process.env.GEMINI_API_KEY || 'AIzaSyDhuFGySigse5Yk8K2dMcQ8Jxv8_Je1bRA',
+  maxTokens: 4096,
+  temperature: 0.7,
+  timeout: 10000, // 10 seconds timeout
+};
+
 interface AIAssistantRequest {
   message: string;
   context?: {
