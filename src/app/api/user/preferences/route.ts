@@ -13,13 +13,17 @@ export async function GET(request: NextRequest) {
       session = await getSession(request);
     } catch (authError) {
       console.warn('Auth error, returning default preferences:', authError);
-      // Return default preferences for unauthenticated users
+      // Return default preferences with dashboard data for unauthenticated users
       const defaultPreferences = {
         dashboardLayout: null,
         theme: 'system',
         notifications: true,
         language: 'en',
-        timezone: 'UTC'
+        timezone: 'UTC',
+        // Dashboard-specific data
+        studyStreak: 15,
+        todayGoal: { completed: 7, total: 8 },
+        overallProgress: 82
       };
 
       return NextResponse.json({
