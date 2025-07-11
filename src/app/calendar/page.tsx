@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  Calendar as CalendarIcon, Plus, Download, Upload, 
+import {
+  Calendar as CalendarIcon, Plus, Download, Upload,
   ChevronLeft, ChevronRight, Clock, MapPin, Users,
-  Edit, Trash2, Save, X, FileText, AlertCircle
+  Edit, Trash2, Save, X, FileText, AlertCircle, CheckCircle, PlayCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { createEvent, EventAttributes } from 'ics';
+import { useTodaySchedule } from '@/hooks/useTodaySchedule';
 
 interface CalendarEvent {
   id: string;
@@ -46,6 +47,183 @@ interface StudySchedule {
   subjects: string[];
   createdAt: string;
   updatedAt: string;
+}
+
+// Today's Schedule Component for Calendar Page
+function TodayScheduleSection() {
+  const { data, isLoading, error, markAsCompleted, markAsInProgress, markAsPending, refresh } = useTodaySchedule();
+
+  if (isLoading) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div className="animate-pulse">
+          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-4 w-48"></div>
+          <div className="space-y-3">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="flex items-center space-x-3">
+                <div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                <div className="flex-1">
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-1"></div>
+                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                </div>
+                <div className="w-20 h-6 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
+            <CalendarIcon className="h-6 w-6 text-red-600 mr-3" />
+            Today's Schedule
+          </h2>
+          <button
+            onClick={refresh}
+            className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
+          >
+            Retry
+          </button>
+        </div>
+        <div className="text-center py-8">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <p className="text-red-600 mb-2">Failed to load today's schedule</p>
+          <p className="text-gray-500 text-sm">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'completed': return <CheckCircle className="h-5 w-5 text-green-600" />;
+      case 'in-progress': return <PlayCircle className="h-5 w-5 text-blue-600" />;
+      default: return <Clock className="h-5 w-5 text-gray-400" />;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'in-progress': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+    }
+  };
+
+  const handleStatusChange = async (itemId: string, newStatus: string) => {
+    try {
+      switch (newStatus) {
+        case 'completed':
+          await markAsCompleted(itemId);
+          toast.success('Marked as completed!');
+          break;
+        case 'in-progress':
+          await markAsInProgress(itemId);
+          toast.success('Marked as in progress!');
+          break;
+        case 'pending':
+          await markAsPending(itemId);
+          toast.success('Marked as pending!');
+          break;
+      }
+    } catch (error) {
+      toast.error('Failed to update status');
+      console.error('Failed to update status:', error);
+    }
+  };
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
+          <CalendarIcon className="h-6 w-6 text-blue-600 mr-3" />
+          Today's Schedule
+        </h2>
+        <div className="flex items-center space-x-4">
+          {data?.stats && (
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              {data.stats.completed}/{data.stats.total} completed ({data.stats.completionRate}%)
+            </div>
+          )}
+          <button
+            onClick={refresh}
+            className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
+          >
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      {data?.schedule && data.schedule.length > 0 ? (
+        <div className="space-y-4">
+          {data.schedule.map((item) => (
+            <div key={item.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className="flex items-center space-x-4 flex-1">
+                <div className="flex items-center space-x-2">
+                  {getStatusIcon(item.status)}
+                  <span className="font-medium text-gray-900 dark:text-white">{item.time}</span>
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900 dark:text-white">{item.subject}</h3>
+                  {item.topics && item.topics.length > 0 && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      {item.topics.join(', ')}
+                    </p>
+                  )}
+                  <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                    <span>{item.duration} minutes</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3">
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(item.status)}`}>
+                  {item.status.replace('-', ' ')}
+                </span>
+                <select
+                  value={item.status}
+                  onChange={(e) => handleStatusChange(item.id, e.target.value)}
+                  className="text-sm border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                >
+                  <option value="pending">Pending</option>
+                  <option value="in-progress">In Progress</option>
+                  <option value="completed">Completed</option>
+                </select>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-8">
+          <CalendarIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-400">No schedule items for today</p>
+        </div>
+      )}
+
+      {data?.stats && (
+        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Daily Progress</span>
+            <span className="text-sm font-bold text-blue-600 dark:text-blue-400">{data.stats.completionRate}%</span>
+          </div>
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+            <div
+              className="bg-blue-600 h-3 rounded-full transition-all duration-500"
+              style={{ width: `${data.stats.completionRate}%` }}
+            />
+          </div>
+          <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400 mt-2">
+            <span>{data.completedStudyTime} min completed</span>
+            <span>{data.totalStudyTime} min total</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function CalendarPage() {
@@ -384,6 +562,9 @@ export default function CalendarPage() {
           </div>
         </div>
       </div>
+
+      {/* Today's Schedule Section */}
+      <TodayScheduleSection />
 
       {/* Calendar Navigation */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">

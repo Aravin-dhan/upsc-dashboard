@@ -1,8 +1,16 @@
 'use client';
 
 import React from 'react';
-import { Calendar, BookOpen, TrendingUp, Target, Brain, Heart, Star, Users, FileText, Zap, BarChart3, Clock, ArrowRight, ExternalLink } from 'lucide-react';
+import { Calendar, BookOpen, TrendingUp, Target, Brain, Heart, Star, Users, FileText, Zap, BarChart3, Clock, ArrowRight, ExternalLink, CheckCircle, PlayCircle, AlertCircle, Bookmark, Eye, EyeOff } from 'lucide-react';
 import { useDashboardData } from '@/hooks/useDashboardData';
+import { useTodaySchedule } from '@/hooks/useTodaySchedule';
+import { usePerformanceData } from '@/hooks/usePerformanceData';
+import { useSyllabusData } from '@/hooks/useSyllabusData';
+import { useRevisionData } from '@/hooks/useRevisionData';
+import { useCurrentAffairs } from '@/hooks/useCurrentAffairs';
+import { useKnowledgeBase } from '@/hooks/useKnowledgeBase';
+import { useWellnessData } from '@/hooks/useWellnessData';
+import { useAIInsights } from '@/hooks/useAIInsights';
 import { useRouter } from 'next/navigation';
 
 /**
@@ -71,7 +79,7 @@ const CommandCenterWidget = () => {
 };
 
 const TodaysScheduleWidget = () => {
-  const { data, isLoading } = useDashboardData();
+  const { data, isLoading, error, markAsCompleted, markAsInProgress } = useTodaySchedule();
   const router = useRouter();
 
   if (isLoading) {
@@ -84,6 +92,21 @@ const TodaysScheduleWidget = () => {
             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
+        <div className="flex items-center mb-4">
+          <Calendar className="h-6 w-6 text-red-600 mr-3" />
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Today's Schedule</h2>
+        </div>
+        <div className="text-center py-4">
+          <p className="text-red-600 mb-2">Failed to load schedule</p>
+          <p className="text-gray-500 text-sm">{error}</p>
         </div>
       </div>
     );
@@ -98,44 +121,91 @@ const TodaysScheduleWidget = () => {
     }
   };
 
+  const handleStatusClick = async (itemId: string, currentStatus: string) => {
+    try {
+      if (currentStatus === 'pending') {
+        await markAsInProgress(itemId);
+      } else if (currentStatus === 'in-progress') {
+        await markAsCompleted(itemId);
+      }
+      // If completed, don't change (or could cycle back to pending)
+    } catch (error) {
+      console.error('Failed to update status:', error);
+    }
+  };
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
-      <div className="flex items-center mb-4">
-        <Calendar className="h-6 w-6 text-green-600 mr-3" />
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Today's Schedule</h2>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center">
+          <Calendar className="h-6 w-6 text-green-600 mr-3" />
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Today's Schedule</h2>
+        </div>
+        {data?.stats && (
+          <div className="text-sm text-gray-500">
+            {data.stats.completed}/{data.stats.total} completed
+          </div>
+        )}
       </div>
+
       <div className="space-y-3">
-        {data?.todaySchedule.slice(0, 3).map((item, index) => (
-          <div key={index} className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className={`w-2 h-2 ${getStatusColor(item.status)} rounded-full mr-3`}></div>
-              <div>
-                <span className="text-gray-700 dark:text-gray-300 text-sm">{item.time}</span>
+        {data?.schedule.slice(0, 3).map((item) => (
+          <div key={item.id} className="flex items-center justify-between group">
+            <div className="flex items-center flex-1">
+              <button
+                onClick={() => handleStatusClick(item.id, item.status)}
+                className={`w-3 h-3 ${getStatusColor(item.status)} rounded-full mr-3 hover:scale-110 transition-transform cursor-pointer`}
+                title={`Click to update status (${item.status})`}
+              />
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-700 dark:text-gray-300 text-sm font-medium">{item.time}</span>
+                  <span className="text-xs text-gray-500">{item.duration}min</span>
+                </div>
                 <div className="text-gray-900 dark:text-white font-medium">{item.subject}</div>
+                {item.topics && item.topics.length > 0 && (
+                  <p className="text-gray-500 text-xs mt-1">{item.topics.join(', ')}</p>
+                )}
               </div>
             </div>
-            <span className={`text-xs px-2 py-1 rounded-full ${
-              item.status === 'completed' ? 'bg-green-100 text-green-800' :
-              item.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
-              'bg-yellow-100 text-yellow-800'
+            <span className={`text-xs px-2 py-1 rounded-full ml-2 ${
+              item.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+              item.status === 'in-progress' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+              'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
             }`}>
               {item.status.replace('-', ' ')}
             </span>
           </div>
         ))}
-        <button
-          onClick={() => router.push('/calendar')}
-          className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md text-sm transition-colors flex items-center justify-center"
-        >
-          View Full Schedule <ExternalLink className="h-4 w-4 ml-2" />
-        </button>
       </div>
+
+      {data?.stats && (
+        <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600 dark:text-gray-400">Progress</span>
+            <span className="font-medium text-gray-900 dark:text-white">{data.stats.completionRate}%</span>
+          </div>
+          <div className="mt-2 w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+            <div
+              className="bg-green-600 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${data.stats.completionRate}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      <button
+        onClick={() => router.push('/calendar')}
+        className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md text-sm transition-colors flex items-center justify-center"
+      >
+        View Full Schedule <ExternalLink className="h-4 w-4 ml-2" />
+      </button>
     </div>
   );
 };
 
 const PerformanceOverviewWidget = () => {
-  const { data, isLoading } = useDashboardData();
+  const { data, isLoading, error, refresh } = usePerformanceData();
   const router = useRouter();
 
   if (isLoading) {
@@ -153,6 +223,24 @@ const PerformanceOverviewWidget = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
+        <div className="flex items-center mb-4">
+          <TrendingUp className="h-6 w-6 text-red-600 mr-3" />
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Performance Overview</h2>
+        </div>
+        <div className="text-center py-4">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <p className="text-red-600 mb-2">Failed to load performance data</p>
+          <button onClick={refresh} className="text-blue-600 hover:text-blue-700 text-sm">
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const getTrendIcon = (trend: string) => {
     switch (trend) {
       case 'up': return '↗️';
@@ -161,28 +249,53 @@ const PerformanceOverviewWidget = () => {
     }
   };
 
+  const getTrendColor = (trend: string) => {
+    return trend === 'up' ? 'text-green-600' : trend === 'down' ? 'text-red-600' : 'text-gray-600';
+  };
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
-      <div className="flex items-center mb-4">
-        <TrendingUp className="h-6 w-6 text-purple-600 mr-3" />
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Performance Overview</h2>
-      </div>
-      <div className="space-y-3">
-        <div className="flex justify-between items-center">
-          <span className="text-gray-600 dark:text-gray-400">Mock Tests</span>
-          <span className="font-semibold text-blue-600">{data?.mockTests.completed || 0} completed</span>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center">
+          <TrendingUp className="h-6 w-6 text-purple-600 mr-3" />
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Performance Overview</h2>
         </div>
-        <div className="flex justify-between items-center">
-          <span className="text-gray-600 dark:text-gray-400">Average Score</span>
-          <div className="flex items-center">
-            <span className="font-semibold text-green-600">{data?.mockTests.averageScore || 0}%</span>
-            <span className="ml-1">{getTrendIcon(data?.mockTests.trend || 'stable')}</span>
+        <button onClick={refresh} className="text-purple-600 hover:text-purple-700 text-sm">
+          Refresh
+        </button>
+      </div>
+
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+            <div className="text-2xl font-bold text-purple-600">{data?.overall.averageScore}%</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Average Score</div>
+          </div>
+          <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+            <div className="text-2xl font-bold text-green-600">#{data?.overall.rank}</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Current Rank</div>
           </div>
         </div>
-        <div className="flex justify-between items-center">
-          <span className="text-gray-600 dark:text-gray-400">Current Rank</span>
-          <span className="font-semibold text-purple-600">#{data?.mockTests.rank || 0}</span>
+
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Subject Performance</h3>
+          {data?.subjects.slice(0, 3).map((subject) => (
+            <div key={subject.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded">
+              <span className="text-gray-700 dark:text-gray-300 font-medium">{subject.subject}</span>
+              <div className="flex items-center space-x-2">
+                <div className="w-16 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                  <div
+                    className="bg-purple-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${subject.percentage}%` }}
+                  />
+                </div>
+                <span className="text-sm font-medium w-12 text-right">{subject.percentage}%</span>
+                <span className={`text-lg ${getTrendColor(subject.trend)}`}>{getTrendIcon(subject.trend)}</span>
+              </div>
+            </div>
+          ))}
         </div>
+
         <button
           onClick={() => router.push('/analytics')}
           className="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md text-sm transition-colors flex items-center justify-center"
