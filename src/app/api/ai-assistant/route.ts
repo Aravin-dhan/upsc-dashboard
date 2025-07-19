@@ -4,7 +4,7 @@ import { getSession } from '@/lib/auth';
 // Enhanced AI Configuration with Gemini 2.5 Flash
 const AI_CONFIG = {
   model: 'gemini-2.5-flash',
-  apiKey: process.env.GEMINI_API_KEY || 'AIzaSyDhuFGySigse5Yk8K2dMcQ8Jxv8_Je1bRA',
+  apiKey: process.env.GEMINI_API_KEY, // Removed hardcoded key for security
   maxTokens: 4096,
   temperature: 0.7,
   timeout: 10000, // 10 seconds timeout
@@ -174,15 +174,30 @@ export async function POST(request: NextRequest) {
     }
 
     const body: AIAssistantRequest = await request.json();
-    
+
     if (!body.message) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: "Message is required" 
+        {
+          success: false,
+          error: "Message is required"
         },
         { status: 400 }
       );
+    }
+
+    // Check if AI service is available
+    if (!AI_CONFIG.apiKey) {
+      return NextResponse.json({
+        success: true,
+        response: {
+          message: "I'm currently unavailable as the AI service is being configured. However, I can still help you navigate the platform and provide basic assistance. Please try again later for advanced AI features.",
+          actions: [
+            { type: 'NAVIGATE', payload: { url: '/dashboard' }, description: 'Go to Dashboard' },
+            { type: 'NAVIGATE', payload: { url: '/practice' }, description: 'Start Practice Tests' }
+          ],
+          suggestions: ['Go to Dashboard', 'Practice Tests', 'Study Materials', 'Contact Support']
+        }
+      });
     }
 
     const aiResponse = await processAIRequest(body);

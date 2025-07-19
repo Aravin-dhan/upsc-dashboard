@@ -2,16 +2,33 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { User, UserWithPassword, RegisterData, Tenant, generateId, generateTenantId, hashPassword, createDefaultTenant } from './auth';
 
-// Database file paths - handle Vercel serverless environment
+// Database configuration - Use Supabase for production
 const isVercel = process.env.VERCEL === '1';
+const useSupabase = process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY;
+
+// Fallback to file-based storage only for development
 const DATA_DIR = isVercel ? '/tmp/data' : path.join(process.cwd(), 'data');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const TENANTS_FILE = path.join(DATA_DIR, 'tenants.json');
 const SESSIONS_FILE = path.join(DATA_DIR, 'sessions.json');
-const USER_DATA_DIR = path.join(DATA_DIR, 'user-data'); // Tenant-scoped user data
+const USER_DATA_DIR = path.join(DATA_DIR, 'user-data');
 
 // Source data directory for initial data in Vercel
 const SOURCE_DATA_DIR = path.join(process.cwd(), 'data');
+
+// Supabase client for production
+let supabase: any = null;
+if (useSupabase) {
+  try {
+    const { createClient } = require('@supabase/supabase-js');
+    supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_ANON_KEY!
+    );
+  } catch (error) {
+    console.warn('Supabase client initialization failed, falling back to file storage:', error);
+  }
+}
 
 // Ensure data directory exists
 async function ensureDataDir(): Promise<void> {
@@ -150,6 +167,28 @@ export class UserDatabase {
   }
   
   static async findByEmail(email: string): Promise<UserWithPassword | null> {
+    // Use Supabase in production
+    if (useSupabase && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('email', email.toLowerCase())
+          .single();
+
+        if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+          console.error('Supabase findByEmail error:', error);
+          throw error;
+        }
+
+        return data || null;
+      } catch (error) {
+        console.error('Supabase findByEmail failed, falling back to file storage:', error);
+        // Fall through to file storage
+      }
+    }
+
+    // Fallback to file storage
     const users = await this.readUsers();
     return users.find(user => user.email.toLowerCase() === email.toLowerCase()) || null;
   }
@@ -172,6 +211,68 @@ export class UserDatabase {
   }
   
   static async createUser(userData: RegisterData): Promise<User> {
+    // Use Supabase in production
+    if (useSupabase && supabase) {
+      try {
+        // Check if email already exists
+        const existingUser = await this.findByEmail(userData.email);
+        if (existingUser) {
+          throw new Error('Email already exists');
+        }
+
+        // Create user in Supabase Auth
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: userData.email.toLowerCase(),
+          password: userData.password,
+          options: {
+            data: {
+              name: userData.name,
+              role: userData.role || 'student'
+            }
+          }
+        });
+
+        if (authError) {
+          throw authError;
+        }
+
+        // Create profile in profiles table
+        const newUser = {
+          id: authData.user.id,
+          email: userData.email.toLowerCase(),
+          name: userData.name,
+          role: userData.role || 'student',
+          tenantId: userData.tenantId || 'default',
+          tenantRole: 'member',
+          tenants: [userData.tenantId || 'default'],
+          createdAt: new Date().toISOString(),
+          isActive: true,
+          preferences: {
+            defaultTenant: userData.tenantId || 'default',
+            theme: 'light',
+            language: 'en'
+          }
+        };
+
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([newUser]);
+
+        if (profileError) {
+          console.error('Profile creation error:', profileError);
+          // Try to clean up auth user if profile creation fails
+          await supabase.auth.admin.deleteUser(authData.user.id);
+          throw profileError;
+        }
+
+        return newUser;
+      } catch (error) {
+        console.error('Supabase createUser failed, falling back to file storage:', error);
+        // Fall through to file storage
+      }
+    }
+
+    // Fallback to file storage
     const users = await this.readUsers();
 
     // Check if email already exists

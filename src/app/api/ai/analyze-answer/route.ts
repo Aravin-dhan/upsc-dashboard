@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const apiKey = process.env.GEMINI_API_KEY || 'AIzaSyDhuFGySigse5Yk8K2dMcQ8Jxv8_Je1bRA';
+    const apiKey = process.env.GEMINI_API_KEY; // Removed hardcoded key for security
 
     // If no API key is configured, use fallback analysis
     if (!apiKey) {

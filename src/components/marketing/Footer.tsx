@@ -22,11 +22,11 @@ export default function Footer() {
     {
       title: 'Platform',
       links: [
-        { name: 'Features', href: '#features' },
-        { name: 'Pricing', href: '#pricing' },
-        { name: 'Success Stories', href: '#testimonials' },
+        { name: 'Features', href: '/features' },
+        { name: 'Pricing', href: '/pricing' },
+        { name: 'About Us', href: '/about' },
         { name: 'Demo', href: '/demo' },
-        { name: 'API Documentation', href: '/docs' }
+        { name: 'Documentation', href: '/docs' }
       ]
     },
     {
@@ -62,11 +62,11 @@ export default function Footer() {
   ];
 
   const socialLinks = [
-    { name: 'Facebook', icon: Facebook, href: 'https://facebook.com/upscdashboard' },
-    { name: 'Twitter', icon: Twitter, href: 'https://twitter.com/upscdashboard' },
-    { name: 'Instagram', icon: Instagram, href: 'https://instagram.com/upscdashboard' },
-    { name: 'LinkedIn', icon: Linkedin, href: 'https://linkedin.com/company/upscdashboard' },
-    { name: 'YouTube', icon: Youtube, href: 'https://youtube.com/upscdashboard' }
+    { name: 'Contact Support', icon: Facebook, href: '/contact' },
+    { name: 'Community Forum', icon: Twitter, href: '/community' },
+    { name: 'Help Center', icon: Instagram, href: '/support' },
+    { name: 'System Status', icon: Linkedin, href: '/status' },
+    { name: 'Documentation', icon: Youtube, href: '/docs' }
   ];
 
   const legalLinks = [

@@ -1,4 +1,4 @@
-# UPSC Dashboard
+# UPSC Dashboard v0.1.1
 
 A comprehensive dashboard to organize your UPSC Civil Services preparation with progress tracking, analytics, and smart revision system.
 

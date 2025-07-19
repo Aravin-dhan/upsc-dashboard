@@ -19,48 +19,11 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    // Mock users data (replace with actual database call)
-    const mockUsers = [
-      {
-        id: '1',
-        email: 'admin@upsc.local',
-        name: 'Admin User',
-        role: 'admin',
-        tenantId: 'default',
-        tenantRole: 'admin',
-        isActive: true,
-        createdAt: '2024-01-01T00:00:00Z',
-        lastLogin: new Date().toISOString(),
-        planType: 'pro'
-      },
-      {
-        id: '2',
-        email: 'teacher@upsc.local',
-        name: 'Teacher User',
-        role: 'teacher',
-        tenantId: 'default',
-        tenantRole: 'teacher',
-        isActive: true,
-        createdAt: '2024-02-01T00:00:00Z',
-        lastLogin: new Date(Date.now() - 86400000).toISOString(),
-        planType: 'pro'
-      },
-      {
-        id: '3',
-        email: 'student@upsc.local',
-        name: 'Student User',
-        role: 'student',
-        tenantId: 'default',
-        tenantRole: 'student',
-        isActive: true,
-        createdAt: '2024-03-01T00:00:00Z',
-        lastLogin: new Date(Date.now() - 3600000).toISOString(),
-        planType: 'free'
-      }
-    ];
+    // Get real users from database
+    const users = await UserDatabase.getAllUsers();
 
     // Remove sensitive information but keep essential admin data
-    const safeUsers = mockUsers.map(user => ({
+    const safeUsers = users.map(user => ({
       id: user.id,
       email: user.email,
       name: user.name,

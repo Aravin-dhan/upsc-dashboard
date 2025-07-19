@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   FileText, Clock, Users, Target, Play, Download,
   Star, Filter, Search, Calendar, Award, TrendingUp
@@ -19,47 +19,37 @@ export default function MockTestsPage() {
     { id: 'full-length', name: 'Full Length', count: 20 }
   ];
 
-  const mockTests = [
-    {
-      id: 1,
-      title: 'UPSC Prelims Mock Test 2024 - Set 1',
-      description: 'Comprehensive test covering all GS papers with detailed solutions',
-      category: 'Prelims',
-      difficulty: 'Medium',
-      questions: 100,
-      duration: 120,
-      attempts: 15420,
-      rating: 4.8,
-      isPremium: false,
-      tags: ['Current Affairs', 'History', 'Geography', 'Polity']
-    },
-    {
-      id: 2,
-      title: 'Mains Answer Writing Practice - Ethics',
-      description: 'Practice questions for Ethics paper with model answers',
-      category: 'Mains',
-      difficulty: 'Hard',
-      questions: 10,
-      duration: 180,
-      attempts: 8750,
-      rating: 4.9,
-      isPremium: true,
-      tags: ['Ethics', 'Case Studies', 'Answer Writing']
-    },
-    {
-      id: 3,
-      title: 'Geography Sectional Test',
-      description: 'Focused test on Indian and World Geography topics',
-      category: 'Sectional',
-      difficulty: 'Easy',
-      questions: 50,
-      duration: 60,
-      attempts: 12300,
-      rating: 4.6,
-      isPremium: false,
-      tags: ['Physical Geography', 'Human Geography', 'Economic Geography']
-    }
-  ];
+  // Production-ready: Tests will be loaded from database
+  const [tests, setTests] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // TODO: Load real tests from API
+    const loadTests = async () => {
+      try {
+        // For now, show empty state to remove mock data
+        setTests([]);
+      } catch (error) {
+        console.error('Failed to load tests:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadTests();
+  }, []);
+
+  // Show empty state for production
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300">Loading tests...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
@@ -151,9 +141,27 @@ export default function MockTestsPage() {
             </select>
           </div>
 
-          {/* Mock Tests Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockTests.map((test) => (
+          {/* Tests Grid - Coming Soon */}
+          <div className="text-center py-12">
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-8 max-w-md mx-auto">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                Mock Tests Coming Soon
+              </h3>
+              <p className="text-blue-800 dark:text-blue-200 mb-6">
+                We're preparing comprehensive mock tests with detailed analytics and performance tracking.
+              </p>
+              <a
+                href="/signup"
+                className="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Get Notified When Available
+              </a>
+            </div>
+          </div>
+
+          {/* Placeholder for when tests are available */}
+          <div className="hidden">
+            {tests.map((test) => (
               <div key={test.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 hover:shadow-lg transition-shadow">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center space-x-2">
