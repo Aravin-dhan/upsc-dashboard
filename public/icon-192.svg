@@ -1,0 +1,13 @@
+<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="192" height="192" rx="24" fill="#3b82f6"/>
+  <rect x="16" y="16" width="160" height="160" rx="16" fill="white"/>
+  
+  <!-- Book Icon -->
+  <path d="M48 64h96v80H48V64z" fill="#3b82f6"/>
+  <path d="M48 64h96v8H48v-8z" fill="#1e40af"/>
+  <path d="M96 64v80" stroke="#1e40af" stroke-width="2"/>
+  
+  <!-- UPSC Text -->
+  <text x="96" y="40" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">UPSC</text>
+  <text x="96" y="168" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">Dashboard</text>
+</svg>

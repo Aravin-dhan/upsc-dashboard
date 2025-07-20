@@ -1,1 +1,22 @@
-[]
+[
+  {
+    "id": "admin-default-001",
+    "email": "admin@upsc.local",
+    "name": "System Administrator",
+    "role": "admin",
+    "tenantId": "default",
+    "tenantRole": "owner",
+    "tenants": [
+      "default"
+    ],
+    "createdAt": "2025-01-20T00:00:00.000Z",
+    "isActive": true,
+    "passwordHash": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+    "salt": "upsc-salt-2024",
+    "preferences": {
+      "defaultTenant": "default",
+      "theme": "light",
+      "language": "en"
+    }
+  }
+]
