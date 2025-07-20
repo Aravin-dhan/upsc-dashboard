@@ -193,6 +193,15 @@ body {
   color: #d1d5db !important;
 }
 
+/* Improved light mode contrast for accessibility */
+.text-gray-600 {
+  color: #4b5563 !important;
+}
+
+.text-gray-700 {
+  color: #374151 !important;
+}
+
 .dark .bg-gray-100 {
   background-color: #1f2937 !important;
 }

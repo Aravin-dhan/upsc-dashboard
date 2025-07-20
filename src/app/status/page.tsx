@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import PublicNavbar from '@/components/marketing/PublicNavbar';
 import Footer from '@/components/marketing/Footer';
-import EmailSubscriptionForm from '@/components/email/EmailSubscriptionForm';
+
 
 interface ServiceStatus {
   name: string;
@@ -423,29 +423,7 @@ export default function StatusPage() {
         </div>
       </section>
 
-      {/* Subscribe to Updates */}
-      <section className="py-16 bg-blue-600">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
-            Stay Updated
-          </h2>
-          <p className="text-xl text-blue-100 mb-8">
-            Get notified about service updates and maintenance schedules.
-          </p>
-          <div className="max-w-md mx-auto">
-            <EmailSubscriptionForm
-              subscriptionType="status"
-              source="status-page"
-              placeholder="Enter your email"
-              buttonText="Subscribe"
-              className="flex flex-col sm:flex-row gap-4"
-            />
-          </div>
-          <p className="text-sm text-blue-200 mt-4">
-            You can also follow us on <a href="#" className="underline">Twitter</a> for real-time updates.
-          </p>
-        </div>
-      </section>
+      {/* Newsletter subscription moved to admin-only access */}
 
       <Footer />
     </div>

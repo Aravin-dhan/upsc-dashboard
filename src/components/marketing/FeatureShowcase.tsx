@@ -47,7 +47,7 @@ export default function FeatureShowcase() {
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
             Complete UPSC Preparation Platform
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-800 dark:text-gray-300 max-w-3xl mx-auto">
             Everything you need for UPSC success - from practice tests to progress tracking,
             with an AI assistant to help you navigate.
           </p>
@@ -78,7 +78,7 @@ export default function FeatureShowcase() {
                   </span>
                 </div>
               </div>
-              <p className="text-gray-600 dark:text-gray-300">
+              <p className="text-gray-800 dark:text-gray-300">
                 {feature.description}
               </p>
             </div>

@@ -49,7 +49,7 @@ const publicRoutes = [
   '/features',
   '/demo',
   '/docs',
-  '/about',
+
   '/careers',
   '/press',
   '/partners',

@@ -1,17 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Play, CheckCircle, Users, TrendingUp, Brain, X } from 'lucide-react';
+import { ArrowRight, Play, CheckCircle, X } from 'lucide-react';
 import { useState } from 'react';
 
 export default function HeroSection() {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
 
-  const stats = [
-    { icon: Users, value: '10,000+', label: 'Active Students' },
-    { icon: TrendingUp, value: '85%', label: 'Success Rate' },
-    { icon: Brain, value: '50+', label: 'AI Features' },
-  ];
+  // Statistics section removed as requested
 
   const features = [
     'AI-Powered Study Assistant',
@@ -42,7 +38,7 @@ export default function HeroSection() {
                 Master UPSC with
                 <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"> Smart Preparation</span>
               </h1>
-              <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
+              <p className="text-xl text-gray-800 dark:text-gray-300 leading-relaxed">
                 Transform your UPSC preparation with our comprehensive platform featuring
                 practice tests, current affairs, study materials, progress tracking, and an AI assistant
                 to help you navigate and get quick answers.
@@ -54,7 +50,7 @@ export default function HeroSection() {
               {features.map((feature, index) => (
                 <div key={index} className="flex items-center space-x-3">
                   <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
-                  <span className="text-gray-700 dark:text-gray-300">{feature}</span>
+                  <span className="text-gray-800 dark:text-gray-300">{feature}</span>
                 </div>
               ))}
             </div>
@@ -77,18 +73,7 @@ export default function HeroSection() {
               </button>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-8 pt-8 border-t border-gray-200 dark:border-gray-700">
-              {stats.map((stat, index) => (
-                <div key={index} className="text-center">
-                  <div className="flex justify-center mb-2">
-                    <stat.icon className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">{stat.label}</div>
-                </div>
-              ))}
-            </div>
+            {/* Statistics section removed as requested */}
           </div>
 
           {/* Right Column - Visual */}

@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import PublicNavbar from '@/components/marketing/PublicNavbar';
 import Footer from '@/components/marketing/Footer';
-import EmailSubscriptionForm from '@/components/email/EmailSubscriptionForm';
+
 
 interface PressRelease {
   id: string;
@@ -414,26 +414,7 @@ export default function PressPage() {
         </div>
       </section>
 
-      {/* Newsletter Signup */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-600">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
-            Stay Updated
-          </h2>
-          <p className="text-xl text-blue-100 mb-8">
-            Subscribe to receive our latest press releases and company news.
-          </p>
-          <div className="max-w-md mx-auto">
-            <EmailSubscriptionForm
-              subscriptionType="press"
-              source="press-page"
-              placeholder="Enter your email"
-              buttonText="Subscribe"
-              className="flex flex-col sm:flex-row gap-4"
-            />
-          </div>
-        </div>
-      </section>
+      {/* Newsletter signup moved to admin-only access */}
 
       <Footer />
     </div>

@@ -109,7 +109,7 @@ export default function PricingSection() {
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Choose Your Success Plan
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
+          <p className="text-xl text-gray-800 dark:text-gray-300 max-w-3xl mx-auto mb-8">
             Start with our free trial and upgrade when you're ready. 
             All plans include our core features with varying levels of access.
           </p>
@@ -187,7 +187,7 @@ export default function PricingSection() {
                           ₹{isAnnual ? plan.price.annual : plan.price.monthly}
                         </span>
                         {plan.price.monthly > 0 && (
-                          <span className="text-gray-600 dark:text-gray-300 ml-2">
+                          <span className="text-gray-700 dark:text-gray-300 ml-2">
                             /{isAnnual ? 'month' : 'month'}
                           </span>
                         )}
@@ -272,7 +272,7 @@ export default function PricingSection() {
             {faqs.map((faq, index) => (
               <div key={index} className="text-left">
                 <h4 className="font-semibold text-gray-900 dark:text-white mb-2">{faq.question}</h4>
-                <p className="text-gray-600 dark:text-gray-300">{faq.answer}</p>
+                <p className="text-gray-800 dark:text-gray-300">{faq.answer}</p>
               </div>
             ))}
           </div>

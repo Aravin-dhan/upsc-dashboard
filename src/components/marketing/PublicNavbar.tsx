@@ -33,9 +33,7 @@ export default function PublicNavbar() {
             <Link href="/pricing" className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
               Pricing
             </Link>
-            <Link href="/about" className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-              About
-            </Link>
+
             <Link href="/login" className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
               Login
             </Link>
@@ -77,13 +75,7 @@ export default function PublicNavbar() {
               >
                 Pricing
               </Link>
-              <Link
-                href="/about"
-                className="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                About
-              </Link>
+
               <Link 
                 href="/login" 
                 className="block px-3 py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"

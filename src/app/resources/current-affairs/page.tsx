@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import PublicNavbar from '@/components/marketing/PublicNavbar';
 import Footer from '@/components/marketing/Footer';
-import EmailSubscriptionForm from '@/components/email/EmailSubscriptionForm';
+
 
 export default function CurrentAffairsPage() {
   const [selectedPeriod, setSelectedPeriod] = useState('monthly');
@@ -280,31 +280,7 @@ export default function CurrentAffairsPage() {
         </div>
       </section>
 
-      {/* Newsletter Subscription */}
-      <section className="py-16 bg-white dark:bg-gray-900">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            Never Miss Important Updates
-          </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
-            Get daily current affairs delivered to your inbox with UPSC relevance analysis.
-          </p>
-          
-          <div className="max-w-md mx-auto">
-            <EmailSubscriptionForm
-              subscriptionType="current-affairs"
-              source="current-affairs-page"
-              placeholder="Enter your email"
-              buttonText="Subscribe"
-              className="flex flex-col sm:flex-row gap-4"
-            />
-          </div>
-          
-          <p className="text-sm text-gray-500 mt-4">
-            Join 50,000+ aspirants who trust our daily updates. Unsubscribe anytime.
-          </p>
-        </div>
-      </section>
+      {/* Newsletter subscription moved to admin-only access */}
 
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-red-600 to-pink-600">

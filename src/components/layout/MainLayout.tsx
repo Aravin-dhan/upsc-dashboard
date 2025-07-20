@@ -26,7 +26,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   }, []);
 
   // Define public routes that don't need sidebar
-  const publicRoutes = ['/', '/login', '/signup', '/forgot-password', '/reset-password', '/privacy', '/terms', '/contact', '/about'];
+  const publicRoutes = ['/', '/login', '/signup', '/forgot-password', '/reset-password', '/privacy', '/terms', '/contact'];
   const isPublicRoute = publicRoutes.includes(pathname);
 
   // Show sidebar only for authenticated users on protected routes

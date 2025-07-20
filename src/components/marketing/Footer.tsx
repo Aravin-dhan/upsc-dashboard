@@ -13,7 +13,7 @@ import {
   Youtube,
   ArrowRight
 } from 'lucide-react';
-import EmailSubscriptionForm from '@/components/email/EmailSubscriptionForm';
+
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -24,7 +24,7 @@ export default function Footer() {
       links: [
         { name: 'Features', href: '/features' },
         { name: 'Pricing', href: '/pricing' },
-        { name: 'About Us', href: '/about' },
+
         { name: 'Demo', href: '/demo' },
         { name: 'Documentation', href: '/docs' }
       ]
@@ -52,7 +52,7 @@ export default function Footer() {
     {
       title: 'Company',
       links: [
-        { name: 'About Us', href: '/about' },
+
         { name: 'Careers', href: '/careers' },
         { name: 'Press Kit', href: '/press' },
         { name: 'Partners', href: '/partners' },
@@ -78,32 +78,8 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-gray-900 text-white">
-      {/* Newsletter Section */}
-      <div className="border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid lg:grid-cols-2 gap-8 items-center">
-            <div>
-              <h3 className="text-2xl font-bold mb-4">Stay Updated with UPSC Insights</h3>
-              <p className="text-gray-300 text-lg">
-                Get weekly study tips, current affairs updates, and exclusive content delivered to your inbox.
-              </p>
-            </div>
-            <div className="space-y-4">
-              <EmailSubscriptionForm
-                subscriptionType="newsletter"
-                source="footer"
-                placeholder="Enter your email address"
-                buttonText="Subscribe"
-                className="max-w-md"
-              />
-              <p className="text-sm text-gray-400">
-                Join 25,000+ UPSC aspirants. Unsubscribe anytime.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+    <footer className="bg-gray-900 text-white hidden">
+      {/* Newsletter section removed - now admin-only */}
 
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
